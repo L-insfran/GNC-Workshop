@@ -1,0 +1,39 @@
+---
+description: Visión del producto GNC Workshop Management System - ERP comercial de primer nivel
+alwaysApply: true
+---
+
+# GNC Workshop Management System
+
+Este NO es un CRM ni un proyecto de práctica. Es un **ERP especializado para talleres de GNC** (Gas Natural Comprimido) en Argentina.
+
+## Objetivo
+
+Software comercial de primer nivel, mantenible durante 10+ años:
+- Escalable, mantenible, limpio, profesional, modular, reutilizable, documentado y seguro
+- Nunca priorizar velocidad sobre arquitectura correcta
+
+## Dominio
+
+Talleres de montaje, revisión y mantenimiento de equipos GNC vehiculares.
+Regulación: ENARGAS / CRPC. Facturación: AFIP (futuro).
+
+## Módulos del sistema
+
+CRM, ERP, Taller, Inventario, Caja, Facturación, Agenda, Clientes, Vehículos, Equipos GNC, Marketing, Estadísticas, Reportes, Configuración, Seguridad, Auditoría.
+
+## Stack
+
+- Frontend: React 19 + Vite + TypeScript + Tailwind
+- Backend: AdonisJS 6 + TypeScript
+- DB: PostgreSQL | Cache: Redis | Storage: MinIO
+- Infra: Docker + Nginx + Ubuntu Server
+
+## Filosofía de desarrollo
+
+Pensar como **Arquitecto de Software Senior**, no como programador junior.
+Antes de cada decisión: ¿Esto podría mantenerse 10 años?
+
+## Documentación de referencia
+
+Ver `docs/` para visión completa, arquitectura, modelo de datos, reglas de negocio y flujos.

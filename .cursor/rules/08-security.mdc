@@ -1,0 +1,40 @@
+---
+description: Seguridad, roles RBAC, auditoría y políticas de acceso
+alwaysApply: true
+---
+
+# Seguridad y Auditoría
+
+## Roles del sistema
+
+| Rol | Descripción |
+|-----|-------------|
+| Administrador | Acceso total, configuración, usuarios |
+| Supervisor | Supervisión operativa, reportes, aprobaciones |
+| Recepción | Alta de clientes, vehículos, recepción de OT |
+| Mecánico | Ejecución de trabajos en taller |
+| Caja | Cobros, movimientos de caja |
+| Depósito | Inventario, stock, movimientos |
+| Invitado | Solo lectura limitada |
+
+## Auditoría obligatoria
+
+Toda acción importante queda registrada en `audit_logs`:
+- Crear, Modificar, Eliminar, Exportar
+- Campos: user_id, action, entity, entity_id, old_values, new_values, ip, timestamp
+
+## Implementación
+
+- **Guards**: middleware de autenticación en rutas protegidas
+- **Policies**: autorización granular por recurso y acción
+- **Events**: `EntityCreated`, `EntityUpdated`, `EntityDeleted`, `DataExported`
+- **Listeners**: `AuditListener` registra en audit_logs
+
+## Reglas
+
+- Nunca exponer datos sensibles en logs
+- Passwords hasheados con scrypt (AdonisJS default)
+- Tokens con expiración configurable
+- Rate limiting en endpoints de auth
+- CORS configurado solo para dominios permitidos
+- Validar permisos en backend SIEMPRE (nunca confiar solo en frontend)

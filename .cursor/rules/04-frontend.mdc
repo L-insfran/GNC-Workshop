@@ -1,0 +1,47 @@
+---
+description: Convenciones frontend React 19 - componentes, hooks y estructura
+globs: apps/frontend/**
+alwaysApply: false
+---
+
+# Frontend React 19
+
+## Estructura
+
+```
+src/
+  pages/          # Pantallas por módulo
+  layouts/        # MainLayout, AuthLayout
+  components/
+    ui/           # Button, Card, Table, Modal, Input...
+    {modulo}/     # Componentes específicos del módulo
+  hooks/          # useClientes, useAuth...
+  services/       # api-client, clienteService...
+  contexts/       # AuthContext
+  utils/          # formatters, validators
+  constants/      # ROUTES, ROLES
+  types/          # interfaces compartidas
+```
+
+## Reglas
+
+- Componentes pequeños y reutilizables (máx ~150 líneas)
+- Nunca lógica de negocio en componentes (usar hooks/services)
+- Nunca consultas directas al backend desde componentes
+- Estado servidor con TanStack Query (React Query)
+- Formularios con React Hook Form + Zod
+- Rutas protegidas con guards por rol
+
+## Naming
+
+- Componentes: `PascalCase` → `ClienteTable.tsx`
+- Hooks: `use` prefix → `useClientes.ts`
+- Services: `camelCase` → `clienteService.ts`
+- Archivos: `kebab-case` en carpetas, `PascalCase` en componentes
+
+## UI/UX
+
+- Design system minimalista (ver `07-uiux.mdc`)
+- Tailwind utility-first con tokens del design system
+- Iconos: Lucide React
+- Loading states, empty states y error states en toda pantalla

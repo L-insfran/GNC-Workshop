@@ -1,0 +1,54 @@
+---
+description: Design system y principios UI/UX - software premium minimalista
+globs: apps/frontend/**
+alwaysApply: false
+---
+
+# UI/UX Design System
+
+## Principio
+
+Debe parecer software vendido por miles de dólares. Transmitir: **Orden, Rapidez, Confiabilidad, Profesionalismo**.
+
+## Estilo visual
+
+- **Minimalista**: mucho espacio en blanco, sin saturación
+- **Tarjetas limpias**: bordes sutiles, sombras suaves
+- **Pocos colores**: paleta reducida (primary, neutral, success, warning, danger)
+- **Muchos iconos**: Lucide React para acciones y estados
+- **Tipografía**: Inter o similar, jerarquía clara (h1-h4, body, caption)
+
+## Paleta
+
+```
+primary:    slate-900 / blue-600
+neutral:    gray-50 a gray-900
+success:    emerald-500
+warning:    amber-500
+danger:     red-500
+background: gray-50
+surface:    white
+```
+
+## Componentes base
+
+Button, Card, Table, Modal, Input, Select, Badge, Avatar, Sidebar, Topbar, StatCard, Chart, Alert, EmptyState, LoadingSpinner.
+
+## Dashboard (módulo estrella)
+
+- KPIs en tarjetas superiores
+- Gráficos de producción y facturación
+- Alertas de vencimientos (oblea/PH)
+- Tabla de OTs del día
+- Indicadores de ganancias
+
+## Patrones UX
+
+- Confirmación antes de eliminar
+- Toast notifications para feedback
+- Breadcrumbs en navegación profunda
+- Filtros y búsqueda en tablas
+- Paginación server-side
+- Responsive (desktop-first, adaptable a tablet)
+
+Ver `docs/06-design-system/` para tokens y componentes detallados.

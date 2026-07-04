@@ -1,0 +1,35 @@
+---
+description: Roadmap técnico y funcional del proyecto por fases
+alwaysApply: false
+---
+
+# Roadmap
+
+## Fase 0 - Contexto (actual)
+Documentación completa + reglas Cursor
+
+## Fase 1 - Infraestructura
+Monorepo, Docker, scaffolding apps
+
+## Fase 2 - Backend core
+Auth, RBAC, auditoría, base classes
+
+## Fase 3 - MVP Backend
+Clientes, Vehículos, Equipos GNC, Órdenes de Trabajo
+
+## Fase 4 - Frontend foundation
+Design system, layout, auth, routing
+
+## Fase 5 - MVP Frontend
+Pantallas del núcleo operativo
+
+## Fase 6 - Dashboard
+KPIs, gráficos, alertas de vencimientos
+
+## Fase 7 - Módulos adicionales
+Inventario → Caja → Facturación → Agenda → Marketing → Reportes → Config
+
+## Fase 8 - Calidad y deploy
+Testing, CI/CD, producción Ubuntu+Nginx
+
+Ver `docs/10-roadmap/` para detalle completo.

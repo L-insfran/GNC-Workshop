@@ -1,0 +1,42 @@
+---
+description: Estándares de código, naming conventions y prohibiciones
+alwaysApply: true
+---
+
+# Estándares de Código
+
+## Naming conventions
+
+| Elemento | Convención | Ejemplo |
+|----------|-----------|---------|
+| Variables | camelCase | `fechaVencimiento` |
+| Componentes React | PascalCase | `ClienteTable` |
+| Constantes | UPPER_CASE | `MAX_CILINDROS` |
+| Archivos | kebab-case | `cliente-table.tsx` |
+| Interfaces | I prefix | `ICliente` |
+| DTOs | Sufijo DTO | `CreateVehicleDTO` |
+| Tablas DB | snake_case plural | `ordenes_trabajo` |
+| Enums | PascalCase | `OrdenEstado` |
+
+## Prohibiciones absolutas
+
+- Funciones de 300+ líneas
+- Tipo `any` en TypeScript
+- Valores hardcodeados (usar config/env/constants)
+- SQL repetido (usar Repository)
+- Componentes duplicados (extraer y reutilizar)
+- Lógica de negocio en Controllers
+- Consultas directas desde React
+- Componentes enormes (>150 líneas)
+- Romper arquitectura existente
+- Copiar/pegar lógica entre módulos
+
+## Calidad antes de finalizar
+
+Revisar: performance, código duplicado, tipado, errores, imports, arquitectura, nombres.
+
+## Imports
+
+- Ordenar: externos → internos → relativos
+- Usar path aliases (`@/components`, `#modules/clientes`)
+- Sin imports circulares

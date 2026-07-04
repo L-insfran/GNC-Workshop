@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: gnc_user
+          POSTGRES_PASSWORD: gnc_password
+          POSTGRES_DB: gnc_workshop_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_USER: gnc_user
+      DB_PASSWORD: gnc_password
+      DB_DATABASE: gnc_workshop_test
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+      APP_KEY: test-app-key-for-ci-only-32chars
+      APP_URL: http://localhost:3333
+      PORT: 3333
+      HOST: 0.0.0.0
+      NODE_ENV: test
+      LOG_LEVEL: silent
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Typecheck shared-types
+        run: npm run typecheck -w @gnc/shared-types
+
+      - name: Typecheck backend
+        run: npm run typecheck -w @gnc/backend
+
+      - name: Typecheck frontend
+        run: npm run typecheck -w @gnc/frontend
+
+      - name: Run backend migrations
+        run: npm run migration:run -w @gnc/backend
+
+      - name: Run backend tests
+        run: npm run test -w @gnc/backend
+
+      - name: Run frontend tests
+        run: npm run test -w @gnc/frontend
+
+      - name: Build frontend
+        run: npm run build -w @gnc/frontend

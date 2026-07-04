@@ -1,0 +1,29 @@
+---
+description: Features futuras planificadas post-MVP
+alwaysApply: false
+---
+
+# Features Futuras
+
+## Corto plazo (post-MVP)
+- App móvil para mecánicos (checklist OT)
+- Escaneo QR de cilindros
+- Impresión de etiquetas de oblea
+
+## Mediano plazo
+- Integración AFIP completa
+- Portal del cliente (consulta vencimientos)
+- Multi-sucursal
+- Facturación recurrente
+
+## Largo plazo
+- BI avanzado con dashboards personalizables
+- Integración con aseguradoras
+- Marketplace de repuestos GNC
+- API pública para terceros
+- Machine learning: predicción de demanda
+
+## Principio
+
+Diseñar la arquitectura actual para soportar estas features sin refactor masivo.
+Usar interfaces y adapters para integraciones futuras.

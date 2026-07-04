@@ -1,0 +1,57 @@
+---
+description: Arquitectura Clean Architecture y modularidad estricta del sistema
+alwaysApply: true
+---
+
+# Arquitectura
+
+## Patrones obligatorios
+
+SOLID, Clean Architecture, Repository Pattern, Service Layer, DTO, Dependency Injection, Validation Layer, Policies, Guards, Events, Queue Jobs.
+
+## Capas backend (por módulo)
+
+```
+Controller → Service → Repository → Database
+                ↓
+           Validator, Policy, DTO, Events
+```
+
+- **Controllers**: solo orquestan HTTP. Sin lógica de negocio.
+- **Services**: toda la lógica de negocio.
+- **Repositories**: único punto de acceso a datos.
+- **Validators**: validación de entrada (VineJS).
+- **Policies**: autorización por rol/recurso.
+- **Events/Listeners**: efectos secundarios desacoplados.
+- **Jobs**: tareas asíncronas (colas Redis).
+
+## Capas frontend
+
+```
+Pages → Layouts → Components → Hooks → Services → API
+```
+
+- **Pages**: composición de pantallas.
+- **Components**: UI reutilizable, pequeños.
+- **Hooks**: lógica reutilizable.
+- **Services**: llamadas HTTP al backend.
+- **Contexts**: estado global (auth, tema).
+- **Types/Constants/Utils**: compartidos.
+
+## Regla de oro: modularidad
+
+Los módulos NO se conocen entre sí directamente.
+Comunicación SOLO vía Services o Events.
+
+```
+Agenda ✗→ Inventario
+Inventario ✗→ Facturación
+```
+
+## Monorepo
+
+```
+apps/backend/    apps/frontend/
+packages/shared-types/    packages/config/
+infra/docker/    docs/
+```

@@ -1,0 +1,52 @@
+---
+description: Reglas de negocio específicas para talleres de GNC en Argentina
+alwaysApply: true
+---
+
+# Reglas de Negocio GNC
+
+## Dominio regulatorio
+
+- **ENARGAS**: Ente regulador de gas natural comprimido
+- **CRPC**: Certificador de Reglamento de Instalaciones de GNC
+- **Oblea GNC**: certificado de habilitación del equipo (vencimiento anual)
+- **PH (Prueba Hidráulica)**: obligatoria cada 5 años por cilindro
+
+## Entidades principales
+
+- **Cliente**: persona física o jurídica dueña del vehículo
+- **Vehículo**: patente, marca, modelo, año, tipo combustible
+- **Equipo GNC**: conjunto instalado en vehículo (regulador + cilindros)
+- **Cilindro**: número de serie, capacidad (m³), fecha PH, vencimiento PH
+- **Orden de Trabajo (OT)**: trabajo a realizar en el taller
+
+## Vencimientos críticos
+
+| Concepto | Periodicidad | Alerta previa |
+|----------|-------------|---------------|
+| Oblea GNC | 1 año | 30 días |
+| PH Cilindro | 5 años | 60 días |
+| Revisión anual | 1 año | 30 días |
+
+## Estados de Orden de Trabajo
+
+`borrador` → `recepcion` → `en_taller` → `en_espera_repuesto` → `control_calidad` → `finalizada` → `entregada` → `cancelada`
+
+## Tipos de trabajo GNC
+
+- Instalación nueva
+- Revisión anual
+- Renovación de oblea
+- Prueba hidráulica
+- Reparación / cambio de cilindro
+- Desinstalación
+- Conversión de regulador
+
+## Validaciones de negocio
+
+- No crear OT si el equipo tiene oblea vencida (excepto renovación)
+- No entregar vehículo sin OT finalizada y control de calidad
+- Cilindro con PH vencida → bloquear uso, forzar PH
+- Patente única por vehículo activo
+
+Ver `docs/04-business-rules/` para reglas detalladas por módulo.

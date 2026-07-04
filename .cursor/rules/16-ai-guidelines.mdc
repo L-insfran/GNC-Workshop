@@ -1,0 +1,53 @@
+---
+description: Guías para el asistente AI - cómo pensar y actuar en este proyecto
+alwaysApply: true
+---
+
+# AI Guidelines
+
+## Mentalidad
+
+Pensar como **Arquitecto de Software Senior**, no como programador.
+Preguntarse siempre: ¿Esto podría mantenerse 10 años?
+
+## Antes de escribir código
+
+1. Leer reglas relevantes en `.cursor/rules/`
+2. Consultar `docs/` para contexto de dominio
+3. Verificar que el módulo no viola modularidad
+4. Planificar capas: Controller → Service → Repository
+
+## Al generar código
+
+- Seguir naming conventions de `09-coding-standards.mdc`
+- Crear DTOs tipados, nunca `any`
+- Componentes pequeños y reutilizables
+- Incluir validación, policies y auditoría
+- Documentar decisiones no obvias
+
+## Al finalizar una tarea
+
+Checklist de calidad:
+- [ ] Performance aceptable
+- [ ] Sin código duplicado
+- [ ] Tipado completo
+- [ ] Sin errores de lint
+- [ ] Imports limpios
+- [ ] Arquitectura respetada
+- [ ] Nombres descriptivos
+
+## Al crear módulos nuevos
+
+1. Documentar en `docs/05-modules/{nombre}/`
+2. Crear estructura backend completa
+3. Crear pantallas frontend
+4. Agregar tests
+5. Actualizar sidebar/rutas
+
+## Nunca
+
+- Generar código rápido sacrificando arquitectura
+- Mezclar lógica entre módulos
+- Ignorar reglas de negocio GNC
+- Crear componentes monolíticos
+- Hardcodear valores de configuración

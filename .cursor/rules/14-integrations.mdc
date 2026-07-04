@@ -1,0 +1,42 @@
+---
+description: Integraciones externas - AFIP, ENARGAS, notificaciones, storage
+alwaysApply: false
+---
+
+# Integraciones
+
+## AFIP (Facturación electrónica)
+- WSAA (autenticación)
+- WSFEv1 (factura electrónica)
+- Módulo: `Facturación`
+- Estado: diseñado, implementación en Fase 7
+
+## ENARGAS / CRPC
+- Validación de habilitaciones
+- Consulta de obleas
+- Estado: manual por ahora, API futura
+
+## MinIO (S3)
+- Documentos escaneados (oblea, PH, DNI)
+- Fotos de vehículos/equipos
+- Bucket: `gnc-workshop-docs`
+
+## Redis
+- Cache de consultas frecuentes
+- Colas de jobs (vencimientos, notificaciones)
+- Sesiones (opcional)
+
+## Notificaciones (futuro)
+- Email: alertas de vencimiento
+- WhatsApp Business API: recordatorios a clientes
+- Push: alertas internas del taller
+
+## Patrón de integración
+
+```
+Service → IntegrationAdapter → ExternalAPI
+                ↓
+           Events (on success/failure)
+```
+
+Nunca llamar APIs externas desde Controllers.

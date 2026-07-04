@@ -1,0 +1,59 @@
+---
+description: Convenciones backend AdonisJS 6 - capas, módulos y patrones
+globs: apps/backend/**
+alwaysApply: false
+---
+
+# Backend AdonisJS 6
+
+## Estructura por módulo
+
+```
+app/modules/{modulo}/
+  controllers/
+  services/
+  repositories/
+  validators/
+  policies/
+  dtos/
+  events/
+  listeners/
+  jobs/
+  models/
+```
+
+## Reglas
+
+- Nunca lógica de negocio en Controllers
+- Nunca consultas SQL directas en Services (usar Repository)
+- Nunca `any` en TypeScript
+- Usar DTOs para entrada/salida de API
+- Validar con VineJS en capa Validator
+- Autorizar con Policies + Guards
+- Registrar acciones importantes vía Events → AuditListener
+
+## Respuesta API estándar
+
+```typescript
+{ success: true, data: T, meta?: PaginationMeta }
+{ success: false, error: { code: string, message: string } }
+```
+
+## Inyección de dependencias
+
+Registrar en Providers. Services reciben Repositories por constructor.
+
+## Ejemplo de flujo
+
+```typescript
+// Controller
+async store({ request, auth }: HttpContext) {
+  const dto = await createClienteValidator.validate(request.all())
+  const cliente = await this.clienteService.create(dto, auth.user!)
+  return ApiResponse.created(cliente)
+}
+```
+
+## Base classes
+
+Extender `BaseRepository` y `BaseService` para operaciones CRUD comunes.

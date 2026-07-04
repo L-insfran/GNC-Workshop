@@ -1,0 +1,39 @@
+---
+description: Despliegue Docker, Nginx y configuración de producción
+globs: infra/**
+alwaysApply: false
+---
+
+# Deployment
+
+## Entornos
+
+- **development**: docker-compose local
+- **staging**: servidor Ubuntu con Docker
+- **production**: Ubuntu + Nginx + Docker + SSL
+
+## Docker Compose servicios
+
+- `postgres`: PostgreSQL 16
+- `redis`: Redis 7
+- `minio`: MinIO (S3 compatible)
+- `backend`: AdonisJS API
+- `frontend`: React build servido por Nginx
+- `nginx`: reverse proxy
+
+## Variables de entorno
+
+Nunca commitear `.env`. Usar `.env.example` documentado.
+Secrets en variables de entorno del servidor.
+
+## Nginx
+
+- `/api/*` → backend:3333
+- `/*` → frontend static
+- SSL con Let's Encrypt
+- Gzip, cache headers para assets
+
+## CI/CD
+
+GitHub Actions: lint → test → build → deploy
+Ver `docs/09-deployment/` y `.github/workflows/`.

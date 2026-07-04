@@ -1,0 +1,37 @@
+---
+description: Catálogo de módulos del sistema y sus responsabilidades
+alwaysApply: true
+---
+
+# Módulos del Sistema
+
+Cada módulo es una unidad aislada con su propia carpeta en backend y frontend.
+
+| Módulo | Responsabilidad | Depende de |
+|--------|----------------|------------|
+| Auth | Login, tokens, sesiones | - |
+| Users | Gestión de usuarios y roles | Auth |
+| Clientes | CRUD clientes, contactos | Users |
+| Vehículos | CRUD vehículos por cliente | Clientes |
+| EquiposGNC | Equipos, cilindros, obleas, PH | Vehículos |
+| OrdenesTrabajo | OT, estados, items, asignación | EquiposGNC, Users |
+| Inventario | Stock, productos, movimientos | Users |
+| Caja | Movimientos, arqueos, cobros | OrdenesTrabajo |
+| Facturación | Comprobantes, AFIP | Caja, Clientes |
+| Agenda | Turnos, calendario | Clientes, Vehículos |
+| Dashboard | KPIs, gráficos, alertas | Todos (lectura) |
+| Reportes | Exportaciones, estadísticas | Todos (lectura) |
+| Configuración | Parámetros del taller | Users |
+| Auditoría | Logs de acciones | Todos (eventos) |
+| Marketing | Campañas, comunicaciones | Clientes |
+
+## Estructura por módulo
+
+```
+backend/app/modules/{nombre}/
+frontend/src/pages/{nombre}/
+frontend/src/components/{nombre}/
+docs/05-modules/{nombre}/
+```
+
+Ver `docs/05-modules/` para README y diagramas de cada módulo.

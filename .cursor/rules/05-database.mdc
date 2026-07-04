@@ -1,0 +1,40 @@
+---
+description: Convenciones de base de datos PostgreSQL - normalización, UUID, auditoría
+globs: apps/backend/database/**
+alwaysApply: false
+---
+
+# Base de Datos PostgreSQL
+
+## Estándares obligatorios
+
+- **UUID** como primary key (`gen_random_uuid()`)
+- **Foreign Keys** con `ON DELETE RESTRICT` (nunca CASCADE en datos de negocio)
+- **Índices** en FKs, campos de búsqueda y filtros frecuentes
+- **Soft Delete**: columna `deleted_at` (timestamp nullable)
+- **Timestamps**: `created_at`, `updated_at` (auto-managed)
+- **Auditoría**: tabla `audit_logs` para acciones críticas
+
+## Naming
+
+- Tablas: `snake_case` plural → `clientes`, `ordenes_trabajo`
+- Columnas: `snake_case` → `fecha_vencimiento_oblea`
+- Índices: `idx_{tabla}_{columna}`
+- FKs: `fk_{tabla}_{referencia}`
+
+## Nunca
+
+- Tablas improvisadas sin normalizar
+- IDs autoincrementales
+- Eliminar registros físicamente (usar soft delete)
+- SQL repetido (usar Query Builder de Lucid ORM)
+- Campos sin tipo definido
+
+## Migraciones
+
+Una migración por cambio lógico. Incluir `up` y `down`.
+Documentar relaciones en comentarios SQL.
+
+## Modelo completo
+
+Ver `docs/03-data-model/` para ERD y definición de 80+ tablas.

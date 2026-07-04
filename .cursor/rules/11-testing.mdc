@@ -1,0 +1,39 @@
+---
+description: Estrategia de testing - unit, integración y e2e
+globs: "**/*.{test,spec}.{ts,tsx}"
+alwaysApply: false
+---
+
+# Testing
+
+## Backend (Japa + AdonisJS)
+
+- **Unit**: Services con mocks de Repository
+- **Integración**: Repositories contra DB de test
+- **Funcional**: Controllers end-to-end con supertest
+
+```
+tests/
+  unit/services/
+  functional/controllers/
+  integration/repositories/
+```
+
+## Frontend (Vitest + Testing Library)
+
+- **Unit**: hooks, utils, services
+- **Component**: render + interacción
+- **E2E**: Playwright para flujos críticos
+
+## Cobertura mínima
+
+- Services: 80%+
+- Repositories: 70%+
+- Componentes críticos: 60%+
+
+## Convenciones
+
+- Archivo test junto al módulo: `cliente.service.test.ts`
+- Usar factories para datos de test
+- DB de test aislada (transacciones rollback)
+- No testear implementación, testear comportamiento
