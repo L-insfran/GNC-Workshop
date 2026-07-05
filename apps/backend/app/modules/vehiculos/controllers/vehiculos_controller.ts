@@ -3,6 +3,7 @@ import type { IPaginationParams } from '@gnc/shared-types'
 import { ApiResponse } from '#shared/api_response'
 import VehiculoService from '#modules/vehiculos/services/vehiculo_service'
 import { createVehiculoValidator } from '#modules/vehiculos/validators/create_vehiculo_validator'
+import { updateVehiculoValidator } from '#modules/vehiculos/validators/update_vehiculo_validator'
 
 const vehiculoService = new VehiculoService()
 
@@ -36,29 +37,22 @@ export default class VehiculosController {
       const vehiculo = await vehiculoService.create(dto, auth.user!)
       return response.created(ApiResponse.created(vehiculo))
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'PATENTE_DUPLICADA') {
-          return response.conflict(
-            ApiResponse.error('PATENTE_DUPLICADA', 'Ya existe un vehículo activo con esa patente')
-          )
-        }
-        if (error.message === 'MODELO_INVALIDO') {
-          return response.badRequest(
-            ApiResponse.error('MODELO_INVALIDO', 'El modelo no corresponde a la marca seleccionada')
-          )
-        }
-      }
-      throw error
+      return this.handleBusinessError(error, response)
     }
   }
 
   async update({ params, request, auth, response }: HttpContext) {
-    const dto = await request.validateUsing(createVehiculoValidator)
-    const vehiculo = await vehiculoService.update(params.id, dto, auth.user!)
-    if (!vehiculo) {
-      return response.notFound(ApiResponse.error('NOT_FOUND', 'Vehículo no encontrado'))
+    const dto = await request.validateUsing(updateVehiculoValidator)
+
+    try {
+      const vehiculo = await vehiculoService.update(params.id, dto, auth.user!)
+      if (!vehiculo) {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Vehículo no encontrado'))
+      }
+      return response.ok(ApiResponse.success(vehiculo))
+    } catch (error) {
+      return this.handleBusinessError(error, response)
     }
-    return response.ok(ApiResponse.success(vehiculo))
   }
 
   async destroy({ params, auth, response }: HttpContext) {
@@ -67,5 +61,21 @@ export default class VehiculosController {
       return response.notFound(ApiResponse.error('NOT_FOUND', 'Vehículo no encontrado'))
     }
     return response.ok(ApiResponse.success({ message: 'Vehículo eliminado' }))
+  }
+
+  private handleBusinessError(error: unknown, response: HttpContext['response']) {
+    if (error instanceof Error) {
+      if (error.message === 'PATENTE_DUPLICADA') {
+        return response.conflict(
+          ApiResponse.error('PATENTE_DUPLICADA', 'Ya existe un vehículo activo con esa patente')
+        )
+      }
+      if (error.message === 'MODELO_INVALIDO') {
+        return response.badRequest(
+          ApiResponse.error('MODELO_INVALIDO', 'El modelo no corresponde a la marca seleccionada')
+        )
+      }
+    }
+    throw error
   }
 }

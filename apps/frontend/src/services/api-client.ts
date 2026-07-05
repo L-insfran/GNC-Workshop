@@ -41,13 +41,25 @@ function buildQueryString(params?: IPaginationParams & Record<string, string | n
   return query ? `?${query}` : ''
 }
 
+interface IVineErrorBody {
+  errors?: Array<{ message?: string; field?: string }>
+}
+
 async function handleResponse<T>(response: Response): Promise<IApiResponse<T>> {
   const contentType = response.headers.get('content-type')
   const isJson = contentType?.includes('application/json')
-  const body = isJson ? ((await response.json()) as IApiResponse<T>) : null
+  const rawBody = isJson ? await response.json() : null
+  const body = rawBody as IApiResponse<T> | null
+  const vineBody = rawBody as IVineErrorBody | null
 
   if (!response.ok) {
-    const message = body?.error?.message ?? response.statusText ?? 'Error de conexión'
+    const vineMessage = vineBody?.errors
+      ?.map((error) => error.message)
+      .filter(Boolean)
+      .join('. ')
+
+    const message =
+      body?.error?.message ?? vineMessage ?? response.statusText ?? 'Error de conexión'
     const code = body?.error?.code ?? 'UNKNOWN_ERROR'
     throw new ApiError(message, code, response.status, body?.error?.details)
   }

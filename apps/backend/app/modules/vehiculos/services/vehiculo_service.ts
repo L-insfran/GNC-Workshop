@@ -1,4 +1,4 @@
-import type { CreateVehicleDTO } from '@gnc/shared-types'
+import type { CreateVehicleDTO, UpdateVehicleDTO } from '@gnc/shared-types'
 import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import type Vehiculo from '#models/vehiculo'
@@ -25,10 +25,7 @@ export default class VehiculoService extends BaseService<Vehiculo> {
       throw new Error('PATENTE_DUPLICADA')
     }
 
-    const modelo = await VehiculoModelo.find(data.modeloId)
-    if (!modelo || modelo.marcaId !== data.marcaId) {
-      throw new Error('MODELO_INVALIDO')
-    }
+    await this.assertModeloPerteneceAMarca(data.marcaId, data.modeloId)
 
     const vehiculo = await super.create(
       {
@@ -40,5 +37,39 @@ export default class VehiculoService extends BaseService<Vehiculo> {
     )
 
     return (await this.repository.findByIdWithRelations(vehiculo.id))!
+  }
+
+  async update(id: string, data: UpdateVehicleDTO, user: User): Promise<Vehiculo | null> {
+    const existing = await this.repository.findById(id)
+    if (!existing) return null
+
+    const updateData: Partial<Vehiculo> = { ...data }
+
+    if (data.patente) {
+      const patente = data.patente.toUpperCase()
+      const duplicado = await this.repository.findByPatente(patente)
+      if (duplicado && duplicado.id !== id) {
+        throw new Error('PATENTE_DUPLICADA')
+      }
+      updateData.patente = patente
+    }
+
+    const marcaId = data.marcaId ?? existing.marcaId
+    const modeloId = data.modeloId ?? existing.modeloId
+    if (data.marcaId || data.modeloId) {
+      await this.assertModeloPerteneceAMarca(marcaId, modeloId)
+    }
+
+    const updated = await super.update(id, updateData, user)
+    if (!updated) return null
+
+    return this.repository.findByIdWithRelations(updated.id)
+  }
+
+  private async assertModeloPerteneceAMarca(marcaId: string, modeloId: string): Promise<void> {
+    const modelo = await VehiculoModelo.find(modeloId)
+    if (!modelo || modelo.marcaId !== marcaId) {
+      throw new Error('MODELO_INVALIDO')
+    }
   }
 }
