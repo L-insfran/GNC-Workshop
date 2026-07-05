@@ -1,4 +1,4 @@
-import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import Cliente from '#models/cliente'
 import { BaseRepository } from '#shared/base_repository'
 
@@ -6,9 +6,9 @@ export default class ClienteRepository extends BaseRepository<Cliente> {
   protected model = Cliente
 
   protected applySearch(
-    query: ModelQueryBuilderContract<Cliente>,
+    query: ModelQueryBuilderContract<LucidModel, LucidRow>,
     search: string
-  ): ModelQueryBuilderContract<Cliente> {
+  ): ModelQueryBuilderContract<LucidModel, LucidRow> {
     return query.where((builder) => {
       builder
         .whereILike('razon_social', `%${search}%`)

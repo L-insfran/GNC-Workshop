@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import OrdenTrabajo from '#models/orden_trabajo'
 import { BaseRepository } from '#shared/base_repository'
 
@@ -7,9 +7,9 @@ export default class OrdenTrabajoRepository extends BaseRepository<OrdenTrabajo>
   protected model = OrdenTrabajo
 
   protected applySearch(
-    query: ModelQueryBuilderContract<OrdenTrabajo>,
+    query: ModelQueryBuilderContract<LucidModel, LucidRow>,
     search: string
-  ): ModelQueryBuilderContract<OrdenTrabajo> {
+  ): ModelQueryBuilderContract<LucidModel, LucidRow> {
     return query.whereILike('numero', `%${search}%`)
   }
 

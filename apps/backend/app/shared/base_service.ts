@@ -2,6 +2,23 @@ import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import { EntityCreated, EntityDeleted, EntityUpdated } from '#events/audit_events'
 
+function toAuditValues(record: unknown): Record<string, unknown> {
+  if (
+    record &&
+    typeof record === 'object' &&
+    'serialize' in record &&
+    typeof (record as { serialize: unknown }).serialize === 'function'
+  ) {
+    return (record as { serialize: () => Record<string, unknown> }).serialize()
+  }
+
+  try {
+    return JSON.parse(JSON.stringify(record)) as Record<string, unknown>
+  } catch {
+    return {}
+  }
+}
+
 export abstract class BaseService<T extends { id: string }> {
   protected abstract entityType: string
 
@@ -27,7 +44,7 @@ export abstract class BaseService<T extends { id: string }> {
       userId: user.id,
       entityType: this.entityType,
       entityId: record.id,
-      newValues: record as unknown as Record<string, unknown>,
+      newValues: toAuditValues(record),
     })
     return record
   }
@@ -41,8 +58,8 @@ export abstract class BaseService<T extends { id: string }> {
         userId: user.id,
         entityType: this.entityType,
         entityId: id,
-        oldValues: existing as unknown as Record<string, unknown>,
-        newValues: updated as unknown as Record<string, unknown>,
+        oldValues: toAuditValues(existing),
+        newValues: toAuditValues(updated),
       })
     }
     return updated
@@ -57,7 +74,7 @@ export abstract class BaseService<T extends { id: string }> {
         userId: user.id,
         entityType: this.entityType,
         entityId: id,
-        oldValues: existing as unknown as Record<string, unknown>,
+        oldValues: toAuditValues(existing),
       })
     }
     return deleted

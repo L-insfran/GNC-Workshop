@@ -1,11 +1,18 @@
+import { DateTime } from 'luxon'
 import type { IPaginationMeta, IPaginationParams } from '@gnc/shared-types'
-import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 
-export abstract class BaseRepository<T extends { deletedAt?: Date | null }> {
-  protected abstract model: { query: () => ModelQueryBuilderContract<T> }
+type SoftDeletableRow = LucidRow & {
+  id: string
+  deletedAt?: DateTime | null
+}
+
+export abstract class BaseRepository<T extends SoftDeletableRow> {
+  protected abstract model: LucidModel
 
   async findById(id: string): Promise<T | null> {
-    return this.model.query().where('id', id).whereNull('deleted_at').first()
+    const record = await this.model.query().where('id', id).whereNull('deleted_at').first()
+    return (record as T | null) ?? null
   }
 
   async findAll(params: IPaginationParams = {}) {
@@ -37,29 +44,28 @@ export abstract class BaseRepository<T extends { deletedAt?: Date | null }> {
   }
 
   async create(data: Partial<T>): Promise<T> {
-    return this.model.query().create(data) as Promise<T>
+    const record = await this.model.create(data as Partial<LucidRow>)
+    return record as T
   }
 
   async update(id: string, data: Partial<T>): Promise<T | null> {
     const record = await this.findById(id)
     if (!record) return null
-    ;(record as T & { merge: (d: Partial<T>) => void; save: () => Promise<void> }).merge(data)
-    await (record as T & { save: () => Promise<void> }).save()
+    record.merge(data as Partial<LucidRow>)
+    await record.save()
     return record
   }
 
   async softDelete(id: string): Promise<boolean> {
     const record = await this.findById(id)
     if (!record) return false
-    ;(record as T & { merge: (d: { deletedAt: Date }) => void; save: () => Promise<void> }).merge({
-      deletedAt: new Date(),
-    })
-    await (record as T & { save: () => Promise<void> }).save()
+    record.merge({ deletedAt: DateTime.now() } as Partial<LucidRow>)
+    await record.save()
     return true
   }
 
   protected abstract applySearch(
-    query: ModelQueryBuilderContract<T>,
+    query: ModelQueryBuilderContract<LucidModel, LucidRow>,
     search: string
-  ): ModelQueryBuilderContract<T>
+  ): ModelQueryBuilderContract<LucidModel, LucidRow>
 }

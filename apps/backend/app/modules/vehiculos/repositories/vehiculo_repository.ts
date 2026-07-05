@@ -1,4 +1,4 @@
-import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import Vehiculo from '#models/vehiculo'
 import { BaseRepository } from '#shared/base_repository'
 
@@ -6,9 +6,9 @@ export default class VehiculoRepository extends BaseRepository<Vehiculo> {
   protected model = Vehiculo
 
   protected applySearch(
-    query: ModelQueryBuilderContract<Vehiculo>,
+    query: ModelQueryBuilderContract<LucidModel, LucidRow>,
     search: string
-  ): ModelQueryBuilderContract<Vehiculo> {
+  ): ModelQueryBuilderContract<LucidModel, LucidRow> {
     return query.whereILike('patente', `%${search}%`)
   }
 

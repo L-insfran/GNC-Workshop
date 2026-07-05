@@ -1,4 +1,4 @@
-import type { ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import EquipoGnc from '#models/equipo_gnc'
 import { BaseRepository } from '#shared/base_repository'
 
@@ -6,9 +6,9 @@ export default class EquipoGncRepository extends BaseRepository<EquipoGnc> {
   protected model = EquipoGnc
 
   protected applySearch(
-    query: ModelQueryBuilderContract<EquipoGnc>,
+    query: ModelQueryBuilderContract<LucidModel, LucidRow>,
     search: string
-  ): ModelQueryBuilderContract<EquipoGnc> {
+  ): ModelQueryBuilderContract<LucidModel, LucidRow> {
     return query.where((builder) => {
       builder
         .whereILike('numero_serie_equipo', `%${search}%`)
