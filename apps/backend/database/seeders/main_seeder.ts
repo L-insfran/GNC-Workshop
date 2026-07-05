@@ -1,5 +1,4 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
-import hash from '@adonisjs/core/services/hash'
 import { ROLES } from '@gnc/shared-types'
 import Role from '#models/role'
 import User from '#models/user'
@@ -27,11 +26,13 @@ export default class MainSeeder extends BaseSeeder {
 
     const adminRole = roles.find((role) => role.name === ROLES.ADMINISTRADOR)!
 
+    // Password en texto plano: withAuthFinder hashea automáticamente al guardar.
+    // No usar hash.make() acá (doble hash → login falla).
     const admin = await User.updateOrCreate(
       { email: 'admin@gnc.local' },
       {
         email: 'admin@gnc.local',
-        password: await hash.make('Admin123!'),
+        password: 'Admin123!',
         fullName: 'Administrador GNC',
         phone: null,
         avatarUrl: null,

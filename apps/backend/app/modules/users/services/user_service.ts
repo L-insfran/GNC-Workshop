@@ -1,4 +1,3 @@
-import hash from '@adonisjs/core/services/hash'
 import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import { BaseService } from '#shared/base_service'
@@ -27,10 +26,10 @@ export default class UserService extends BaseService<User> {
     },
     user: User
   ): Promise<User> {
-    const hashedPassword = await hash.make(data.password)
+    // Password en texto plano: withAuthFinder hashea al guardar (no usar hash.make).
     const record = await this.repository.create({
       email: data.email,
-      password: hashedPassword,
+      password: data.password,
       fullName: data.fullName,
       phone: data.phone ?? null,
       isActive: data.isActive ?? true,
@@ -63,7 +62,7 @@ export default class UserService extends BaseService<User> {
     if (data.fullName !== undefined) updateData.fullName = data.fullName
     if (data.phone !== undefined) updateData.phone = data.phone
     if (data.isActive !== undefined) updateData.isActive = data.isActive
-    if (data.password) updateData.password = await hash.make(data.password)
+    if (data.password) updateData.password = data.password
 
     const updated = await this.repository.update(id, updateData)
     if (!updated) return null
