@@ -1,4 +1,4 @@
-import type { IRole, RoleName } from './roles.js'
+import type { IRole, RoleName } from './roles'
 
 export interface ILoginDTO {
   email: string

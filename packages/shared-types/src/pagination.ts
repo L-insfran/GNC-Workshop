@@ -1,1 +1,1 @@
-export type { IPaginationMeta, IPaginationParams } from './api-response.js'
+export type { IPaginationMeta, IPaginationParams } from './api-response'
