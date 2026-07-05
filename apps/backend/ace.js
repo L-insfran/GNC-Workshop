@@ -2,6 +2,10 @@
 |--------------------------------------------------------------------------
 | JavaScript entrypoint for running ace commands
 |--------------------------------------------------------------------------
+|
+| NOTE: This file must remain plain JavaScript (no TypeScript syntax).
+| TypeScript support is loaded via `import 'tsx/esm'` below.
+|
 */
 
 import 'tsx/esm'
@@ -9,7 +13,7 @@ import { Ignitor, prettyPrintError } from '@adonisjs/core'
 
 const APP_ROOT = new URL('./', import.meta.url)
 
-const IMPORTER = (filePath: string) => {
+const IMPORTER = (filePath) => {
   if (filePath.startsWith('./') || filePath.startsWith('../')) {
     return import(new URL(filePath, APP_ROOT).href)
   }

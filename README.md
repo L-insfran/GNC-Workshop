@@ -102,3 +102,29 @@ Ver [docs/README.md](docs/README.md) para documentación técnica completa.
 ## Licencia
 
 Privado - Todos los derechos reservados.
+
+## Flujo de trabajo recomendado (Git)
+
+1. **Desarrollar en local** (Windows) con Cursor/VS Code
+2. **Commit y push** a GitHub
+3. **En la VM**, actualizar código:
+   ```bash
+   cd ~/GNC-Workshop
+   git pull
+   npm install          # solo si cambiaron dependencias
+   cd apps/backend
+   npm run migration:run  # solo si hay migraciones nuevas
+   ```
+4. **Reiniciar servicios** (PM2 o terminales de dev)
+
+### Reglas importantes
+
+- **Nunca** commitear `.env` (usar `.env.example` como plantilla)
+- Cada entorno (local / VM) tiene su propio `.env` con IPs y credenciales correctas
+- Si solo cambiaste código frontend/backend, con `git pull` alcanza
+- Si cambiaron `package.json`, correr `npm install` en la raíz del monorepo
+
+### Alternativa: Cursor Remote SSH
+
+Conectá Cursor directamente a la VM y editá ahí. Útil para debuggear en el servidor sin copiar archivos manualmente.
+

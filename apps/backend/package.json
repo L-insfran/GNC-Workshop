@@ -6,14 +6,14 @@
   "description": "GNC Workshop Management System - Backend API",
   "scripts": {
     "dev": "node --import tsx bin/server.ts",
-    "build": "node ace build",
+    "build": "node ace.js build",
     "start": "node bin/server.js",
     "test": "node --import tsx bin/test.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "migration:run": "node --import tsx ace migration:run",
-    "migration:rollback": "node --import tsx ace migration:rollback",
-    "db:seed": "node --import tsx ace db:seed"
+    "migration:run": "node ace.js migration:run",
+    "migration:rollback": "node ace.js migration:rollback",
+    "db:seed": "node ace.js db:seed"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
