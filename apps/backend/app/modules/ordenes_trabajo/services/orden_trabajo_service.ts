@@ -144,9 +144,8 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
 
       await trx.commit()
 
-      const { default: emitter } = await import('@adonisjs/core/services/emitter')
       const { EntityUpdated } = await import('#events/audit_events')
-      await emitter.emit(EntityUpdated, {
+      await EntityUpdated.dispatch({
         userId: user.id,
         entityType: this.entityType,
         entityId: orden.id,

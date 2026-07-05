@@ -78,9 +78,8 @@ export default class UserService extends BaseService<User> {
   }
 
   private async emitCreated(actor: User, record: User) {
-    const { default: emitter } = await import('@adonisjs/core/services/emitter')
     const { EntityCreated } = await import('#events/audit_events')
-    await emitter.emit(EntityCreated, {
+    await EntityCreated.dispatch({
       userId: actor.id,
       entityType: this.entityType,
       entityId: record.id,
@@ -89,9 +88,8 @@ export default class UserService extends BaseService<User> {
   }
 
   private async emitUpdated(actor: User, existing: User, updated: User) {
-    const { default: emitter } = await import('@adonisjs/core/services/emitter')
     const { EntityUpdated } = await import('#events/audit_events')
-    await emitter.emit(EntityUpdated, {
+    await EntityUpdated.dispatch({
       userId: actor.id,
       entityType: this.entityType,
       entityId: updated.id,

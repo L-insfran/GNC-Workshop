@@ -31,7 +31,11 @@ export default defineConfig({
     () => import('@adonisjs/bouncer/bouncer_provider'),
     () => import('#providers/app_provider'),
   ],
-  preloads: [() => import('#start/routes'), () => import('#start/kernel')],
+  preloads: [
+    () => import('#start/kernel'),
+    () => import('#start/events'),
+    () => import('#start/routes'),
+  ],
   metaFiles: [
     { pattern: 'public/**', reloadServer: false },
     { pattern: 'resources/views/**/*.edge', reloadServer: false },

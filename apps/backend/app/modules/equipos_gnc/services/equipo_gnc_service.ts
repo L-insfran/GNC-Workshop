@@ -85,9 +85,8 @@ export default class EquipoGncService extends BaseService<EquipoGnc> {
 
       await trx.commit()
 
-      const { default: emitter } = await import('@adonisjs/core/services/emitter')
       const { EntityCreated } = await import('#events/audit_events')
-      await emitter.emit(EntityCreated, {
+      await EntityCreated.dispatch({
         userId: user.id,
         entityType: this.entityType,
         entityId: equipo.id,
