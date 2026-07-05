@@ -4,6 +4,7 @@ import type { IPaginationParams } from '@gnc/shared-types'
 import { ApiResponse } from '#shared/api_response'
 import EquipoGncService from '#modules/equipos_gnc/services/equipo_gnc_service'
 import { createEquipoGncValidator } from '#modules/equipos_gnc/validators/create_equipo_gnc_validator'
+import { updateEquipoGncValidator } from '#modules/equipos_gnc/validators/update_equipo_gnc_validator'
 
 const equipoGncService = new EquipoGncService()
 
@@ -36,42 +37,53 @@ export default class EquiposGncController {
       const equipo = await equipoGncService.create(dto, auth.user!)
       return response.created(ApiResponse.created(equipo))
     } catch (error) {
-      if (error instanceof Error) {
-        if (error.message === 'MAX_CILINDROS_EXCEDIDO') {
-          return response.badRequest(
-            ApiResponse.error('MAX_CILINDROS_EXCEDIDO', 'Un equipo GNC no puede tener más de 4 cilindros')
-          )
-        }
-        if (error.message === 'VEHICULO_NO_ENCONTRADO') {
-          return response.notFound(ApiResponse.error('NOT_FOUND', 'Vehículo no encontrado'))
-        }
-      }
-      throw error
+      return this.handleBusinessError(error, response)
     }
   }
 
   async update({ params, request, auth, response }: HttpContext) {
-    const dto = await request.validateUsing(createEquipoGncValidator)
-    const fechaInstalacion = DateTime.fromISO(dto.fechaInstalacion)
+    const dto = await request.validateUsing(updateEquipoGncValidator)
 
-    const equipo = await equipoGncService.update(
-      params.id,
-      {
-        vehiculoId: dto.vehiculoId,
-        numeroSerieEquipo: dto.numeroSerieEquipo,
-        marcaRegulador: dto.marcaRegulador,
-        modeloRegulador: dto.modeloRegulador,
-        fechaInstalacion,
-        fechaVencimientoOblea: EquipoGncService.calcularVencimientoOblea(fechaInstalacion),
-        certificadorCrpc: dto.certificadorCrpc ?? null,
-        notas: dto.notas ?? null,
-      },
-      auth.user!
-    )
-    if (!equipo) {
-      return response.notFound(ApiResponse.error('NOT_FOUND', 'Equipo GNC no encontrado'))
+    try {
+      const updateData: Record<string, unknown> = {}
+
+      if (dto.numeroSerieEquipo !== undefined) {
+        updateData.numeroSerieEquipo = dto.numeroSerieEquipo
+      }
+      if (dto.marcaRegulador !== undefined) {
+        updateData.marcaRegulador = dto.marcaRegulador
+      }
+      if (dto.modeloRegulador !== undefined) {
+        updateData.modeloRegulador = dto.modeloRegulador
+      }
+      if (dto.certificadorCrpc !== undefined) {
+        updateData.certificadorCrpc = dto.certificadorCrpc
+      }
+      if (dto.notas !== undefined) {
+        updateData.notas = dto.notas
+      }
+      if (dto.fechaInstalacion) {
+        const fechaInstalacion = DateTime.fromISO(dto.fechaInstalacion, { zone: 'utc' }).startOf(
+          'day'
+        )
+        if (!fechaInstalacion.isValid) {
+          throw new Error('FECHA_INVALIDA:fechaInstalacion')
+        }
+        updateData.fechaInstalacion = fechaInstalacion
+        updateData.fechaVencimientoOblea =
+          EquipoGncService.calcularVencimientoOblea(fechaInstalacion)
+      }
+
+      const equipo = await equipoGncService.update(params.id, updateData, auth.user!)
+
+      if (!equipo) {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Equipo GNC no encontrado'))
+      }
+
+      return response.ok(ApiResponse.success(equipo))
+    } catch (error) {
+      return this.handleBusinessError(error, response)
     }
-    return response.ok(ApiResponse.success(equipo))
   }
 
   async destroy({ params, auth, response }: HttpContext) {
@@ -80,5 +92,41 @@ export default class EquiposGncController {
       return response.notFound(ApiResponse.error('NOT_FOUND', 'Equipo GNC no encontrado'))
     }
     return response.ok(ApiResponse.success({ message: 'Equipo GNC eliminado' }))
+  }
+
+  private handleBusinessError(error: unknown, response: HttpContext['response']) {
+    if (error instanceof Error) {
+      if (error.message === 'MAX_CILINDROS_EXCEDIDO') {
+        return response.badRequest(
+          ApiResponse.error(
+            'MAX_CILINDROS_EXCEDIDO',
+            'Un equipo GNC no puede tener más de 4 cilindros'
+          )
+        )
+      }
+      if (error.message === 'VEHICULO_NO_ENCONTRADO') {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Vehículo no encontrado'))
+      }
+      if (error.message === 'CILINDROS_REQUERIDOS') {
+        return response.badRequest(
+          ApiResponse.error('CILINDROS_REQUERIDOS', 'Debés agregar al menos un cilindro')
+        )
+      }
+      if (error.message === 'SERIE_DUPLICADA') {
+        return response.conflict(
+          ApiResponse.error(
+            'SERIE_DUPLICADA',
+            'Ya existe un equipo o cilindro con ese número de serie'
+          )
+        )
+      }
+      if (error.message.startsWith('FECHA_INVALIDA:')) {
+        return response.badRequest(
+          ApiResponse.error('FECHA_INVALIDA', 'Hay una fecha inválida en el formulario')
+        )
+      }
+    }
+
+    throw error
   }
 }

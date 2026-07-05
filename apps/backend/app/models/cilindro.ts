@@ -4,6 +4,8 @@ import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import EquipoGnc from '#models/equipo_gnc'
 
 export default class Cilindro extends BaseModel {
+  static table = 'cilindros'
+
   @column({ isPrimary: true })
   declare id: string
 
