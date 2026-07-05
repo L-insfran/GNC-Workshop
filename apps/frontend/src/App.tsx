@@ -16,6 +16,16 @@ import { EquipoGncFormPage } from '@/pages/equipos-gnc/EquipoGncFormPage'
 import { OrdenesTrabajoPage } from '@/pages/ordenes-trabajo/OrdenesTrabajoPage'
 import { OrdenTrabajoFormPage } from '@/pages/ordenes-trabajo/OrdenTrabajoFormPage'
 import { OrdenTrabajoDetailPage } from '@/pages/ordenes-trabajo/OrdenTrabajoDetailPage'
+import { ProductosPage } from '@/pages/inventario/ProductosPage'
+import { ProductoFormPage } from '@/pages/inventario/ProductoFormPage'
+import { MovimientoPage } from '@/pages/inventario/MovimientoPage'
+import { CajaPage } from '@/pages/caja/CajaPage'
+import { MovimientoCajaFormPage } from '@/pages/caja/MovimientoCajaFormPage'
+import { FacturasPage } from '@/pages/facturacion/FacturasPage'
+import { FacturaFormPage } from '@/pages/facturacion/FacturaFormPage'
+import { FacturaDetailPage } from '@/pages/facturacion/FacturaDetailPage'
+import { AgendaPage } from '@/pages/agenda/AgendaPage'
+import { TurnoFormPage } from '@/pages/agenda/TurnoFormPage'
 
 export default function App() {
   return (
@@ -56,6 +66,30 @@ export default function App() {
             <Route path="nuevo" element={<OrdenTrabajoFormPage />} />
             <Route path=":id" element={<OrdenTrabajoDetailPage />} />
             <Route path=":id/editar" element={<OrdenTrabajoFormPage />} />
+          </Route>
+
+          <Route path="inventario" element={<RoleGuard allowedRoles={MODULE_ROLES.inventario} />}>
+            <Route index element={<ProductosPage />} />
+            <Route path="nuevo" element={<ProductoFormPage />} />
+            <Route path="movimiento" element={<MovimientoPage />} />
+            <Route path=":id/editar" element={<ProductoFormPage />} />
+          </Route>
+
+          <Route path="caja" element={<RoleGuard allowedRoles={MODULE_ROLES.caja} />}>
+            <Route index element={<CajaPage />} />
+            <Route path="movimiento" element={<MovimientoCajaFormPage />} />
+          </Route>
+
+          <Route path="facturacion" element={<RoleGuard allowedRoles={MODULE_ROLES.facturacion} />}>
+            <Route index element={<FacturasPage />} />
+            <Route path="nueva" element={<FacturaFormPage />} />
+            <Route path=":id" element={<FacturaDetailPage />} />
+          </Route>
+
+          <Route path="agenda" element={<RoleGuard allowedRoles={MODULE_ROLES.agenda} />}>
+            <Route index element={<AgendaPage />} />
+            <Route path="nuevo" element={<TurnoFormPage />} />
+            <Route path=":id/editar" element={<TurnoFormPage />} />
           </Route>
         </Route>
       </Route>

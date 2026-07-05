@@ -46,6 +46,26 @@ export const MODULE_ROLES: Record<string, RoleName[]> = {
     ROLES.RECEPCION,
     ROLES.MECANICO,
   ],
+  inventario: [
+    ROLES.ADMINISTRADOR,
+    ROLES.SUPERVISOR,
+    ROLES.DEPOSITO,
+  ],
+  caja: [
+    ROLES.ADMINISTRADOR,
+    ROLES.SUPERVISOR,
+    ROLES.CAJA,
+  ],
+  facturacion: [
+    ROLES.ADMINISTRADOR,
+    ROLES.SUPERVISOR,
+    ROLES.CAJA,
+  ],
+  agenda: [
+    ROLES.ADMINISTRADOR,
+    ROLES.SUPERVISOR,
+    ROLES.RECEPCION,
+  ],
 }
 
 export function hasRole(userRole: RoleName, allowedRoles: RoleName[]): boolean {

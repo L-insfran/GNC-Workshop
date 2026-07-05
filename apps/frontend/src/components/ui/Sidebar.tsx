@@ -6,6 +6,10 @@ import {
   Gauge,
   ClipboardList,
   Wrench,
+  Package,
+  DollarSign,
+  FileText,
+  Calendar,
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { ROUTES } from '@/constants/routes'
@@ -31,6 +35,10 @@ const NAV_ITEMS: NavItemConfig[] = [
     icon: ClipboardList,
     roles: MODULE_ROLES.ordenesTrabajo,
   },
+  { label: 'Inventario', path: ROUTES.INVENTARIO, icon: Package, roles: MODULE_ROLES.inventario },
+  { label: 'Caja', path: ROUTES.CAJA, icon: DollarSign, roles: MODULE_ROLES.caja },
+  { label: 'Facturación', path: ROUTES.FACTURACION, icon: FileText, roles: MODULE_ROLES.facturacion },
+  { label: 'Agenda', path: ROUTES.AGENDA, icon: Calendar, roles: MODULE_ROLES.agenda },
 ]
 
 export function Sidebar() {

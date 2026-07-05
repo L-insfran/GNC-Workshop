@@ -22,10 +22,38 @@ router
         router.get('dashboard/kpis', '#modules/dashboard/controllers/dashboard_controller.kpis')
         router.get('dashboard/vencimientos', '#modules/dashboard/controllers/dashboard_controller.vencimientos')
         router.get('dashboard/produccion', '#modules/dashboard/controllers/dashboard_controller.produccion')
-        router.get('inventario', '#modules/inventario/controllers/inventario_controller.index')
+
+        // Inventario
+        router.get('inventario/productos', '#modules/inventario/controllers/inventario_controller.index')
+        router.get('inventario/productos/:id', '#modules/inventario/controllers/inventario_controller.show')
+        router.post('inventario/productos', '#modules/inventario/controllers/inventario_controller.store')
+        router.put('inventario/productos/:id', '#modules/inventario/controllers/inventario_controller.update')
+        router.delete('inventario/productos/:id', '#modules/inventario/controllers/inventario_controller.destroy')
+        router.post('inventario/movimientos', '#modules/inventario/controllers/inventario_controller.movimiento')
+        router.get('inventario/alertas', '#modules/inventario/controllers/inventario_controller.alertas')
+        router.get('inventario/categorias', '#modules/inventario/controllers/inventario_controller.categorias')
+        router.post('inventario/categorias', '#modules/inventario/controllers/inventario_controller.storeCategoria')
+
+        // Caja
         router.get('caja', '#modules/caja/controllers/caja_controller.index')
-        router.get('facturacion', '#modules/facturacion/controllers/facturacion_controller.index')
-        router.get('agenda', '#modules/agenda/controllers/agenda_controller.index')
+        router.get('caja/saldo', '#modules/caja/controllers/caja_controller.saldo')
+        router.get('caja/movimientos', '#modules/caja/controllers/caja_controller.movimientos')
+        router.post('caja/movimientos', '#modules/caja/controllers/caja_controller.storeMovimiento')
+        router.get('caja/arqueo', '#modules/caja/controllers/caja_controller.arqueo')
+
+        // Facturación
+        router.get('facturas', '#modules/facturacion/controllers/facturacion_controller.index')
+        router.get('facturas/:id', '#modules/facturacion/controllers/facturacion_controller.show')
+        router.post('facturas', '#modules/facturacion/controllers/facturacion_controller.store')
+        router.patch('facturas/:id/anular', '#modules/facturacion/controllers/facturacion_controller.anular')
+
+        // Agenda
+        router.get('agenda/turnos', '#modules/agenda/controllers/agenda_controller.index')
+        router.get('agenda/por-fecha', '#modules/agenda/controllers/agenda_controller.porFecha')
+        router.get('agenda/turnos/:id', '#modules/agenda/controllers/agenda_controller.show')
+        router.post('agenda/turnos', '#modules/agenda/controllers/agenda_controller.store')
+        router.put('agenda/turnos/:id', '#modules/agenda/controllers/agenda_controller.update')
+        router.delete('agenda/turnos/:id', '#modules/agenda/controllers/agenda_controller.destroy')
       })
       .use(middleware.auth())
   })

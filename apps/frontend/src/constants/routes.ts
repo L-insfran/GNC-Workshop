@@ -15,6 +15,18 @@ export const ROUTES = {
   ORDEN_TRABAJO_NEW: '/ordenes-trabajo/nuevo',
   ORDEN_TRABAJO_DETAIL: (id: string) => `/ordenes-trabajo/${id}`,
   ORDEN_TRABAJO_EDIT: (id: string) => `/ordenes-trabajo/${id}/editar`,
+  INVENTARIO: '/inventario',
+  PRODUCTO_NEW: '/inventario/nuevo',
+  PRODUCTO_EDIT: (id: string) => `/inventario/${id}/editar`,
+  MOVIMIENTO_STOCK: '/inventario/movimiento',
+  CAJA: '/caja',
+  CAJA_MOVIMIENTO_NEW: '/caja/movimiento',
+  FACTURACION: '/facturacion',
+  FACTURA_NEW: '/facturacion/nueva',
+  FACTURA_DETAIL: (id: string) => `/facturacion/${id}`,
+  AGENDA: '/agenda',
+  TURNO_NEW: '/agenda/nuevo',
+  TURNO_EDIT: (id: string) => `/agenda/${id}/editar`,
 } as const
 
 export type RouteKey = keyof typeof ROUTES
