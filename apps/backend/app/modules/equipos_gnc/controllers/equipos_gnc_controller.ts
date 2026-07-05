@@ -125,8 +125,15 @@ export default class EquiposGncController {
           ApiResponse.error('FECHA_INVALIDA', 'Hay una fecha inválida en el formulario')
         )
       }
+
+      // En desarrollo devolvemos el mensaje real para diagnosticar.
+      return response.internalServerError(
+        ApiResponse.error('INTERNAL_ERROR', error.message || 'Error interno al guardar el equipo')
+      )
     }
 
-    throw error
+    return response.internalServerError(
+      ApiResponse.error('INTERNAL_ERROR', 'Error interno al guardar el equipo')
+    )
   }
 }

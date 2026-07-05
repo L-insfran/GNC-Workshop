@@ -1,10 +1,10 @@
+import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import type { CreateEquipoGncDTO } from '@gnc/shared-types'
 import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import type EquipoGnc from '#models/equipo_gnc'
-import Cilindro from '#models/cilindro'
 import Vehiculo from '#models/vehiculo'
 import { BaseService } from '#shared/base_service'
 import EquipoGncRepository from '#modules/equipos_gnc/repositories/equipo_gnc_repository'
@@ -62,59 +62,56 @@ export default class EquipoGncService extends BaseService<EquipoGnc> {
 
     const fechaInstalacion = parseDate(data.fechaInstalacion, 'fechaInstalacion')
     const fechaVencimientoOblea = fechaInstalacion.plus({ years: OBLEA_YEARS })
+    const now = DateTime.utc().toISO()
 
-    let equipoId = ''
-    const trx = await db.transaction()
+    const equipoId = randomUUID()
 
     try {
-      const equipo = await EquipoGnc.create(
-        {
-          vehiculoId: data.vehiculoId,
-          numeroSerieEquipo: data.numeroSerieEquipo.trim(),
-          marcaRegulador: data.marcaRegulador.trim(),
-          modeloRegulador: data.modeloRegulador.trim(),
-          fechaInstalacion,
-          fechaVencimientoOblea,
+      await db.transaction(async (trx) => {
+        await trx.table('equipos_gnc').insert({
+          id: equipoId,
+          vehiculo_id: data.vehiculoId,
+          numero_serie_equipo: data.numeroSerieEquipo.trim(),
+          marca_regulador: data.marcaRegulador.trim(),
+          modelo_regulador: data.modeloRegulador.trim(),
+          fecha_instalacion: fechaInstalacion.toISODate(),
+          fecha_vencimiento_oblea: fechaVencimientoOblea.toISODate(),
           estado: 'activo',
-          certificadorCrpc: data.certificadorCrpc?.trim() || null,
+          certificador_crpc: data.certificadorCrpc?.trim() || null,
           notas: data.notas?.trim() || null,
-        },
-        { client: trx }
-      )
+          created_at: now,
+          updated_at: now,
+          deleted_at: null,
+        })
 
-      equipoId = equipo.id
+        for (const cilindroData of data.cilindros) {
+          const fechaUltimaPh = parseDate(cilindroData.fechaUltimaPh, 'fechaUltimaPh')
+          const fechaVencimientoPh = fechaUltimaPh.plus({ years: PH_YEARS })
+          const phVencida = fechaVencimientoPh.toMillis() < DateTime.utc().toMillis()
 
-      for (const cilindroData of data.cilindros) {
-        const fechaUltimaPh = parseDate(cilindroData.fechaUltimaPh, 'fechaUltimaPh')
-        const fechaVencimientoPh = fechaUltimaPh.plus({ years: PH_YEARS })
-        const phVencida = fechaVencimientoPh.toMillis() < DateTime.utc().toMillis()
-
-        await Cilindro.create(
-          {
-            equipoGncId: equipo.id,
-            numeroSerie: cilindroData.numeroSerie.trim(),
-            capacidadM3: Number(cilindroData.capacidadM3),
+          await trx.table('cilindros').insert({
+            id: randomUUID(),
+            equipo_gnc_id: equipoId,
+            numero_serie: cilindroData.numeroSerie.trim(),
+            capacidad_m3: Number(cilindroData.capacidadM3),
             marca: cilindroData.marca.trim(),
-            fechaFabricacion: cilindroData.fechaFabricacion
-              ? parseDate(cilindroData.fechaFabricacion, 'fechaFabricacion')
+            fecha_fabricacion: cilindroData.fechaFabricacion
+              ? parseDate(cilindroData.fechaFabricacion, 'fechaFabricacion').toISODate()
               : null,
-            fechaUltimaPh,
-            fechaVencimientoPh,
+            fecha_ultima_ph: fechaUltimaPh.toISODate(),
+            fecha_vencimiento_ph: fechaVencimientoPh.toISODate(),
             estado: phVencida ? 'vencido' : 'activo',
             posicion: Number(cilindroData.posicion),
-          },
-          { client: trx }
-        )
-      }
-
-      await trx.commit()
+            created_at: now,
+            updated_at: now,
+            deleted_at: null,
+          })
+        }
+      })
     } catch (error) {
-      await trx.rollback()
-
       if (isUniqueViolation(error)) {
         throw new Error('SERIE_DUPLICADA')
       }
-
       throw error
     }
 
@@ -133,7 +130,12 @@ export default class EquipoGncService extends BaseService<EquipoGnc> {
       // La auditoría no debe impedir el alta del equipo.
     }
 
-    return (await this.repository.findByIdWithCilindros(equipoId))!
+    const equipo = await this.repository.findByIdWithCilindros(equipoId)
+    if (!equipo) {
+      throw new Error('EQUIPO_NO_ENCONTRADO_POST_CREATE')
+    }
+
+    return equipo
   }
 
   static calcularVencimientoOblea(fechaInstalacion: DateTime): DateTime {
