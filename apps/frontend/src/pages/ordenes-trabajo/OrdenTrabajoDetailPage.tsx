@@ -11,10 +11,9 @@ import { Select } from '@/components/ui/Select'
 import { Alert } from '@/components/ui/Alert'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
+import { OtPresupuestoSection } from '@/components/ordenes-trabajo/OtPresupuestoSection'
 import { ApiError } from '@/services/api-client'
 import {
-  formatCurrency,
-  formatDate,
   formatDateOnly,
   formatDateTime,
   ORDEN_ESTADO_LABELS,
@@ -159,18 +158,6 @@ export function OrdenTrabajoDetailPage() {
                 {orden.kilometrajeIngreso?.toLocaleString('es-AR') ?? '-'} km
               </dd>
             </div>
-            {orden.totalEstimado !== undefined && (
-              <div>
-                <dt className="text-xs font-medium uppercase text-slate-500">Total estimado</dt>
-                <dd className="mt-1 text-sm text-slate-900">{formatCurrency(orden.totalEstimado)}</dd>
-              </div>
-            )}
-            {orden.totalFinal !== undefined && (
-              <div>
-                <dt className="text-xs font-medium uppercase text-slate-500">Total final</dt>
-                <dd className="mt-1 text-sm font-semibold text-slate-900">{formatCurrency(orden.totalFinal)}</dd>
-              </div>
-            )}
             {orden.descripcionProblema && (
               <div className="sm:col-span-2">
                 <dt className="text-xs font-medium uppercase text-slate-500">Descripción</dt>
@@ -186,6 +173,8 @@ export function OrdenTrabajoDetailPage() {
           </dl>
         </CardBody>
       </Card>
+
+      <OtPresupuestoSection ordenTrabajoId={orden.id} />
 
       <Card>
         <CardHeader title="Cambiar estado" description="Actualizar el flujo de la orden de trabajo" />

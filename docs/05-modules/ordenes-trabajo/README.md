@@ -16,7 +16,10 @@ GET    /api/v1/ordenes-trabajo/:id
 POST   /api/v1/ordenes-trabajo
 PUT    /api/v1/ordenes-trabajo/:id
 PATCH  /api/v1/ordenes-trabajo/:id/estado
+GET    /api/v1/ordenes-trabajo/:id/items
 POST   /api/v1/ordenes-trabajo/:id/items
+PUT    /api/v1/ordenes-trabajo/:id/items/:itemId
+DELETE /api/v1/ordenes-trabajo/:id/items/:itemId
 GET    /api/v1/ordenes-trabajo/:id/historial
 ```
 

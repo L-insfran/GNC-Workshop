@@ -28,6 +28,10 @@ router
         router.resource('equipos-gnc', '#modules/equipos_gnc/controllers/equipos_gnc_controller').apiOnly()
         router.resource('ordenes-trabajo', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller').apiOnly()
         router.patch('ordenes-trabajo/:id/estado', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.updateEstado')
+        router.get('ordenes-trabajo/:id/items', '#modules/ordenes_trabajo/controllers/ot_items_controller.index')
+        router.post('ordenes-trabajo/:id/items', '#modules/ordenes_trabajo/controllers/ot_items_controller.store')
+        router.put('ordenes-trabajo/:id/items/:itemId', '#modules/ordenes_trabajo/controllers/ot_items_controller.update')
+        router.delete('ordenes-trabajo/:id/items/:itemId', '#modules/ordenes_trabajo/controllers/ot_items_controller.destroy')
         router.get('tipos-trabajo', '#modules/ordenes_trabajo/controllers/tipos_trabajo_controller.index')
 
         router.get('vehiculo-marcas', '#modules/vehiculos/controllers/vehiculo_marcas_controller.index')
