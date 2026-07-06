@@ -13,5 +13,6 @@ export const updateEstadoValidator = vine.compile(
       'cancelada',
     ]),
     observacion: vine.string().optional(),
+    mecanicoAsignadoId: vine.string().uuid().optional(),
   })
 )

@@ -11,14 +11,14 @@ import {
 } from '@/hooks/useOrdenesTrabajo'
 import { useClientes, useClienteVehiculos } from '@/hooks/useClientes'
 import { useEquiposGnc } from '@/hooks/useEquiposGnc'
-import { useUsers } from '@/hooks/useUsers'
+import { useMecanicos } from '@/hooks/useMecanicos'
 import { ROUTES } from '@/constants/routes'
-import { ROLES } from '@/constants/roles'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Alert } from '@/components/ui/Alert'
+import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { ORDEN_PRIORIDAD_LABELS, calcularFechaEstimadaDefault, formatPatente, toDateInputValue, todayDateInputValue } from '@/utils/format'
 import { ApiError } from '@/services/api-client'
@@ -59,7 +59,7 @@ export function OrdenTrabajoFormPage() {
   const { data: orden, isLoading } = useOrdenTrabajo(id)
   const { data: clientesData } = useClientes({ perPage: 100 })
   const { data: tiposTrabajo } = useTiposTrabajo()
-  const { data: usersData } = useUsers({ perPage: 100 })
+  const { mecanicos, hayMecanicos } = useMecanicos()
   const { create, update } = useOrdenTrabajoMutations()
 
   const minFechaEntrega = isEditing
@@ -216,13 +216,10 @@ export function OrdenTrabajoFormPage() {
     label,
   }))
 
-  const mecanicoOptions = (usersData?.data ?? [])
-    .filter(
-      (user) =>
-        user.isActive &&
-        user.roles.some((role) => role.name === ROLES.MECANICO || role.name === ROLES.SUPERVISOR),
-    )
-    .map((user) => ({ value: user.id, label: user.fullName }))
+  const mecanicoOptions = mecanicos.map((user) => ({
+    value: user.id,
+    label: user.fullName,
+  }))
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -237,6 +234,12 @@ export function OrdenTrabajoFormPage() {
       <Card>
         <CardHeader title={isEditing ? 'Editar orden de trabajo' : 'Nueva orden de trabajo'} />
         <CardBody>
+          {!hayMecanicos && (
+            <div className="mb-5">
+              <SinMecanicosAlert />
+            </div>
+          )}
+
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {errors.root && <Alert variant="error">{errors.root.message}</Alert>}
 
@@ -310,12 +313,15 @@ export function OrdenTrabajoFormPage() {
               <Select
                 label="Mecánico asignado (opcional)"
                 options={mecanicoOptions}
-                placeholder="Sin asignar"
+                placeholder={hayMecanicos ? 'Sin asignar' : 'No hay mecánicos disponibles'}
+                disabled={!hayMecanicos}
                 value={watch('mecanicoAsignadoId') ?? ''}
                 onChange={(e) => setValue('mecanicoAsignadoId', e.target.value)}
               />
               <p className="text-xs text-slate-500">
-                Se asigna normalmente al pasar la OT a estado &quot;En taller&quot;.
+                {hayMecanicos
+                  ? 'Es obligatorio al pasar la OT a estado "En taller".'
+                  : 'Registre un mecánico para poder asignarlo al ingresar la OT al taller.'}
               </p>
             </div>
 

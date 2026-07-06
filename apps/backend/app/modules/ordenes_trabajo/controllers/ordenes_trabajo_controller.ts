@@ -53,6 +53,10 @@ export default class OrdenesTrabajoController {
             'FECHA_ENTREGA_INVALIDA',
             'La fecha estimada de entrega no puede ser anterior a la fecha de ingreso',
           ],
+          MECANICO_INVALIDO: [
+            'MECANICO_INVALIDO',
+            'El mecánico seleccionado no es válido o no está activo',
+          ],
         }
         const mapped = messages[error.message]
         if (mapped) {
@@ -98,6 +102,14 @@ export default class OrdenesTrabajoController {
           )
         )
       }
+      if (error instanceof Error && error.message === 'MECANICO_INVALIDO') {
+        return response.badRequest(
+          ApiResponse.error(
+            'MECANICO_INVALIDO',
+            'El mecánico seleccionado no es válido o no está activo'
+          )
+        )
+      }
       throw error
     }
   }
@@ -120,10 +132,26 @@ export default class OrdenesTrabajoController {
       }
       return response.ok(ApiResponse.success(serializeOrdenTrabajo(orden)))
     } catch (error) {
-      if (error instanceof Error && error.message === 'TRANSICION_INVALIDA') {
-        return response.badRequest(
-          ApiResponse.error('TRANSICION_INVALIDA', 'Transición de estado no permitida')
-        )
+      if (error instanceof Error) {
+        const messages: Record<string, [string, string]> = {
+          TRANSICION_INVALIDA: ['TRANSICION_INVALIDA', 'Transición de estado no permitida'],
+          MECANICO_REQUERIDO: [
+            'MECANICO_REQUERIDO',
+            'Debe asignar un mecánico para pasar la OT a taller',
+          ],
+          MECANICO_INVALIDO: [
+            'MECANICO_INVALIDO',
+            'El mecánico seleccionado no es válido o no está activo',
+          ],
+          SIN_MECANICOS_REGISTRADOS: [
+            'SIN_MECANICOS_REGISTRADOS',
+            'No hay mecánicos registrados en el sistema. Registre al menos uno en Configuración > Usuarios',
+          ],
+        }
+        const mapped = messages[error.message]
+        if (mapped) {
+          return response.badRequest(ApiResponse.error(mapped[0], mapped[1]))
+        }
       }
       throw error
     }

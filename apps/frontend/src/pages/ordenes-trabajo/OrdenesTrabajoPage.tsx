@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Plus, Eye, Pencil, Trash2 } from 'lucide-react'
 import { useOrdenesTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
+import { useMecanicos } from '@/hooks/useMecanicos'
 import { ROUTES } from '@/constants/routes'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -9,6 +10,7 @@ import { Badge, getOrdenEstadoBadgeVariant } from '@/components/ui/Badge'
 import { Table, TablePagination, TableToolbar } from '@/components/ui/Table'
 import { Modal } from '@/components/ui/Modal'
 import { Alert } from '@/components/ui/Alert'
+import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
 import { formatDate, ORDEN_ESTADO_LABELS, ORDEN_PRIORIDAD_LABELS } from '@/utils/format'
 import type { IOrdenTrabajo, ITableColumn } from '@/types'
 
@@ -19,6 +21,7 @@ export function OrdenesTrabajoPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
   const { data, isLoading, error } = useOrdenesTrabajo({ page, perPage: 10, search: search || undefined })
+  const { hayMecanicos } = useMecanicos()
   const { remove } = useOrdenTrabajoMutations()
 
   const columns: ITableColumn<IOrdenTrabajo>[] = [
@@ -98,6 +101,7 @@ export function OrdenesTrabajoPage() {
       </div>
 
       {error && <Alert variant="error">Error al cargar órdenes de trabajo.</Alert>}
+      {!hayMecanicos && <SinMecanicosAlert />}
 
       <Card>
         <TableToolbar

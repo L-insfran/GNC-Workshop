@@ -14,6 +14,7 @@ import TipoTrabajo from '#models/tipo_trabajo'
 import Vehiculo from '#models/vehiculo'
 import { BaseService } from '#shared/base_service'
 import { parseDateOnly } from '#shared/date_util'
+import { countActiveMecanicos, findActiveMecanico } from '#shared/mecanico_util'
 import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_trabajo_repository'
 
 function resolveFechaEstimadaEntrega(
@@ -86,6 +87,13 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     const numero = await this.repository.generateNumero()
     const fechaIngreso = DateTime.now()
 
+    if (data.mecanicoAsignadoId) {
+      const mecanico = await findActiveMecanico(data.mecanicoAsignadoId)
+      if (!mecanico) {
+        throw new Error('MECANICO_INVALIDO')
+      }
+    }
+
     const orden = await super.create(
       {
         numero,
@@ -126,6 +134,13 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
       }
     }
 
+    if (data.mecanicoAsignadoId) {
+      const mecanico = await findActiveMecanico(data.mecanicoAsignadoId)
+      if (!mecanico) {
+        throw new Error('MECANICO_INVALIDO')
+      }
+    }
+
     const updated = await super.update(id, data, user)
     if (!updated) return null
     return this.repository.findByIdWithRelations(id)
@@ -158,6 +173,25 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     const updateData: Partial<OrdenTrabajo> = { estado: estadoNuevo }
     if (estadoNuevo === 'entregada') {
       updateData.fechaEntregaReal = DateTime.now()
+    }
+
+    if (estadoNuevo === 'en_taller') {
+      const mecanicosDisponibles = await countActiveMecanicos()
+      if (mecanicosDisponibles === 0) {
+        throw new Error('SIN_MECANICOS_REGISTRADOS')
+      }
+
+      const mecanicoId = dto.mecanicoAsignadoId ?? orden.mecanicoAsignadoId
+      if (!mecanicoId) {
+        throw new Error('MECANICO_REQUERIDO')
+      }
+
+      const mecanico = await findActiveMecanico(mecanicoId)
+      if (!mecanico) {
+        throw new Error('MECANICO_INVALIDO')
+      }
+
+      updateData.mecanicoAsignadoId = mecanicoId
     }
 
     const trx = await db.transaction()

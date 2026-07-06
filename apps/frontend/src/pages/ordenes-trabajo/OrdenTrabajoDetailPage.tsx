@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft, Pencil } from 'lucide-react'
 import { useOrdenTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
+import { useMecanicos } from '@/hooks/useMecanicos'
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
@@ -9,6 +10,8 @@ import { Badge, getOrdenEstadoBadgeVariant } from '@/components/ui/Badge'
 import { Select } from '@/components/ui/Select'
 import { Alert } from '@/components/ui/Alert'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
+import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
+import { ApiError } from '@/services/api-client'
 import {
   formatCurrency,
   formatDate,
@@ -23,8 +26,10 @@ export function OrdenTrabajoDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: orden, isLoading, error } = useOrdenTrabajo(id)
+  const { mecanicos, hayMecanicos } = useMecanicos()
   const { updateEstado } = useOrdenTrabajoMutations()
   const [nuevoEstado, setNuevoEstado] = useState<OrdenEstado | ''>('')
+  const [mecanicoAsignadoId, setMecanicoAsignadoId] = useState('')
   const [estadoError, setEstadoError] = useState<string | null>(null)
 
   if (isLoading) return <PageLoader />
@@ -41,19 +46,44 @@ export function OrdenTrabajoDetailPage() {
     .join(' · ')
 
   const estadosSiguientes = getOrdenEstadosSiguientes(orden.estado)
-  const estadoOptions = estadosSiguientes.map((value) => ({
-    value,
-    label: ORDEN_ESTADO_LABELS[value],
+  const requiereMecanico = nuevoEstado === 'en_taller'
+  const mecanicoResuelto = mecanicoAsignadoId || orden.mecanicoAsignadoId || ''
+  const estadoOptions = estadosSiguientes
+    .filter((value) => value !== 'en_taller' || hayMecanicos)
+    .map((value) => ({
+      value,
+      label: ORDEN_ESTADO_LABELS[value],
+    }))
+  const mecanicoOptions = mecanicos.map((user) => ({
+    value: user.id,
+    label: user.fullName,
   }))
+  const puedePasarATaller =
+    !requiereMecanico || (hayMecanicos && Boolean(mecanicoResuelto))
 
   const handleEstadoChange = async () => {
     if (!nuevoEstado || !id) return
     setEstadoError(null)
+
+    if (nuevoEstado === 'en_taller' && !mecanicoResuelto) {
+      setEstadoError('Debe seleccionar un mecánico para pasar la OT a taller.')
+      return
+    }
+
     try {
-      await updateEstado.mutateAsync({ id, data: { estado: nuevoEstado } })
+      await updateEstado.mutateAsync({
+        id,
+        data: {
+          estado: nuevoEstado,
+          mecanicoAsignadoId: nuevoEstado === 'en_taller' ? mecanicoResuelto : undefined,
+        },
+      })
       setNuevoEstado('')
-    } catch {
-      setEstadoError('No se pudo actualizar el estado.')
+      setMecanicoAsignadoId('')
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : 'No se pudo actualizar el estado.'
+      setEstadoError(message)
     }
   }
 
@@ -72,6 +102,18 @@ export function OrdenTrabajoDetailPage() {
           Editar
         </Button>
       </div>
+
+      {!hayMecanicos && <SinMecanicosAlert />}
+
+      {orden.estado !== 'borrador' &&
+        orden.estado !== 'recepcion' &&
+        orden.estado !== 'cancelada' &&
+        orden.estado !== 'entregada' &&
+        !orden.mecanicoAsignadoId && (
+          <Alert variant="warning">
+            Esta orden está en taller sin mecánico asignado. Asignelo antes de continuar el trabajo.
+          </Alert>
+        )}
 
       <Card>
         <CardHeader
@@ -159,23 +201,48 @@ export function OrdenTrabajoDetailPage() {
                   {estadoError}
                 </Alert>
               )}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-                <div className="flex-1">
-                  <Select
-                    label="Nuevo estado"
-                    options={estadoOptions}
-                    placeholder="Seleccionar estado"
-                    value={nuevoEstado}
-                    onChange={(e) => setNuevoEstado(e.target.value as OrdenEstado)}
-                  />
+              <div className="space-y-3">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                  <div className="flex-1">
+                    <Select
+                      label="Nuevo estado"
+                      options={estadoOptions}
+                      placeholder="Seleccionar estado"
+                      value={nuevoEstado}
+                      onChange={(e) => {
+                        const estado = e.target.value as OrdenEstado
+                        setNuevoEstado(estado)
+                        if (estado === 'en_taller') {
+                          setMecanicoAsignadoId(orden.mecanicoAsignadoId ?? '')
+                        } else {
+                          setMecanicoAsignadoId('')
+                        }
+                      }}
+                    />
+                  </div>
+                  <Button
+                    onClick={handleEstadoChange}
+                    disabled={!nuevoEstado || nuevoEstado === orden.estado || !puedePasarATaller}
+                    isLoading={updateEstado.isPending}
+                  >
+                    Actualizar estado
+                  </Button>
                 </div>
-                <Button
-                  onClick={handleEstadoChange}
-                  disabled={!nuevoEstado || nuevoEstado === orden.estado}
-                  isLoading={updateEstado.isPending}
-                >
-                  Actualizar estado
-                </Button>
+
+                {requiereMecanico && hayMecanicos && (
+                  <div className="space-y-1.5">
+                    <Select
+                      label="Mecánico asignado"
+                      options={mecanicoOptions}
+                      placeholder="Seleccionar mecánico"
+                      value={mecanicoResuelto}
+                      onChange={(e) => setMecanicoAsignadoId(e.target.value)}
+                    />
+                    <p className="text-xs text-slate-500">
+                      Es obligatorio asignar un mecánico al pasar la OT a taller.
+                    </p>
+                  </div>
+                )}
               </div>
             </>
           )}

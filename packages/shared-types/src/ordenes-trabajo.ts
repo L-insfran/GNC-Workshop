@@ -71,6 +71,7 @@ export interface CreateOrdenTrabajoDTO {
 export interface UpdateOrdenEstadoDTO {
   estado: OrdenEstado
   observacion?: string
+  mecanicoAsignadoId?: string
 }
 
 export interface ITipoTrabajo {
