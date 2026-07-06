@@ -66,8 +66,34 @@ export const MODULE_ROLES: Record<string, RoleName[]> = {
     ROLES.SUPERVISOR,
     ROLES.RECEPCION,
   ],
+  configuracion: [ROLES.ADMINISTRADOR],
+  configuracionAll: [
+    ROLES.ADMINISTRADOR,
+    ROLES.SUPERVISOR,
+    ROLES.DEPOSITO,
+  ],
+  configuracionCatalogos: [
+    ROLES.ADMINISTRADOR,
+    ROLES.SUPERVISOR,
+    ROLES.DEPOSITO,
+  ],
+  configuracionMarcas: [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR],
 }
 
-export function hasRole(userRole: RoleName, allowedRoles: RoleName[]): boolean {
-  return allowedRoles.includes(userRole)
+export function hasRole(
+  userRole: RoleName,
+  allowedRoles: RoleName[],
+  userRoles?: RoleName[],
+): boolean {
+  const rolesToCheck = userRoles?.length ? userRoles : [userRole]
+  return rolesToCheck.some((role) => allowedRoles.includes(role))
+}
+
+export function getUserRoleNames(user: {
+  role: RoleName
+  roles?: { name: RoleName }[]
+}): RoleName[] {
+  const fromRoles = user.roles?.map((r) => r.name) ?? []
+  if (fromRoles.length > 0) return fromRoles
+  return [user.role]
 }

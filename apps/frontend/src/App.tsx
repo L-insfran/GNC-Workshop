@@ -26,6 +26,11 @@ import { FacturaFormPage } from '@/pages/facturacion/FacturaFormPage'
 import { FacturaDetailPage } from '@/pages/facturacion/FacturaDetailPage'
 import { AgendaPage } from '@/pages/agenda/AgendaPage'
 import { TurnoFormPage } from '@/pages/agenda/TurnoFormPage'
+import { ConfiguracionPage } from '@/pages/configuracion/ConfiguracionPage'
+import { UsuariosPage } from '@/pages/configuracion/usuarios/UsuariosPage'
+import { UsuarioFormPage } from '@/pages/configuracion/usuarios/UsuarioFormPage'
+import { MarcasModelosPage } from '@/pages/configuracion/MarcasModelosPage'
+import { CategoriasPage } from '@/pages/configuracion/CategoriasPage'
 
 export default function App() {
   return (
@@ -90,6 +95,27 @@ export default function App() {
             <Route index element={<AgendaPage />} />
             <Route path="nuevo" element={<TurnoFormPage />} />
             <Route path=":id/editar" element={<TurnoFormPage />} />
+          </Route>
+
+          <Route path="configuracion" element={<RoleGuard allowedRoles={MODULE_ROLES.configuracionAll} />}>
+            <Route index element={<ConfiguracionPage />} />
+            <Route path="usuarios" element={<RoleGuard allowedRoles={MODULE_ROLES.configuracion} />}>
+              <Route index element={<UsuariosPage />} />
+              <Route path="nuevo" element={<UsuarioFormPage />} />
+              <Route path=":id/editar" element={<UsuarioFormPage />} />
+            </Route>
+            <Route
+              path="marcas-modelos"
+              element={<RoleGuard allowedRoles={MODULE_ROLES.configuracionMarcas} />}
+            >
+              <Route index element={<MarcasModelosPage />} />
+            </Route>
+            <Route
+              path="categorias"
+              element={<RoleGuard allowedRoles={MODULE_ROLES.configuracionCatalogos} />}
+            >
+              <Route index element={<CategoriasPage />} />
+            </Route>
           </Route>
         </Route>
       </Route>

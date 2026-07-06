@@ -4,6 +4,8 @@ import type {
   IPaginationParams,
   MovimientoStockDTO,
   UpdateProductoDTO,
+  CreateCategoriaProductoDTO,
+  UpdateCategoriaProductoDTO,
 } from '@gnc/shared-types'
 import { inventarioService } from '@/services/inventarioService'
 
@@ -71,6 +73,27 @@ export function useInventarioMutations() {
     }),
     movimiento: useMutation({
       mutationFn: (data: MovimientoStockDTO) => inventarioService.movimiento(data),
+      onSuccess: invalidate,
+    }),
+  }
+}
+
+export function useCategoriaMutations() {
+  const queryClient = useQueryClient()
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY, 'categorias'] })
+
+  return {
+    create: useMutation({
+      mutationFn: (data: CreateCategoriaProductoDTO) => inventarioService.createCategoria(data),
+      onSuccess: invalidate,
+    }),
+    update: useMutation({
+      mutationFn: ({ id, data }: { id: string; data: UpdateCategoriaProductoDTO }) =>
+        inventarioService.updateCategoria(id, data),
+      onSuccess: invalidate,
+    }),
+    remove: useMutation({
+      mutationFn: (id: string) => inventarioService.removeCategoria(id),
       onSuccess: invalidate,
     }),
   }

@@ -1,5 +1,10 @@
 import router from '@adonisjs/core/services/router'
 import { middleware } from '#start/kernel'
+import { ROLES } from '@gnc/shared-types'
+
+const adminOnly = [ROLES.ADMINISTRADOR] as const
+const catalogManagers = [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR] as const
+const categoriaManagers = [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR, ROLES.DEPOSITO] as const
 
 router
   .group(() => {
@@ -9,7 +14,14 @@ router
 
     router
       .group(() => {
-        router.resource('users', '#modules/users/controllers/users_controller').apiOnly()
+        router
+          .resource('users', '#modules/users/controllers/users_controller')
+          .apiOnly()
+          .use(middleware.role(adminOnly))
+        router
+          .get('roles', '#modules/users/controllers/roles_controller.index')
+          .use(middleware.role(adminOnly))
+
         router.resource('clientes', '#modules/clientes/controllers/clientes_controller').apiOnly()
         router.get('clientes/:id/vehiculos', '#modules/clientes/controllers/clientes_controller.vehiculos')
         router.resource('vehiculos', '#modules/vehiculos/controllers/vehiculos_controller').apiOnly()
@@ -17,8 +29,29 @@ router
         router.resource('ordenes-trabajo', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller').apiOnly()
         router.patch('ordenes-trabajo/:id/estado', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.updateEstado')
         router.get('tipos-trabajo', '#modules/ordenes_trabajo/controllers/tipos_trabajo_controller.index')
+
         router.get('vehiculo-marcas', '#modules/vehiculos/controllers/vehiculo_marcas_controller.index')
+        router
+          .post('vehiculo-marcas', '#modules/vehiculos/controllers/vehiculo_marcas_controller.store')
+          .use(middleware.role(catalogManagers))
+        router
+          .put('vehiculo-marcas/:id', '#modules/vehiculos/controllers/vehiculo_marcas_controller.update')
+          .use(middleware.role(catalogManagers))
+        router
+          .delete('vehiculo-marcas/:id', '#modules/vehiculos/controllers/vehiculo_marcas_controller.destroy')
+          .use(middleware.role(catalogManagers))
+
         router.get('vehiculo-modelos', '#modules/vehiculos/controllers/vehiculo_modelos_controller.index')
+        router
+          .post('vehiculo-modelos', '#modules/vehiculos/controllers/vehiculo_modelos_controller.store')
+          .use(middleware.role(catalogManagers))
+        router
+          .put('vehiculo-modelos/:id', '#modules/vehiculos/controllers/vehiculo_modelos_controller.update')
+          .use(middleware.role(catalogManagers))
+        router
+          .delete('vehiculo-modelos/:id', '#modules/vehiculos/controllers/vehiculo_modelos_controller.destroy')
+          .use(middleware.role(catalogManagers))
+
         router.get('dashboard/kpis', '#modules/dashboard/controllers/dashboard_controller.kpis')
         router.get('dashboard/vencimientos', '#modules/dashboard/controllers/dashboard_controller.vencimientos')
         router.get('dashboard/produccion', '#modules/dashboard/controllers/dashboard_controller.produccion')
@@ -32,7 +65,15 @@ router
         router.post('inventario/movimientos', '#modules/inventario/controllers/inventario_controller.movimiento')
         router.get('inventario/alertas', '#modules/inventario/controllers/inventario_controller.alertas')
         router.get('inventario/categorias', '#modules/inventario/controllers/inventario_controller.categorias')
-        router.post('inventario/categorias', '#modules/inventario/controllers/inventario_controller.storeCategoria')
+        router
+          .post('inventario/categorias', '#modules/inventario/controllers/inventario_controller.storeCategoria')
+          .use(middleware.role(categoriaManagers))
+        router
+          .put('inventario/categorias/:id', '#modules/inventario/controllers/inventario_controller.updateCategoria')
+          .use(middleware.role(categoriaManagers))
+        router
+          .delete('inventario/categorias/:id', '#modules/inventario/controllers/inventario_controller.destroyCategoria')
+          .use(middleware.role(categoriaManagers))
 
         // Caja
         router.get('caja', '#modules/caja/controllers/caja_controller.index')

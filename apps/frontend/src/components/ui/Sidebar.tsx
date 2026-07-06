@@ -10,10 +10,11 @@ import {
   DollarSign,
   FileText,
   Calendar,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { ROUTES } from '@/constants/routes'
-import { MODULE_ROLES } from '@/constants/roles'
+import { MODULE_ROLES, ROLE_LABELS } from '@/constants/roles'
 import { useAuth } from '@/hooks/useAuth'
 import type { RoleName } from '@gnc/shared-types'
 
@@ -26,6 +27,12 @@ interface NavItemConfig {
 
 const NAV_ITEMS: NavItemConfig[] = [
   { label: 'Dashboard', path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: MODULE_ROLES.dashboard },
+  {
+    label: 'Configuración',
+    path: ROUTES.CONFIGURACION,
+    icon: Settings,
+    roles: MODULE_ROLES.configuracionAll,
+  },
   { label: 'Clientes', path: ROUTES.CLIENTES, icon: Users, roles: MODULE_ROLES.clientes },
   { label: 'Vehículos', path: ROUTES.VEHICULOS, icon: Car, roles: MODULE_ROLES.vehiculos },
   { label: 'Equipos GNC', path: ROUTES.EQUIPOS_GNC, icon: Gauge, roles: MODULE_ROLES.equiposGnc },
@@ -80,9 +87,12 @@ export function Sidebar() {
       </nav>
 
       {user && (
-        <div className="border-t border-slate-800 p-4">
+        <div className="shrink-0 border-t border-slate-800 p-4">
           <p className="truncate text-sm font-medium text-white">{user.fullName}</p>
           <p className="truncate text-xs text-slate-400">{user.email}</p>
+          <p className="mt-1 truncate text-xs text-brand-400">
+            {ROLE_LABELS[user.role] ?? user.role}
+          </p>
         </div>
       )}
     </aside>

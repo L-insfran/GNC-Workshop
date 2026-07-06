@@ -59,3 +59,8 @@ export interface CreateCategoriaProductoDTO {
   nombre: string
   descripcion?: string
 }
+
+export interface UpdateCategoriaProductoDTO {
+  nombre?: string
+  descripcion?: string | null
+}

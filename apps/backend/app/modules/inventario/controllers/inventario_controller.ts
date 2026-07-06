@@ -6,6 +6,7 @@ import { createProductoValidator } from '#modules/inventario/validators/create_p
 import { updateProductoValidator } from '#modules/inventario/validators/update_producto_validator'
 import { movimientoStockValidator } from '#modules/inventario/validators/movimiento_stock_validator'
 import { createCategoriaValidator } from '#modules/inventario/validators/create_categoria_validator'
+import { updateCategoriaValidator } from '#modules/inventario/validators/update_categoria_validator'
 
 const productoService = new ProductoService()
 
@@ -82,10 +83,44 @@ export default class InventarioController {
     return response.ok(ApiResponse.success(categorias))
   }
 
-  async storeCategoria({ request, response }: HttpContext) {
+  async storeCategoria({ request, auth, response }: HttpContext) {
     const dto = await request.validateUsing(createCategoriaValidator)
-    const categoria = await productoService.createCategoria(dto)
-    return response.created(ApiResponse.created(categoria))
+    try {
+      const categoria = await productoService.createCategoria(dto, auth.user!)
+      return response.created(ApiResponse.created(categoria))
+    } catch (error) {
+      return this.handleCategoriaError(error, response)
+    }
+  }
+
+  async updateCategoria({ params, request, auth, response }: HttpContext) {
+    const dto = await request.validateUsing(updateCategoriaValidator)
+    try {
+      const categoria = await productoService.updateCategoria(params.id, dto, auth.user!)
+      if (!categoria) {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Categoría no encontrada'))
+      }
+      return response.ok(ApiResponse.success(categoria))
+    } catch (error) {
+      return this.handleCategoriaError(error, response)
+    }
+  }
+
+  async destroyCategoria({ params, auth, response }: HttpContext) {
+    const deleted = await productoService.deleteCategoria(params.id, auth.user!)
+    if (!deleted) {
+      return response.notFound(ApiResponse.error('NOT_FOUND', 'Categoría no encontrada'))
+    }
+    return response.ok(ApiResponse.success({ message: 'Categoría eliminada' }))
+  }
+
+  private handleCategoriaError(error: unknown, response: HttpContext['response']) {
+    if (error instanceof Error && error.message === 'NOMBRE_DUPLICADO') {
+      return response.conflict(
+        ApiResponse.error('NOMBRE_DUPLICADO', 'Ya existe una categoría con ese nombre')
+      )
+    }
+    throw error
   }
 
   private handleError(error: unknown, response: HttpContext['response']) {

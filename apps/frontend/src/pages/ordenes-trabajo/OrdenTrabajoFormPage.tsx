@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -52,6 +52,7 @@ export function OrdenTrabajoFormPage() {
     watch,
     formState: { errors, isSubmitting },
     setError,
+    setValue,
   } = useForm<OrdenForm>({
     resolver: zodResolver(ordenSchema),
     defaultValues: { prioridad: 'normal' },
@@ -60,10 +61,17 @@ export function OrdenTrabajoFormPage() {
   const clienteId = watch('clienteId')
   const vehiculoId = watch('vehiculoId')
 
-  const { data: vehiculos } = useClienteVehiculos(clienteId || undefined)
+  const {
+    data: vehiculos,
+    isLoading: vehiculosLoading,
+    isFetching: vehiculosFetching,
+  } = useClienteVehiculos(clienteId || undefined)
   const { data: equiposData } = useEquiposGnc(
     vehiculoId ? { perPage: 100 } : undefined,
   )
+
+  const prevClienteIdRef = useRef<string | undefined>(undefined)
+  const isInitialLoadRef = useRef(true)
 
   useEffect(() => {
     if (orden) {
@@ -78,8 +86,29 @@ export function OrdenTrabajoFormPage() {
         descripcionProblema: orden.descripcionProblema ?? '',
         observacionesInternas: orden.observacionesInternas ?? '',
       })
+      prevClienteIdRef.current = orden.clienteId
+      isInitialLoadRef.current = false
     }
   }, [orden, reset])
+
+  useEffect(() => {
+    if (!clienteId) {
+      prevClienteIdRef.current = undefined
+      return
+    }
+
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false
+      prevClienteIdRef.current = clienteId
+      return
+    }
+
+    if (prevClienteIdRef.current !== clienteId) {
+      setValue('vehiculoId', '')
+      setValue('equipoGncId', '')
+      prevClienteIdRef.current = clienteId
+    }
+  }, [clienteId, setValue])
 
   const onSubmit = async (data: OrdenForm) => {
     try {
@@ -112,6 +141,17 @@ export function OrdenTrabajoFormPage() {
   }))
 
   const vehiculoOptions = (vehiculos ?? []).map((v) => ({ value: v.id, label: v.patente }))
+
+  const vehiculosCargando = Boolean(clienteId) && (vehiculosLoading || vehiculosFetching)
+  const sinVehiculos = Boolean(clienteId) && !vehiculosCargando && vehiculoOptions.length === 0
+
+  const vehiculoPlaceholder = !clienteId
+    ? 'Seleccionar vehículo'
+    : vehiculosCargando
+      ? 'Cargando vehículos...'
+      : sinVehiculos
+        ? 'Este cliente no tiene vehículos'
+        : 'Seleccionar vehículo'
 
   const equipoOptions = (equiposData?.data ?? [])
     .filter((e) => !vehiculoId || e.vehiculoId === vehiculoId)
@@ -151,20 +191,38 @@ export function OrdenTrabajoFormPage() {
               {...register('clienteId')}
             />
 
-            <Select
-              label="Vehículo"
-              options={vehiculoOptions}
-              placeholder="Seleccionar vehículo"
-              error={errors.vehiculoId?.message}
-              disabled={!clienteId}
-              {...register('vehiculoId')}
-            />
+            <div className="space-y-1.5">
+              <Select
+                label="Vehículo"
+                options={vehiculoOptions}
+                placeholder={vehiculoPlaceholder}
+                error={errors.vehiculoId?.message}
+                disabled={!clienteId || vehiculosCargando || sinVehiculos}
+                value={vehiculoId ?? ''}
+                onChange={(e) => {
+                  setValue('vehiculoId', e.target.value, { shouldValidate: true })
+                  setValue('equipoGncId', '')
+                }}
+              />
+              {sinVehiculos && (
+                <p className="text-xs text-slate-500">
+                  <Link
+                    to={`${ROUTES.VEHICULO_NEW}?clienteId=${clienteId}`}
+                    className="text-brand-600 hover:underline"
+                  >
+                    Registrar vehículo para este cliente
+                  </Link>
+                </p>
+              )}
+            </div>
 
             <Select
               label="Equipo GNC (opcional)"
               options={equipoOptions}
               placeholder="Seleccionar equipo"
-              {...register('equipoGncId')}
+              disabled={!vehiculoId}
+              value={watch('equipoGncId') ?? ''}
+              onChange={(e) => setValue('equipoGncId', e.target.value)}
             />
 
             <Select

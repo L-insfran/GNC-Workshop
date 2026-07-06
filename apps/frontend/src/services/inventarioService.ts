@@ -5,6 +5,8 @@ import type {
   UpdateProductoDTO,
   MovimientoStockDTO,
   IPaginationParams,
+  CreateCategoriaProductoDTO,
+  UpdateCategoriaProductoDTO,
 } from '@gnc/shared-types'
 import { apiDelete, apiGet, apiPost, apiPut } from '@/services/api-client'
 
@@ -41,7 +43,15 @@ export const inventarioService = {
     return apiGet<ICategoriaProducto[]>('/inventario/categorias')
   },
 
-  createCategoria(data: { nombre: string; descripcion?: string }) {
+  createCategoria(data: CreateCategoriaProductoDTO) {
     return apiPost<ICategoriaProducto>('/inventario/categorias', data)
+  },
+
+  updateCategoria(id: string, data: UpdateCategoriaProductoDTO) {
+    return apiPut<ICategoriaProducto>(`/inventario/categorias/${id}`, data)
+  },
+
+  removeCategoria(id: string) {
+    return apiDelete<void>(`/inventario/categorias/${id}`)
   },
 }

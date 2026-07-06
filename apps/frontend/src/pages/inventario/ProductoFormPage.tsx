@@ -1,11 +1,12 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { useProducto, useCategorias, useInventarioMutations } from '@/hooks/useInventario'
+import { useProducto, useCategorias, useInventarioMutations, useCategoriaMutations } from '@/hooks/useInventario'
 import { ROUTES } from '@/constants/routes'
+import { CatalogModal } from '@/components/configuracion/CatalogModal'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
@@ -33,11 +34,15 @@ export function ProductoFormPage() {
   const { data: producto, isLoading } = useProducto(id)
   const { data: categorias } = useCategorias()
   const { create, update } = useInventarioMutations()
+  const { create: createCategoria } = useCategoriaMutations()
+  const [showCategoriaModal, setShowCategoriaModal] = useState(false)
 
   const {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
     setError,
   } = useForm<FormData>({
@@ -95,12 +100,22 @@ export function ProductoFormPage() {
               <Input label="Código" error={errors.codigo?.message} {...register('codigo')} />
               <Input label="Nombre" error={errors.nombre?.message} {...register('nombre')} />
             </div>
-            <Select
-              label="Categoría"
-              options={(categorias ?? []).map((c) => ({ value: c.id, label: c.nombre }))}
-              placeholder="Sin categoría"
-              {...register('categoriaId')}
-            />
+            <div className="space-y-1.5">
+              <Select
+                label="Categoría"
+                options={(categorias ?? []).map((c) => ({ value: c.id, label: c.nombre }))}
+                placeholder="Sin categoría"
+                value={watch('categoriaId') ?? ''}
+                onChange={(e) => setValue('categoriaId', e.target.value)}
+              />
+              <button
+                type="button"
+                className="text-xs text-brand-600 hover:underline"
+                onClick={() => setShowCategoriaModal(true)}
+              >
+                + Nueva categoría
+              </button>
+            </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <Input label="Precio compra" type="number" step="0.01" error={errors.precioCompra?.message} {...register('precioCompra')} />
               <Input label="Precio venta" type="number" step="0.01" error={errors.precioVenta?.message} {...register('precioVenta')} />
@@ -116,6 +131,19 @@ export function ProductoFormPage() {
           </form>
         </CardBody>
       </Card>
+
+      <CatalogModal
+        isOpen={showCategoriaModal}
+        onClose={() => setShowCategoriaModal(false)}
+        title="Nueva categoría"
+        showDescripcion
+        onSubmit={async (data) => {
+          const response = await createCategoria.mutateAsync(data)
+          if (response.data?.id) {
+            setValue('categoriaId', response.data.id)
+          }
+        }}
+      />
     </div>
   )
 }

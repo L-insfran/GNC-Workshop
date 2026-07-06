@@ -5,6 +5,10 @@ import type {
   IPaginationParams,
   IVehiculoMarca,
   IVehiculoModelo,
+  CreateVehiculoMarcaDTO,
+  UpdateVehiculoMarcaDTO,
+  CreateVehiculoModeloDTO,
+  UpdateVehiculoModeloDTO,
 } from '@gnc/shared-types'
 import { apiDelete, apiGet, apiPost, apiPut } from '@/services/api-client'
 
@@ -35,5 +39,29 @@ export const vehiculoService = {
 
   getModelos(marcaId?: string) {
     return apiGet<IVehiculoModelo[]>('/vehiculo-modelos', marcaId ? { marcaId } : undefined)
+  },
+
+  createMarca(data: CreateVehiculoMarcaDTO) {
+    return apiPost<IVehiculoMarca>('/vehiculo-marcas', data)
+  },
+
+  updateMarca(id: string, data: UpdateVehiculoMarcaDTO) {
+    return apiPut<IVehiculoMarca>(`/vehiculo-marcas/${id}`, data)
+  },
+
+  removeMarca(id: string) {
+    return apiDelete<void>(`/vehiculo-marcas/${id}`)
+  },
+
+  createModelo(data: CreateVehiculoModeloDTO) {
+    return apiPost<IVehiculoModelo>('/vehiculo-modelos', data)
+  },
+
+  updateModelo(id: string, data: UpdateVehiculoModeloDTO) {
+    return apiPut<IVehiculoModelo>(`/vehiculo-modelos/${id}`, data)
+  },
+
+  removeModelo(id: string) {
+    return apiDelete<void>(`/vehiculo-modelos/${id}`)
   },
 }

@@ -27,6 +27,12 @@ export const ROUTES = {
   AGENDA: '/agenda',
   TURNO_NEW: '/agenda/nuevo',
   TURNO_EDIT: (id: string) => `/agenda/${id}/editar`,
+  CONFIGURACION: '/configuracion',
+  CONFIG_USUARIOS: '/configuracion/usuarios',
+  CONFIG_USUARIO_NEW: '/configuracion/usuarios/nuevo',
+  CONFIG_USUARIO_EDIT: (id: string) => `/configuracion/usuarios/${id}/editar`,
+  CONFIG_MARCAS_MODELOS: '/configuracion/marcas-modelos',
+  CONFIG_CATEGORIAS: '/configuracion/categorias',
 } as const
 
 export type RouteKey = keyof typeof ROUTES

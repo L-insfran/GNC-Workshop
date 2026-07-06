@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -60,6 +60,7 @@ export function VehiculoFormPage() {
     watch,
     formState: { errors, isSubmitting },
     setError,
+    setValue,
   } = useForm<VehiculoForm>({
     resolver: zodResolver(vehiculoSchema),
     defaultValues: {
@@ -70,7 +71,11 @@ export function VehiculoFormPage() {
   })
 
   const marcaId = watch('marcaId')
-  const { data: modelos } = useVehiculoModelos(marcaId)
+  const modeloId = watch('modeloId')
+  const { data: modelos, isLoading: modelosLoading } = useVehiculoModelos(marcaId)
+
+  const prevMarcaIdRef = useRef<string | undefined>(undefined)
+  const isInitialLoadRef = useRef(true)
 
   useEffect(() => {
     if (vehiculo) {
@@ -86,8 +91,28 @@ export function VehiculoFormPage() {
         numeroChasis: vehiculo.numeroChasis ?? '',
         kilometraje: vehiculo.kilometraje,
       })
+      prevMarcaIdRef.current = vehiculo.marcaId
+      isInitialLoadRef.current = false
     }
   }, [vehiculo, reset])
+
+  useEffect(() => {
+    if (!marcaId) {
+      prevMarcaIdRef.current = undefined
+      return
+    }
+
+    if (isInitialLoadRef.current) {
+      isInitialLoadRef.current = false
+      prevMarcaIdRef.current = marcaId
+      return
+    }
+
+    if (prevMarcaIdRef.current !== marcaId) {
+      setValue('modeloId', '')
+      prevMarcaIdRef.current = marcaId
+    }
+  }, [marcaId, setValue])
 
   const onSubmit = async (data: VehiculoForm) => {
     try {
@@ -148,21 +173,33 @@ export function VehiculoFormPage() {
               <Input label="Año" type="number" error={errors.anio?.message} {...register('anio')} />
             </div>
 
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-700">Marca y modelo</p>
+              <Link
+                to={ROUTES.CONFIG_MARCAS_MODELOS}
+                className="text-xs text-brand-600 hover:underline"
+              >
+                Gestionar marcas y modelos
+              </Link>
+            </div>
+
             <div className="grid gap-4 sm:grid-cols-2">
               <Select
                 label="Marca"
                 options={marcaOptions}
                 placeholder="Seleccionar marca"
                 error={errors.marcaId?.message}
-                {...register('marcaId')}
+                value={marcaId ?? ''}
+                onChange={(e) => setValue('marcaId', e.target.value, { shouldValidate: true })}
               />
               <Select
                 label="Modelo"
                 options={modeloOptions}
-                placeholder="Seleccionar modelo"
+                placeholder={modelosLoading ? 'Cargando modelos...' : 'Seleccionar modelo'}
                 error={errors.modeloId?.message}
-                disabled={!marcaId}
-                {...register('modeloId')}
+                disabled={!marcaId || modelosLoading}
+                value={modeloId ?? ''}
+                onChange={(e) => setValue('modeloId', e.target.value, { shouldValidate: true })}
               />
             </div>
 

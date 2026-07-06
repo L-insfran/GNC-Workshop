@@ -9,7 +9,7 @@ import {
 import type { IAuthUser, RoleName } from '@gnc/shared-types'
 import { authService } from '@/services/authService'
 import { ApiError, getAuthToken } from '@/services/api-client'
-import { hasRole } from '@/constants/roles'
+import { getUserRoleNames, hasRole } from '@/constants/roles'
 
 interface IAuthContextValue {
   user: IAuthUser | null
@@ -63,7 +63,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const checkRole = useCallback(
     (allowedRoles: RoleName[]) => {
       if (!user) return false
-      return hasRole(user.role, allowedRoles)
+      return hasRole(user.role, allowedRoles, getUserRoleNames(user))
     },
     [user],
   )

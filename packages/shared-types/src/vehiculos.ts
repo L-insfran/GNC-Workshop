@@ -44,3 +44,20 @@ export interface IVehiculoModelo {
   marcaId: string
   nombre: string
 }
+
+export interface CreateVehiculoMarcaDTO {
+  nombre: string
+}
+
+export interface UpdateVehiculoMarcaDTO {
+  nombre: string
+}
+
+export interface CreateVehiculoModeloDTO {
+  marcaId: string
+  nombre: string
+}
+
+export interface UpdateVehiculoModeloDTO {
+  nombre: string
+}
