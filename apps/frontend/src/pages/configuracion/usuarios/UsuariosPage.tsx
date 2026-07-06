@@ -30,7 +30,7 @@ export function UsuariosPage() {
       header: 'Roles',
       render: (item) => (
         <div className="flex flex-wrap gap-1">
-          {item.roles.map((role) => (
+          {item.roles?.map((role) => (
             <Badge key={role.id} variant="neutral">
               {ROLE_LABELS[role.name] ?? role.displayName}
             </Badge>
@@ -99,11 +99,23 @@ export function UsuariosPage() {
       {error && <Alert variant="error">Error al cargar usuarios</Alert>}
 
       <Card>
-        <TableToolbar search={search} onSearchChange={setSearch} placeholder="Buscar por nombre o email..." />
-        <Table columns={columns} data={data?.data ?? []} isLoading={isLoading} emptyMessage="No hay usuarios" />
-        {data?.meta && (
-          <TablePagination meta={data.meta} onPageChange={setPage} />
-        )}
+        <TableToolbar
+          search={search}
+          onSearchChange={(value) => {
+            setSearch(value)
+            setPage(1)
+          }}
+          placeholder="Buscar por nombre o email..."
+        />
+        <Table
+          columns={columns}
+          data={data?.data ?? []}
+          isLoading={isLoading}
+          keyExtractor={(item) => item.id}
+          emptyTitle="No hay usuarios"
+          emptyDescription="Creá el primer usuario del sistema."
+        />
+        <TablePagination meta={data?.meta} onPageChange={setPage} />
       </Card>
 
       <Modal

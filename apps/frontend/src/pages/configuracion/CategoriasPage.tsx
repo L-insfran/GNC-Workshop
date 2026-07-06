@@ -80,7 +80,9 @@ export function CategoriasPage() {
           columns={columns}
           data={categorias ?? []}
           isLoading={isLoading}
-          emptyMessage="No hay categorías cargadas"
+          keyExtractor={(item) => item.id}
+          emptyTitle="No hay categorías cargadas"
+          emptyDescription="Creá la primera categoría de productos."
         />
       </Card>
 
