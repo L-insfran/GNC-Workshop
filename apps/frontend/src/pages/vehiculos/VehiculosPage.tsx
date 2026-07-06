@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Table, TablePagination, TableToolbar } from '@/components/ui/Table'
 import { Modal } from '@/components/ui/Modal'
 import { Alert } from '@/components/ui/Alert'
-import { formatPatente } from '@/utils/format'
+import { formatPatente, formatVehiculoMarcaModelo } from '@/utils/format'
 import type { IVehiculo, ITableColumn } from '@/types'
 
 export function VehiculosPage() {
@@ -30,7 +30,7 @@ export function VehiculosPage() {
     {
       key: 'marca',
       header: 'Marca / Modelo',
-      render: (item) => `${item.marcaNombre ?? '-'} ${item.modeloNombre ?? ''}`,
+      render: (item) => formatVehiculoMarcaModelo(item),
     },
     { key: 'anio', header: 'Año' },
     { key: 'tipoCombustible', header: 'Combustible' },

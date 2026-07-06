@@ -1,6 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import type { IPaginationParams } from '@gnc/shared-types'
 import { ApiResponse } from '#shared/api_response'
+import { serializeVehiculo, serializeVehiculos } from '#shared/vehiculo_serializer'
 import VehiculoService from '#modules/vehiculos/services/vehiculo_service'
 import { createVehiculoValidator } from '#modules/vehiculos/validators/create_vehiculo_validator'
 import { updateVehiculoValidator } from '#modules/vehiculos/validators/update_vehiculo_validator'
@@ -19,7 +20,9 @@ export default class VehiculosController {
     }
 
     const result = await vehiculoService.list(params)
-    return response.ok(ApiResponse.paginated(result.data, result.meta as never))
+    return response.ok(
+      ApiResponse.paginated(serializeVehiculos(result.data), result.meta as never)
+    )
   }
 
   async show({ params, response }: HttpContext) {
@@ -27,7 +30,7 @@ export default class VehiculosController {
     if (!vehiculo) {
       return response.notFound(ApiResponse.error('NOT_FOUND', 'Vehículo no encontrado'))
     }
-    return response.ok(ApiResponse.success(vehiculo))
+    return response.ok(ApiResponse.success(serializeVehiculo(vehiculo)))
   }
 
   async store({ request, auth, response }: HttpContext) {
@@ -35,7 +38,7 @@ export default class VehiculosController {
 
     try {
       const vehiculo = await vehiculoService.create(dto, auth.user!)
-      return response.created(ApiResponse.created(vehiculo))
+      return response.created(ApiResponse.created(serializeVehiculo(vehiculo)))
     } catch (error) {
       return this.handleBusinessError(error, response)
     }
@@ -49,7 +52,7 @@ export default class VehiculosController {
       if (!vehiculo) {
         return response.notFound(ApiResponse.error('NOT_FOUND', 'Vehículo no encontrado'))
       }
-      return response.ok(ApiResponse.success(vehiculo))
+      return response.ok(ApiResponse.success(serializeVehiculo(vehiculo)))
     } catch (error) {
       return this.handleBusinessError(error, response)
     }

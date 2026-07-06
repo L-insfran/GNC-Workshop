@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import type { IPaginationParams } from '@gnc/shared-types'
 import Vehiculo from '#models/vehiculo'
 import { ApiResponse } from '#shared/api_response'
+import { serializeVehiculos } from '#shared/vehiculo_serializer'
 import ClienteService from '#modules/clientes/services/cliente_service'
 import { createClienteValidator } from '#modules/clientes/validators/create_cliente_validator'
 import { updateClienteValidator } from '#modules/clientes/validators/update_cliente_validator'
@@ -76,6 +77,6 @@ export default class ClientesController {
       .preload('modelo')
       .orderBy('created_at', 'desc')
 
-    return response.ok(ApiResponse.success(vehiculos))
+    return response.ok(ApiResponse.success(serializeVehiculos(vehiculos)))
   }
 }

@@ -13,6 +13,7 @@ import {
   DOCUMENTO_TIPO_LABELS,
   formatDate,
   formatPatente,
+  formatVehiculoMarcaModelo,
 } from '@/utils/format'
 
 export function ClienteDetailPage() {
@@ -106,7 +107,7 @@ export function ClienteDetailPage() {
                   <div>
                     <p className="font-medium text-slate-900">{formatPatente(vehiculo.patente)}</p>
                     <p className="text-sm text-slate-500">
-                      {vehiculo.marcaNombre} {vehiculo.modeloNombre} · {vehiculo.anio}
+                      {formatVehiculoMarcaModelo(vehiculo)} · {vehiculo.anio}
                     </p>
                   </div>
                   <Button

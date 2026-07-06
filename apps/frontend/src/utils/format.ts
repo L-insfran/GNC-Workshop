@@ -38,6 +38,19 @@ export function formatPatente(patente: string): string {
   return patente.toUpperCase()
 }
 
+export function formatVehiculoMarcaModelo(vehiculo: {
+  marcaNombre?: string | null
+  modeloNombre?: string | null
+  marca?: { nombre: string } | null
+  modelo?: { nombre: string } | null
+}): string {
+  const marca = vehiculo.marcaNombre ?? vehiculo.marca?.nombre
+  const modelo = vehiculo.modeloNombre ?? vehiculo.modelo?.nombre
+
+  if (!marca && !modelo) return '-'
+  return [marca, modelo].filter(Boolean).join(' ')
+}
+
 export const CLIENTE_TIPO_LABELS: Record<ClienteTipo, string> = {
   persona_fisica: 'Persona física',
   persona_juridica: 'Persona jurídica',

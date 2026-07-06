@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate, useParams } from 'react-router-dom'
@@ -18,7 +18,7 @@ import { Select } from '@/components/ui/Select'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Alert } from '@/components/ui/Alert'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
-import { ORDEN_PRIORIDAD_LABELS } from '@/utils/format'
+import { ORDEN_PRIORIDAD_LABELS, formatPatente } from '@/utils/format'
 import { ApiError } from '@/services/api-client'
 
 const ordenSchema = z.object({
@@ -50,12 +50,18 @@ export function OrdenTrabajoFormPage() {
     handleSubmit,
     reset,
     watch,
+    control,
     formState: { errors, isSubmitting },
     setError,
     setValue,
   } = useForm<OrdenForm>({
     resolver: zodResolver(ordenSchema),
-    defaultValues: { prioridad: 'normal' },
+    defaultValues: {
+      prioridad: 'normal',
+      clienteId: '',
+      vehiculoId: '',
+      equipoGncId: '',
+    },
   })
 
   const clienteId = watch('clienteId')
@@ -65,13 +71,20 @@ export function OrdenTrabajoFormPage() {
     data: vehiculos,
     isLoading: vehiculosLoading,
     isFetching: vehiculosFetching,
+    isError: vehiculosError,
   } = useClienteVehiculos(clienteId || undefined)
   const { data: equiposData } = useEquiposGnc(
     vehiculoId ? { perPage: 100 } : undefined,
   )
 
   const prevClienteIdRef = useRef<string | undefined>(undefined)
-  const isInitialLoadRef = useRef(true)
+  const isInitialLoadRef = useRef(isEditing)
+
+  useEffect(() => {
+    if (!isEditing) {
+      isInitialLoadRef.current = false
+    }
+  }, [isEditing])
 
   useEffect(() => {
     if (orden) {
@@ -140,7 +153,10 @@ export function OrdenTrabajoFormPage() {
     label: c.razonSocial,
   }))
 
-  const vehiculoOptions = (vehiculos ?? []).map((v) => ({ value: v.id, label: v.patente }))
+  const vehiculoOptions = (vehiculos ?? []).map((v) => ({
+    value: v.id,
+    label: formatPatente(v.patente),
+  }))
 
   const vehiculosCargando = Boolean(clienteId) && (vehiculosLoading || vehiculosFetching)
   const sinVehiculos = Boolean(clienteId) && !vehiculosCargando && vehiculoOptions.length === 0
@@ -183,27 +199,43 @@ export function OrdenTrabajoFormPage() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             {errors.root && <Alert variant="error">{errors.root.message}</Alert>}
 
-            <Select
-              label="Cliente"
-              options={clienteOptions}
-              placeholder="Seleccionar cliente"
-              error={errors.clienteId?.message}
-              {...register('clienteId')}
+            <Controller
+              name="clienteId"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  label="Cliente"
+                  options={clienteOptions}
+                  placeholder="Seleccionar cliente"
+                  error={errors.clienteId?.message}
+                  value={field.value ?? ''}
+                  onChange={(e) => field.onChange(e.target.value)}
+                />
+              )}
             />
 
             <div className="space-y-1.5">
-              <Select
-                label="Vehículo"
-                options={vehiculoOptions}
-                placeholder={vehiculoPlaceholder}
-                error={errors.vehiculoId?.message}
-                disabled={!clienteId || vehiculosCargando || sinVehiculos}
-                value={vehiculoId ?? ''}
-                onChange={(e) => {
-                  setValue('vehiculoId', e.target.value, { shouldValidate: true })
-                  setValue('equipoGncId', '')
-                }}
+              <Controller
+                name="vehiculoId"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    label="Vehículo"
+                    options={vehiculoOptions}
+                    placeholder={vehiculoPlaceholder}
+                    error={errors.vehiculoId?.message}
+                    disabled={!clienteId || vehiculosCargando || sinVehiculos}
+                    value={field.value ?? ''}
+                    onChange={(e) => {
+                      field.onChange(e.target.value)
+                      setValue('equipoGncId', '')
+                    }}
+                  />
+                )}
               />
+              {vehiculosError && (
+                <p className="text-xs text-red-600">No se pudieron cargar los vehículos del cliente.</p>
+              )}
               {sinVehiculos && (
                 <p className="text-xs text-slate-500">
                   <Link
