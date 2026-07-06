@@ -11,7 +11,9 @@ import {
 } from '@/hooks/useOrdenesTrabajo'
 import { useClientes, useClienteVehiculos } from '@/hooks/useClientes'
 import { useEquiposGnc } from '@/hooks/useEquiposGnc'
+import { useUsers } from '@/hooks/useUsers'
 import { ROUTES } from '@/constants/routes'
+import { ROLES } from '@/constants/roles'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
@@ -29,6 +31,7 @@ const ordenSchema = z.object({
   prioridad: z.enum(['baja', 'normal', 'alta', 'urgente']).optional(),
   fechaEstimadaEntrega: z.string().optional(),
   kilometrajeIngreso: z.coerce.number().optional(),
+  mecanicoAsignadoId: z.string().optional(),
   descripcionProblema: z.string().optional(),
   observacionesInternas: z.string().optional(),
 })
@@ -43,6 +46,7 @@ export function OrdenTrabajoFormPage() {
   const { data: orden, isLoading } = useOrdenTrabajo(id)
   const { data: clientesData } = useClientes({ perPage: 100 })
   const { data: tiposTrabajo } = useTiposTrabajo()
+  const { data: usersData } = useUsers({ perPage: 100 })
   const { create, update } = useOrdenTrabajoMutations()
 
   const {
@@ -96,6 +100,7 @@ export function OrdenTrabajoFormPage() {
         prioridad: orden.prioridad,
         fechaEstimadaEntrega: orden.fechaEstimadaEntrega?.split('T')[0] ?? '',
         kilometrajeIngreso: orden.kilometrajeIngreso,
+        mecanicoAsignadoId: orden.mecanicoAsignadoId ?? '',
         descripcionProblema: orden.descripcionProblema ?? '',
         observacionesInternas: orden.observacionesInternas ?? '',
       })
@@ -128,6 +133,7 @@ export function OrdenTrabajoFormPage() {
       const payload = {
         ...data,
         equipoGncId: data.equipoGncId || undefined,
+        mecanicoAsignadoId: data.mecanicoAsignadoId || undefined,
         fechaEstimadaEntrega: data.fechaEstimadaEntrega || undefined,
         descripcionProblema: data.descripcionProblema || undefined,
         observacionesInternas: data.observacionesInternas || undefined,
@@ -182,6 +188,14 @@ export function OrdenTrabajoFormPage() {
     value,
     label,
   }))
+
+  const mecanicoOptions = (usersData?.data ?? [])
+    .filter(
+      (user) =>
+        user.isActive &&
+        user.roles.some((role) => role.name === ROLES.MECANICO || role.name === ROLES.SUPERVISOR),
+    )
+    .map((user) => ({ value: user.id, label: user.fullName }))
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -264,6 +278,19 @@ export function OrdenTrabajoFormPage() {
               error={errors.tipoTrabajoId?.message}
               {...register('tipoTrabajoId')}
             />
+
+            <div className="space-y-1.5">
+              <Select
+                label="Mecánico asignado (opcional)"
+                options={mecanicoOptions}
+                placeholder="Sin asignar"
+                value={watch('mecanicoAsignadoId') ?? ''}
+                onChange={(e) => setValue('mecanicoAsignadoId', e.target.value)}
+              />
+              <p className="text-xs text-slate-500">
+                Se asigna normalmente al pasar la OT a estado &quot;En taller&quot;.
+              </p>
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <Select

@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { DateTime } from 'luxon'
 import type { IPaginationParams } from '@gnc/shared-types'
 import { ApiResponse } from '#shared/api_response'
+import { serializeOrdenTrabajo, serializeOrdenesTrabajo } from '#shared/orden_trabajo_serializer'
 import OrdenTrabajoService from '#modules/ordenes_trabajo/services/orden_trabajo_service'
 import { createOrdenTrabajoValidator } from '#modules/ordenes_trabajo/validators/create_orden_trabajo_validator'
 import { updateEstadoValidator } from '#modules/ordenes_trabajo/validators/update_estado_validator'
@@ -19,7 +20,9 @@ export default class OrdenesTrabajoController {
     }
 
     const result = await ordenTrabajoService.list(params)
-    return response.ok(ApiResponse.paginated(result.data, result.meta as never))
+    return response.ok(
+      ApiResponse.paginated(serializeOrdenesTrabajo(result.data), result.meta as never)
+    )
   }
 
   async show({ params, response }: HttpContext) {
@@ -27,7 +30,7 @@ export default class OrdenesTrabajoController {
     if (!orden) {
       return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
     }
-    return response.ok(ApiResponse.success(orden))
+    return response.ok(ApiResponse.success(serializeOrdenTrabajo(orden)))
   }
 
   async store({ request, auth, response }: HttpContext) {
@@ -35,7 +38,7 @@ export default class OrdenesTrabajoController {
 
     try {
       const orden = await ordenTrabajoService.create(dto, auth.user!)
-      return response.created(ApiResponse.created(orden))
+      return response.created(ApiResponse.created(serializeOrdenTrabajo(orden)))
     } catch (error) {
       if (error instanceof Error) {
         const messages: Record<string, [string, string]> = {
@@ -80,7 +83,7 @@ export default class OrdenesTrabajoController {
     if (!orden) {
       return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
     }
-    return response.ok(ApiResponse.success(orden))
+    return response.ok(ApiResponse.success(serializeOrdenTrabajo(orden)))
   }
 
   async destroy({ params, auth, response }: HttpContext) {
@@ -99,7 +102,7 @@ export default class OrdenesTrabajoController {
       if (!orden) {
         return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
       }
-      return response.ok(ApiResponse.success(orden))
+      return response.ok(ApiResponse.success(serializeOrdenTrabajo(orden)))
     } catch (error) {
       if (error instanceof Error && error.message === 'TRANSICION_INVALIDA') {
         return response.badRequest(

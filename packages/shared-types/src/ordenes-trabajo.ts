@@ -17,7 +17,10 @@ export interface IOrdenTrabajo {
   clienteNombre?: string
   vehiculoId: string
   vehiculoPatente?: string
+  vehiculoMarcaNombre?: string
+  vehiculoModeloNombre?: string
   equipoGncId?: string
+  equipoGncNumeroSerie?: string
   tipoTrabajoId: string
   tipoTrabajoNombre?: string
   estado: OrdenEstado

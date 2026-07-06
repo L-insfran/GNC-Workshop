@@ -37,6 +37,13 @@ export function OrdenTrabajoDetailPage() {
     return <Alert variant="error">No se pudo cargar la orden de trabajo.</Alert>
   }
 
+  const vehiculoDescripcion = [
+    orden.vehiculoPatente,
+    [orden.vehiculoMarcaNombre, orden.vehiculoModeloNombre].filter(Boolean).join(' '),
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
   const handleEstadoChange = async () => {
     if (!nuevoEstado || !id) return
     setEstadoError(null)
@@ -67,7 +74,7 @@ export function OrdenTrabajoDetailPage() {
       <Card>
         <CardHeader
           title={`OT ${orden.numero}`}
-          description={`${orden.clienteNombre ?? '-'} · ${orden.vehiculoPatente ?? '-'}`}
+          description={`${orden.clienteNombre ?? '-'} · ${vehiculoDescripcion || '-'}`}
           action={
             <Badge variant={getOrdenEstadoBadgeVariant(orden.estado)}>
               {ORDEN_ESTADO_LABELS[orden.estado]}
@@ -79,6 +86,10 @@ export function OrdenTrabajoDetailPage() {
             <div>
               <dt className="text-xs font-medium uppercase text-slate-500">Tipo de trabajo</dt>
               <dd className="mt-1 text-sm text-slate-900">{orden.tipoTrabajoNombre ?? '-'}</dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase text-slate-500">Equipo GNC</dt>
+              <dd className="mt-1 text-sm text-slate-900">{orden.equipoGncNumeroSerie ?? 'Sin equipo'}</dd>
             </div>
             <div>
               <dt className="text-xs font-medium uppercase text-slate-500">Prioridad</dt>

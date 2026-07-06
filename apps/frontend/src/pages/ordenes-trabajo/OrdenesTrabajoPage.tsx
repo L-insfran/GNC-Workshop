@@ -23,11 +23,20 @@ export function OrdenesTrabajoPage() {
 
   const columns: ITableColumn<IOrdenTrabajo>[] = [
     { key: 'numero', header: 'N° OT' },
-    { key: 'clienteNombre', header: 'Cliente' },
-    { key: 'vehiculoPatente', header: 'Patente' },
+    {
+      key: 'clienteNombre',
+      header: 'Cliente',
+      render: (item) => item.clienteNombre ?? '-',
+    },
+    {
+      key: 'vehiculoPatente',
+      header: 'Patente',
+      render: (item) => item.vehiculoPatente ?? '-',
+    },
     {
       key: 'tipoTrabajoNombre',
       header: 'Tipo trabajo',
+      render: (item) => item.tipoTrabajoNombre ?? '-',
     },
     {
       key: 'estado',

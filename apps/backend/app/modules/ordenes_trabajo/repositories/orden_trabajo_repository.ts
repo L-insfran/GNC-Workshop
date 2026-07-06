@@ -31,8 +31,10 @@ export default class OrdenTrabajoRepository extends BaseRepository<OrdenTrabajo>
     await Promise.all(
       result.data.map(async (orden) => {
         await orden.load('cliente')
-        await orden.load('vehiculo')
+        await orden.load('vehiculo', (query) => query.preload('marca').preload('modelo'))
+        await orden.load('equipoGnc')
         await orden.load('tipoTrabajo')
+        await orden.load('mecanico')
       })
     )
     return result

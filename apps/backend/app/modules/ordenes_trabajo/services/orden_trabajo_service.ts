@@ -95,6 +95,12 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     return (await this.repository.findByIdWithRelations(orden.id))!
   }
 
+  async update(id: string, data: Partial<OrdenTrabajo>, user: User): Promise<OrdenTrabajo | null> {
+    const updated = await super.update(id, data, user)
+    if (!updated) return null
+    return this.repository.findByIdWithRelations(id)
+  }
+
   async updateEstado(
     id: string,
     dto: UpdateOrdenEstadoDTO,
