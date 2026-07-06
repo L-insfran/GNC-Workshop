@@ -12,16 +12,12 @@ import { PageLoader } from '@/components/ui/LoadingSpinner'
 import {
   formatCurrency,
   formatDate,
+  formatDateOnly,
   formatDateTime,
   ORDEN_ESTADO_LABELS,
   ORDEN_PRIORIDAD_LABELS,
 } from '@/utils/format'
-import type { OrdenEstado } from '@gnc/shared-types'
-
-const estadoOptions = Object.entries(ORDEN_ESTADO_LABELS).map(([value, label]) => ({
-  value,
-  label,
-}))
+import { getOrdenEstadosSiguientes, type OrdenEstado } from '@gnc/shared-types'
 
 export function OrdenTrabajoDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -43,6 +39,12 @@ export function OrdenTrabajoDetailPage() {
   ]
     .filter(Boolean)
     .join(' · ')
+
+  const estadosSiguientes = getOrdenEstadosSiguientes(orden.estado)
+  const estadoOptions = estadosSiguientes.map((value) => ({
+    value,
+    label: ORDEN_ESTADO_LABELS[value],
+  }))
 
   const handleEstadoChange = async () => {
     if (!nuevoEstado || !id) return
@@ -102,7 +104,7 @@ export function OrdenTrabajoDetailPage() {
             <div>
               <dt className="text-xs font-medium uppercase text-slate-500">Entrega estimada</dt>
               <dd className="mt-1 text-sm text-slate-900">
-                {orden.fechaEstimadaEntrega ? formatDate(orden.fechaEstimadaEntrega) : '-'}
+                {orden.fechaEstimadaEntrega ? formatDateOnly(orden.fechaEstimadaEntrega) : '-'}
               </dd>
             </div>
             <div>
@@ -146,29 +148,37 @@ export function OrdenTrabajoDetailPage() {
       <Card>
         <CardHeader title="Cambiar estado" description="Actualizar el flujo de la orden de trabajo" />
         <CardBody>
-          {estadoError && (
-            <Alert variant="error" className="mb-4">
-              {estadoError}
-            </Alert>
+          {estadoOptions.length === 0 ? (
+            <p className="text-sm text-slate-500">
+              Esta orden está en estado final y no admite más cambios.
+            </p>
+          ) : (
+            <>
+              {estadoError && (
+                <Alert variant="error" className="mb-4">
+                  {estadoError}
+                </Alert>
+              )}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div className="flex-1">
+                  <Select
+                    label="Nuevo estado"
+                    options={estadoOptions}
+                    placeholder="Seleccionar estado"
+                    value={nuevoEstado}
+                    onChange={(e) => setNuevoEstado(e.target.value as OrdenEstado)}
+                  />
+                </div>
+                <Button
+                  onClick={handleEstadoChange}
+                  disabled={!nuevoEstado || nuevoEstado === orden.estado}
+                  isLoading={updateEstado.isPending}
+                >
+                  Actualizar estado
+                </Button>
+              </div>
+            </>
           )}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <Select
-                label="Nuevo estado"
-                options={estadoOptions}
-                placeholder="Seleccionar estado"
-                value={nuevoEstado}
-                onChange={(e) => setNuevoEstado(e.target.value as OrdenEstado)}
-              />
-            </div>
-            <Button
-              onClick={handleEstadoChange}
-              disabled={!nuevoEstado || nuevoEstado === orden.estado}
-              isLoading={updateEstado.isPending}
-            >
-              Actualizar estado
-            </Button>
-          </div>
         </CardBody>
       </Card>
     </div>

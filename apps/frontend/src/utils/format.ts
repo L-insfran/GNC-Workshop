@@ -29,6 +29,37 @@ export function formatDate(value: string | Date): string {
   return dateFormatter.format(date)
 }
 
+/** Formatea fechas calendario (sin hora) sin desplazamiento por zona horaria. */
+export function formatDateOnly(value: string): string {
+  const datePart = value.split('T')[0]
+  const [year, month, day] = datePart.split('-').map(Number)
+  return dateFormatter.format(new Date(year, month - 1, day))
+}
+
+export function toDateInputValue(value?: string | null): string {
+  if (!value) return ''
+  return value.split('T')[0]
+}
+
+export function todayDateInputValue(): string {
+  const today = new Date()
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+export function calcularFechaEstimadaDefault(duracionHoras?: number | null): string {
+  const today = new Date()
+  const diasEstimados = Math.max(1, Math.ceil((duracionHoras ?? 8) / 8))
+  today.setDate(today.getDate() + diasEstimados - 1)
+
+  const year = today.getFullYear()
+  const month = String(today.getMonth() + 1).padStart(2, '0')
+  const day = String(today.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 export function formatDateTime(value: string | Date): string {
   const date = typeof value === 'string' ? new Date(value) : value
   return dateTimeFormatter.format(date)

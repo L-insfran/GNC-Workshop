@@ -10,6 +10,21 @@ export type OrdenEstado =
 
 export type OrdenPrioridad = 'baja' | 'normal' | 'alta' | 'urgente'
 
+export const ORDEN_TRANSICIONES_PERMITIDAS: Record<OrdenEstado, OrdenEstado[]> = {
+  borrador: ['recepcion'],
+  recepcion: ['en_taller', 'cancelada'],
+  en_taller: ['en_espera_repuesto', 'control_calidad', 'cancelada'],
+  en_espera_repuesto: ['en_taller'],
+  control_calidad: ['finalizada', 'en_taller'],
+  finalizada: ['entregada'],
+  entregada: [],
+  cancelada: [],
+}
+
+export function getOrdenEstadosSiguientes(estado: OrdenEstado): OrdenEstado[] {
+  return ORDEN_TRANSICIONES_PERMITIDAS[estado] ?? []
+}
+
 export interface IOrdenTrabajo {
   id: string
   numero: string

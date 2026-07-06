@@ -20,23 +20,36 @@ import { Select } from '@/components/ui/Select'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Alert } from '@/components/ui/Alert'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
-import { ORDEN_PRIORIDAD_LABELS, formatPatente } from '@/utils/format'
+import { ORDEN_PRIORIDAD_LABELS, calcularFechaEstimadaDefault, formatPatente, toDateInputValue, todayDateInputValue } from '@/utils/format'
 import { ApiError } from '@/services/api-client'
 
-const ordenSchema = z.object({
-  clienteId: z.string().min(1, 'Seleccioná un cliente'),
-  vehiculoId: z.string().min(1, 'Seleccioná un vehículo'),
-  equipoGncId: z.string().optional(),
-  tipoTrabajoId: z.string().min(1, 'Seleccioná un tipo de trabajo'),
-  prioridad: z.enum(['baja', 'normal', 'alta', 'urgente']).optional(),
-  fechaEstimadaEntrega: z.string().optional(),
-  kilometrajeIngreso: z.coerce.number().optional(),
-  mecanicoAsignadoId: z.string().optional(),
-  descripcionProblema: z.string().optional(),
-  observacionesInternas: z.string().optional(),
-})
+const createOrdenSchema = (minFechaEntrega: string) =>
+  z
+    .object({
+      clienteId: z.string().min(1, 'Seleccioná un cliente'),
+      vehiculoId: z.string().min(1, 'Seleccioná un vehículo'),
+      equipoGncId: z.string().optional(),
+      tipoTrabajoId: z.string().min(1, 'Seleccioná un tipo de trabajo'),
+      prioridad: z.enum(['baja', 'normal', 'alta', 'urgente']).optional(),
+      fechaEstimadaEntrega: z.string().optional(),
+      kilometrajeIngreso: z.coerce.number().optional(),
+      mecanicoAsignadoId: z.string().optional(),
+      descripcionProblema: z.string().optional(),
+      observacionesInternas: z.string().optional(),
+    })
+    .superRefine((data, ctx) => {
+      if (!data.fechaEstimadaEntrega) return
 
-type OrdenForm = z.infer<typeof ordenSchema>
+      if (data.fechaEstimadaEntrega < minFechaEntrega) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'La entrega estimada no puede ser anterior a la fecha de ingreso',
+          path: ['fechaEstimadaEntrega'],
+        })
+      }
+    })
+
+type OrdenForm = z.infer<ReturnType<typeof createOrdenSchema>>
 
 export function OrdenTrabajoFormPage() {
   const { id } = useParams<{ id: string }>()
@@ -49,6 +62,10 @@ export function OrdenTrabajoFormPage() {
   const { data: usersData } = useUsers({ perPage: 100 })
   const { create, update } = useOrdenTrabajoMutations()
 
+  const minFechaEntrega = isEditing
+    ? toDateInputValue(orden?.fechaIngreso) || todayDateInputValue()
+    : todayDateInputValue()
+
   const {
     register,
     handleSubmit,
@@ -59,7 +76,7 @@ export function OrdenTrabajoFormPage() {
     setError,
     setValue,
   } = useForm<OrdenForm>({
-    resolver: zodResolver(ordenSchema),
+    resolver: zodResolver(createOrdenSchema(minFechaEntrega)),
     defaultValues: {
       prioridad: 'normal',
       clienteId: '',
@@ -70,6 +87,7 @@ export function OrdenTrabajoFormPage() {
 
   const clienteId = watch('clienteId')
   const vehiculoId = watch('vehiculoId')
+  const tipoTrabajoId = watch('tipoTrabajoId')
 
   const {
     data: vehiculos,
@@ -98,7 +116,7 @@ export function OrdenTrabajoFormPage() {
         equipoGncId: orden.equipoGncId ?? '',
         tipoTrabajoId: orden.tipoTrabajoId,
         prioridad: orden.prioridad,
-        fechaEstimadaEntrega: orden.fechaEstimadaEntrega?.split('T')[0] ?? '',
+        fechaEstimadaEntrega: toDateInputValue(orden.fechaEstimadaEntrega),
         kilometrajeIngreso: orden.kilometrajeIngreso,
         mecanicoAsignadoId: orden.mecanicoAsignadoId ?? '',
         descripcionProblema: orden.descripcionProblema ?? '',
@@ -127,6 +145,15 @@ export function OrdenTrabajoFormPage() {
       prevClienteIdRef.current = clienteId
     }
   }, [clienteId, setValue])
+
+  useEffect(() => {
+    if (isEditing || !tipoTrabajoId) return
+
+    const tipo = tiposTrabajo?.find((item) => item.id === tipoTrabajoId)
+    if (!tipo) return
+
+    setValue('fechaEstimadaEntrega', calcularFechaEstimadaDefault(tipo.duracionEstimadaHoras))
+  }, [isEditing, tipoTrabajoId, tiposTrabajo, setValue])
 
   const onSubmit = async (data: OrdenForm) => {
     try {
@@ -299,8 +326,18 @@ export function OrdenTrabajoFormPage() {
                 error={errors.prioridad?.message}
                 {...register('prioridad')}
               />
-              <Input label="Fecha estimada entrega" type="date" {...register('fechaEstimadaEntrega')} />
+              <Input
+                label="Fecha estimada entrega"
+                type="date"
+                min={minFechaEntrega}
+                error={errors.fechaEstimadaEntrega?.message}
+                {...register('fechaEstimadaEntrega')}
+              />
             </div>
+            <p className="text-xs text-slate-500">
+              La fecha de ingreso se registra automáticamente al crear la OT. La entrega estimada se
+              sugiere según la duración del tipo de trabajo.
+            </p>
 
             <Input label="Kilometraje ingreso" type="number" {...register('kilometrajeIngreso')} />
 

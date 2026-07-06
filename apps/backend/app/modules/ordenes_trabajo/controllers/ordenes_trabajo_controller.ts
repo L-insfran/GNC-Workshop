@@ -1,7 +1,7 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
 import type { IPaginationParams } from '@gnc/shared-types'
 import { ApiResponse } from '#shared/api_response'
+import { parseDateOnly } from '#shared/date_util'
 import { serializeOrdenTrabajo, serializeOrdenesTrabajo } from '#shared/orden_trabajo_serializer'
 import OrdenTrabajoService from '#modules/ordenes_trabajo/services/orden_trabajo_service'
 import { createOrdenTrabajoValidator } from '#modules/ordenes_trabajo/validators/create_orden_trabajo_validator'
@@ -49,6 +49,10 @@ export default class OrdenesTrabajoController {
             'OBLEA_VENCIDA',
             'No se puede crear la OT: oblea vencida. Solo permitido para renovación de oblea',
           ],
+          FECHA_ENTREGA_INVALIDA: [
+            'FECHA_ENTREGA_INVALIDA',
+            'La fecha estimada de entrega no puede ser anterior a la fecha de ingreso',
+          ],
         }
         const mapped = messages[error.message]
         if (mapped) {
@@ -62,28 +66,40 @@ export default class OrdenesTrabajoController {
   async update({ params, request, auth, response }: HttpContext) {
     const dto = await request.validateUsing(createOrdenTrabajoValidator)
 
-    const orden = await ordenTrabajoService.update(
-      params.id,
-      {
-        clienteId: dto.clienteId,
-        vehiculoId: dto.vehiculoId,
-        equipoGncId: dto.equipoGncId ?? null,
-        tipoTrabajoId: dto.tipoTrabajoId,
-        prioridad: dto.prioridad ?? 'normal',
-        fechaEstimadaEntrega: dto.fechaEstimadaEntrega
-          ? DateTime.fromISO(dto.fechaEstimadaEntrega)
-          : null,
-        mecanicoAsignadoId: dto.mecanicoAsignadoId ?? null,
-        kilometrajeIngreso: dto.kilometrajeIngreso ?? null,
-        descripcionProblema: dto.descripcionProblema ?? null,
-        observacionesInternas: dto.observacionesInternas ?? null,
-      },
-      auth.user!
-    )
-    if (!orden) {
-      return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
+    try {
+      const orden = await ordenTrabajoService.update(
+        params.id,
+        {
+          clienteId: dto.clienteId,
+          vehiculoId: dto.vehiculoId,
+          equipoGncId: dto.equipoGncId ?? null,
+          tipoTrabajoId: dto.tipoTrabajoId,
+          prioridad: dto.prioridad ?? 'normal',
+          fechaEstimadaEntrega: dto.fechaEstimadaEntrega
+            ? parseDateOnly(dto.fechaEstimadaEntrega, 'fechaEstimadaEntrega')
+            : null,
+          mecanicoAsignadoId: dto.mecanicoAsignadoId ?? null,
+          kilometrajeIngreso: dto.kilometrajeIngreso ?? null,
+          descripcionProblema: dto.descripcionProblema ?? null,
+          observacionesInternas: dto.observacionesInternas ?? null,
+        },
+        auth.user!
+      )
+      if (!orden) {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
+      }
+      return response.ok(ApiResponse.success(serializeOrdenTrabajo(orden)))
+    } catch (error) {
+      if (error instanceof Error && error.message === 'FECHA_ENTREGA_INVALIDA') {
+        return response.badRequest(
+          ApiResponse.error(
+            'FECHA_ENTREGA_INVALIDA',
+            'La fecha estimada de entrega no puede ser anterior a la fecha de ingreso'
+          )
+        )
+      }
+      throw error
     }
-    return response.ok(ApiResponse.success(serializeOrdenTrabajo(orden)))
   }
 
   async destroy({ params, auth, response }: HttpContext) {
