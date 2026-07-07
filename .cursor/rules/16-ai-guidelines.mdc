@@ -35,6 +35,7 @@ Checklist de calidad:
 - [ ] Imports limpios
 - [ ] Arquitectura respetada
 - [ ] Nombres descriptivos
+- [ ] **Commit creado** con los cambios (ver `17-auto-commit.mdc`)
 
 ## Al crear módulos nuevos
 

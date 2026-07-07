@@ -1,0 +1,31 @@
+---
+description: Commitear cambios al finalizar tareas de implementación
+alwaysApply: true
+---
+
+# Commits automáticos
+
+Al terminar una tarea que modifique archivos del repositorio, **crear un commit** con esos cambios.
+
+## Cuándo commitear
+
+- Después de implementar una feature, fix o refactor solicitado
+- Al cerrar una sesión de trabajo con cambios pendientes en el working tree
+- Cuando el usuario pida explícitamente commitear
+
+## Cuándo NO commitear
+
+- Si el usuario no pidió cambios (solo preguntas o revisión)
+- Si hay archivos sensibles (`.env`, credenciales)
+- Si los cambios están incompletos o rotos sin avisar al usuario
+
+## Cómo commitear
+
+1. `git status` y `git diff` para revisar qué se incluye
+2. Mensaje conciso en español o inglés, enfocado en el **por qué**
+3. Agrupar cambios relacionados; separar en commits distintos si son temas diferentes
+4. Verificar con `git status` que el commit fue exitoso
+
+## Nota
+
+No hacer push a remoto salvo que el usuario lo pida.
