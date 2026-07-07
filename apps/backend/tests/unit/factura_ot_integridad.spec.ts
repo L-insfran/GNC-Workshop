@@ -3,6 +3,7 @@ import { DateTime } from 'luxon'
 import type Factura from '#models/factura'
 import type CajaMovimiento from '#models/caja_movimiento'
 import { serializeFactura } from '#shared/factura_serializer'
+import { validarMontoCobro } from '#shared/factura_cobro_util'
 
 const FACTURA_ESTADOS_ACTIVOS = ['borrador', 'emitida'] as const
 
@@ -147,19 +148,40 @@ test.group('Factura OT integridad', () => {
     assert.equal(conNc.notaCreditoId, 'nc-1')
   })
 
-  test('cobro único: una factura no debe admitir segundo ingreso vinculado', ({ assert }) => {
-    const cobrosPorFactura = new Map<string, number>()
-    const facturaId = 'factura-1'
+  test('permite cobros parciales hasta cubrir el total de la factura', ({ assert }) => {
+    const totalFactura = 1210
+    let totalCobrado = 0
 
-    const registrarCobro = () => {
-      const actual = cobrosPorFactura.get(facturaId) ?? 0
-      if (actual > 0) {
-        throw new Error('COBRO_YA_REGISTRADO')
-      }
-      cobrosPorFactura.set(facturaId, actual + 1)
+    const registrarCobro = (monto: number) => {
+      validarMontoCobro(totalFactura, totalCobrado, monto)
+      totalCobrado += monto
     }
 
-    registrarCobro()
-    assert.throws(() => registrarCobro(), 'COBRO_YA_REGISTRADO')
+    registrarCobro(500)
+    assert.equal(totalCobrado, 500)
+
+    registrarCobro(710)
+    assert.equal(totalCobrado, 1210)
+
+    assert.throws(() => registrarCobro(1), 'COBRO_EXCEDE_TOTAL')
+  })
+
+  test('serializeFactura marca cobro parcial con múltiples movimientos', ({ assert }) => {
+    const factura = createFacturaMock()
+    const cobro1 = { ...createCobroMock(), monto: 500, concepto: 'Seña', createdAt: DateTime.fromISO('2026-07-02T10:00:00.000Z') }
+    const cobro2 = {
+      ...createCobroMock(),
+      id: 'cobro-2',
+      monto: 710,
+      concepto: 'Saldo',
+      createdAt: DateTime.fromISO('2026-07-03T10:00:00.000Z'),
+    }
+
+    const serialized = serializeFactura(factura, { cobros: [cobro1, cobro2] as never })
+
+    assert.equal(serialized.estadoCobro, 'cobrada')
+    assert.isTrue(serialized.cobrada)
+    assert.equal(serialized.totalCobrado, 1210)
+    assert.equal(serialized.saldoPendiente, 0)
   })
 })

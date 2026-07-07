@@ -36,7 +36,12 @@ export function useArqueo(fecha?: string) {
 
 export function useCajaMutations() {
   const queryClient = useQueryClient()
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
+    queryClient.invalidateQueries({ queryKey: ['facturas'] })
+    queryClient.invalidateQueries({ queryKey: ['ordenes-trabajo'] })
+    queryClient.invalidateQueries({ queryKey: ['ot-items'] })
+  }
 
   return {
     createMovimiento: useMutation({

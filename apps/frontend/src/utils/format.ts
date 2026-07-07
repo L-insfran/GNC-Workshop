@@ -1,4 +1,11 @@
-import type { OrdenEstado, OrdenPrioridad, ClienteTipo, CondicionIva, DocumentoTipo } from '@gnc/shared-types'
+import type {
+  OrdenEstado,
+  OrdenPrioridad,
+  OrdenResumenCobroEstado,
+  ClienteTipo,
+  CondicionIva,
+  DocumentoTipo,
+} from '@gnc/shared-types'
 
 const currencyFormatter = new Intl.NumberFormat('es-AR', {
   style: 'currency',
@@ -116,6 +123,35 @@ export const ORDEN_PRIORIDAD_LABELS: Record<OrdenPrioridad, string> = {
   normal: 'Normal',
   alta: 'Alta',
   urgente: 'Urgente',
+}
+
+export const ORDEN_COBRO_LABELS: Record<OrdenResumenCobroEstado, string> = {
+  no_aplica: '—',
+  sin_factura: 'Sin factura',
+  borrador: 'Borrador',
+  pendiente: 'Pendiente',
+  parcial: 'Cobro parcial',
+  cobrada: 'Cobrada',
+  anulada: 'Anulada',
+}
+
+export function getOrdenCobroBadgeVariant(
+  estado: OrdenResumenCobroEstado,
+): 'success' | 'warning' | 'danger' | 'neutral' | 'info' {
+  switch (estado) {
+    case 'cobrada':
+      return 'success'
+    case 'parcial':
+    case 'pendiente':
+    case 'borrador':
+      return 'warning'
+    case 'anulada':
+      return 'danger'
+    case 'sin_factura':
+      return 'info'
+    default:
+      return 'neutral'
+  }
 }
 
 export function getInitials(name: string): string {

@@ -21,6 +21,7 @@ import { parseDateOnly } from '#shared/date_util'
 import { countActiveMecanicos, findActiveMecanico } from '#shared/mecanico_util'
 import OtItemService from '#modules/ordenes_trabajo/services/ot_item_service'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
+import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_trabajo_repository'
 import StockReservaService from '#modules/inventario/services/stock_reserva_service'
 
@@ -51,7 +52,14 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
   private stockReservaService = new StockReservaService()
 
   async list(params?: IPaginationParams) {
-    return this.repository.findAllWithRelations(params)
+    const result = await this.repository.findAllWithRelations(params)
+    const estados = new Map(result.data.map((orden) => [orden.id, orden.estado]))
+    const resumenesCobro = await this.facturaRepository.findCobroResumenByOrdenTrabajoIds(
+      result.data.map((orden) => orden.id),
+      estados
+    )
+
+    return { data: result.data, meta: result.meta, resumenesCobro }
   }
 
   async getById(id: string): Promise<OrdenTrabajo | null> {

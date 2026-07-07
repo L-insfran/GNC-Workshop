@@ -60,6 +60,10 @@ router
 
         router.get('dashboard/kpis', '#modules/dashboard/controllers/dashboard_controller.kpis')
         router.get('dashboard/vencimientos', '#modules/dashboard/controllers/dashboard_controller.vencimientos')
+        router.get(
+          'dashboard/alertas-operativas',
+          '#modules/dashboard/controllers/dashboard_controller.alertasOperativas'
+        )
         router.get('dashboard/produccion', '#modules/dashboard/controllers/dashboard_controller.produccion')
 
         // Inventario

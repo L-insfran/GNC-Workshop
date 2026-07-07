@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ExternalLink, FileText, Receipt } from 'lucide-react'
+import { ExternalLink, FileText, Receipt, DollarSign } from 'lucide-react'
 import type { OrdenEstado } from '@gnc/shared-types'
 import { useAuth } from '@/hooks/useAuth'
 import { useFacturaVinculadaOT } from '@/hooks/useFacturaVinculadaOT'
@@ -74,7 +74,15 @@ export function OtFacturacionSection({
     )
   }
 
-  const { factura, cobrada, puedeGenerarFactura, notaCreditoId } = vinculada
+  const { factura, estadoCobro, totalCobrado, saldoPendiente, puedeGenerarFactura, notaCreditoId } =
+    vinculada
+
+  const cobroLabel =
+    estadoCobro === 'cobrada'
+      ? 'Cobrada'
+      : estadoCobro === 'parcial'
+        ? 'Cobro parcial'
+        : 'Pendiente de cobro'
 
   return (
     <Card className="border-slate-200">
@@ -96,8 +104,12 @@ export function OtFacturacionSection({
             {factura.estado}
           </Badge>
           {factura.estado === 'emitida' && (
-            <Badge variant={cobrada ? 'success' : 'warning'}>
-              {cobrada ? 'Cobrada' : 'Pendiente de cobro'}
+            <Badge
+              variant={
+                estadoCobro === 'cobrada' ? 'success' : estadoCobro === 'parcial' ? 'warning' : 'warning'
+              }
+            >
+              {cobroLabel}
             </Badge>
           )}
           {factura.tipo === 'nota_credito' && <Badge variant="neutral">Nota de crédito</Badge>}
@@ -112,6 +124,18 @@ export function OtFacturacionSection({
             <p className="text-slate-500">Total</p>
             <p className="font-medium">{formatCurrency(factura.total)}</p>
           </div>
+          {factura.estado === 'emitida' && (
+            <>
+              <div>
+                <p className="text-slate-500">Cobrado</p>
+                <p className="font-medium">{formatCurrency(totalCobrado)}</p>
+              </div>
+              <div>
+                <p className="text-slate-500">Saldo</p>
+                <p className="font-medium">{formatCurrency(saldoPendiente)}</p>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -121,6 +145,15 @@ export function OtFacturacionSection({
               Ver comprobante
             </Button>
           </Link>
+
+          {factura.estado === 'emitida' && estadoCobro !== 'cobrada' && checkRole(MODULE_ROLES.caja) && (
+            <Link to={ROUTES.FACTURA_DETAIL(factura.id)}>
+              <Button size="sm">
+                <DollarSign className="h-4 w-4" />
+                {estadoCobro === 'parcial' ? 'Registrar saldo' : 'Registrar cobro'}
+              </Button>
+            </Link>
+          )}
 
           {puedeGenerarFactura && factura.estado === 'anulada' && (
             <Button size="sm" onClick={() => navigate(ROUTES.FACTURA_NEW_FROM_OT(ordenId))}>

@@ -21,6 +21,16 @@ export function useDashboardVencimientos() {
   })
 }
 
+export function useDashboardAlertasOperativas() {
+  return useQuery({
+    queryKey: ['dashboard', 'alertas-operativas'],
+    queryFn: async () => {
+      const response = await dashboardService.getAlertasOperativas()
+      return response.data ?? []
+    },
+  })
+}
+
 export function useDashboardProduccion(dias = 7) {
   return useQuery({
     queryKey: ['dashboard', 'produccion', dias],

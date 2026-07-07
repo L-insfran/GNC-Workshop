@@ -12,7 +12,7 @@ import Factura from '#models/factura'
 import FacturaItem from '#models/factura_item'
 import Cliente from '#models/cliente'
 import { BaseService } from '#shared/base_service'
-import { serializeFactura } from '#shared/factura_serializer'
+import { serializeFactura, buildCobroFacturaResumen } from '#shared/factura_serializer'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 
 const IVA_RATE = 0.21
@@ -25,8 +25,8 @@ export default class FacturaService extends BaseService<Factura> {
     const result = await this.repository.findAllWithRelations(params)
     const data = await Promise.all(
       result.data.map(async (factura) => {
-        const cobro = await this.repository.findCobroByFacturaId(factura.id)
-        return serializeFactura(factura, cobro)
+        const cobros = await this.repository.findCobrosByFacturaId(factura.id)
+        return serializeFactura(factura, { cobros })
       })
     )
     return { data, meta: result.meta }
@@ -35,9 +35,9 @@ export default class FacturaService extends BaseService<Factura> {
   async getById(id: string): Promise<IFactura | null> {
     const factura = await this.repository.findByIdWithRelations(id)
     if (!factura) return null
-    const cobro = await this.repository.findCobroByFacturaId(factura.id)
+    const cobros = await this.repository.findCobrosByFacturaId(factura.id)
     const notaCredito = await this.repository.findNotaCreditoByFacturaReferenciaId(factura.id)
-    return serializeFactura(factura, { cobro, notaCredito })
+    return serializeFactura(factura, { cobros, notaCredito })
   }
 
   async getFacturaVinculadaOT(ordenTrabajoId: string): Promise<IFacturaVinculadaOT | null> {
@@ -55,15 +55,19 @@ export default class FacturaService extends BaseService<Factura> {
       await factura.load('items')
     }
 
-    const cobro = await this.repository.findCobroByFacturaId(factura.id)
+    const cobros = await this.repository.findCobrosByFacturaId(factura.id)
     const notaCredito = await this.repository.findNotaCreditoByFacturaReferenciaId(factura.id)
     const hayActiva = Boolean(activa)
     const esEmitida = factura.estado === 'emitida'
+    const cobroResumen = buildCobroFacturaResumen(Number(factura.total), cobros)
 
     return {
-      factura: serializeFactura(factura, cobro),
-      cobrada: Boolean(cobro),
-      cobroMovimientoId: cobro?.id,
+      factura: serializeFactura(factura, { cobros, notaCredito }),
+      cobrada: cobroResumen.cobrada,
+      estadoCobro: cobroResumen.estadoCobro,
+      totalCobrado: cobroResumen.totalCobrado,
+      saldoPendiente: cobroResumen.saldoPendiente,
+      cobroMovimientoId: cobroResumen.ultimoCobroId,
       puedeEmitirNotaCredito: esEmitida && !notaCredito,
       notaCreditoId: notaCredito?.id,
       puedeGenerarFactura: !hayActiva,
@@ -203,8 +207,8 @@ export default class FacturaService extends BaseService<Factura> {
       throw new Error('FACTURA_YA_ANULADA')
     }
 
-    const cobro = await this.repository.findCobroByFacturaId(factura.id)
-    if (cobro) {
+    const cobros = await this.repository.findCobrosByFacturaId(factura.id)
+    if (cobros.length > 0) {
       throw new Error('FACTURA_CON_COBRO')
     }
 

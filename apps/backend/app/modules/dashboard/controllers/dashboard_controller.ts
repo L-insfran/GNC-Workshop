@@ -15,6 +15,11 @@ export default class DashboardController {
     return response.ok(ApiResponse.success(data))
   }
 
+  async alertasOperativas({ response }: HttpContext) {
+    const data = await dashboardService.getAlertasOperativas()
+    return response.ok(ApiResponse.success(data))
+  }
+
   async produccion({ request, response }: HttpContext) {
     const dias = Number(request.input('dias', 30))
     const data = await dashboardService.getProduccion(dias)

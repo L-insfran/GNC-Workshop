@@ -11,7 +11,7 @@ import { Table, TablePagination, TableToolbar } from '@/components/ui/Table'
 import { Modal } from '@/components/ui/Modal'
 import { Alert } from '@/components/ui/Alert'
 import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
-import { formatDate, ORDEN_ESTADO_LABELS, ORDEN_PRIORIDAD_LABELS } from '@/utils/format'
+import { formatDate, ORDEN_ESTADO_LABELS, ORDEN_PRIORIDAD_LABELS, ORDEN_COBRO_LABELS, getOrdenCobroBadgeVariant } from '@/utils/format'
 import type { IOrdenTrabajo, ITableColumn } from '@/types'
 
 export function OrdenesTrabajoPage() {
@@ -49,6 +49,21 @@ export function OrdenesTrabajoPage() {
           {ORDEN_ESTADO_LABELS[item.estado]}
         </Badge>
       ),
+    },
+    {
+      key: 'resumenCobro',
+      header: 'Cobro',
+      render: (item) => {
+        const resumen = item.resumenCobro
+        if (!resumen || resumen.estado === 'no_aplica') {
+          return <span className="text-sm text-slate-400">—</span>
+        }
+        return (
+          <Badge variant={getOrdenCobroBadgeVariant(resumen.estado)}>
+            {ORDEN_COBRO_LABELS[resumen.estado]}
+          </Badge>
+        )
+      },
     },
     {
       key: 'prioridad',

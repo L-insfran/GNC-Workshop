@@ -62,9 +62,14 @@ export default class CajaController {
           ApiResponse.error('SALDO_INSUFICIENTE', 'Saldo insuficiente para el egreso')
         )
       }
-      if (error.message === 'COBRO_YA_REGISTRADO') {
+      if (error.message === 'COBRO_EXCEDE_TOTAL') {
         return response.badRequest(
-          ApiResponse.error('COBRO_YA_REGISTRADO', 'Esta factura ya tiene un cobro registrado en caja')
+          ApiResponse.error('COBRO_EXCEDE_TOTAL', 'El monto supera el saldo pendiente de la factura')
+        )
+      }
+      if (error.message === 'MONTO_COBRO_INVALIDO') {
+        return response.badRequest(
+          ApiResponse.error('MONTO_COBRO_INVALIDO', 'El monto del cobro debe ser mayor a cero')
         )
       }
       if (error.message === 'FACTURA_NO_ENCONTRADA') {

@@ -1,4 +1,4 @@
-import type { IDashboardKpi, IVencimientoAlerta, IProduccionDiaria } from '@gnc/shared-types'
+import type { IDashboardKpi, IAlertaOperativa, IVencimientoAlerta, IProduccionDiaria } from '@gnc/shared-types'
 import { apiGet } from '@/services/api-client'
 
 export const dashboardService = {
@@ -8,6 +8,10 @@ export const dashboardService = {
 
   getVencimientos() {
     return apiGet<IVencimientoAlerta[]>('/dashboard/vencimientos')
+  },
+
+  getAlertasOperativas() {
+    return apiGet<IAlertaOperativa[]>('/dashboard/alertas-operativas')
   },
 
   getProduccion(dias = 7) {

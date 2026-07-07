@@ -1,7 +1,11 @@
 import type OrdenTrabajo from '#models/orden_trabajo'
+import type { IOrdenCobroResumen } from '@gnc/shared-types'
 import { serializeVehiculo } from '#shared/vehiculo_serializer'
 
-export function serializeOrdenTrabajo(orden: OrdenTrabajo) {
+export function serializeOrdenTrabajo(
+  orden: OrdenTrabajo,
+  resumenCobro?: IOrdenCobroResumen
+) {
   const data = orden.serialize() as Record<string, unknown>
 
   return {
@@ -14,6 +18,7 @@ export function serializeOrdenTrabajo(orden: OrdenTrabajo) {
     tipoTrabajoNombre: orden.tipoTrabajo?.nombre ?? null,
     mecanicoNombre: orden.mecanico?.fullName ?? null,
     recepcionistaNombre: orden.recepcionista?.fullName ?? null,
+    resumenCobro,
     cliente: orden.cliente?.serialize(),
     vehiculo: orden.vehiculo ? serializeVehiculo(orden.vehiculo) : undefined,
     equipoGnc: orden.equipoGnc?.serialize(),
@@ -23,6 +28,11 @@ export function serializeOrdenTrabajo(orden: OrdenTrabajo) {
   }
 }
 
-export function serializeOrdenesTrabajo(ordenes: OrdenTrabajo[]) {
-  return ordenes.map(serializeOrdenTrabajo)
+export function serializeOrdenesTrabajo(
+  ordenes: OrdenTrabajo[],
+  resumenesCobro?: Map<string, IOrdenCobroResumen>
+) {
+  return ordenes.map((orden) =>
+    serializeOrdenTrabajo(orden, resumenesCobro?.get(orden.id))
+  )
 }

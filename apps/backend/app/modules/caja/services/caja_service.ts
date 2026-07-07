@@ -5,6 +5,7 @@ import type CajaMovimiento from '#models/caja_movimiento'
 import Factura from '#models/factura'
 import CajaRepository from '#modules/caja/repositories/caja_repository'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
+import { validarMontoCobro } from '#shared/factura_cobro_util'
 
 export default class CajaService {
   private repository = new CajaRepository()
@@ -63,10 +64,8 @@ export default class CajaService {
         throw new Error('FACTURA_NO_EMITIDA')
       }
 
-      const cobroExistente = await this.facturaRepository.findCobroByFacturaId(factura.id)
-      if (cobroExistente) {
-        throw new Error('COBRO_YA_REGISTRADO')
-      }
+      const totalCobrado = await this.facturaRepository.sumCobradoByFacturaId(factura.id)
+      validarMontoCobro(Number(factura.total), totalCobrado, data.monto)
     }
 
     if (data.tipo === 'egreso') {

@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import type {
+  IAlertaOperativa,
   IDashboardKpi,
   IProduccionDiaria,
   IVencimientoAlerta,
@@ -9,6 +10,7 @@ import Cilindro from '#models/cilindro'
 import EquipoGnc from '#models/equipo_gnc'
 import Factura from '#models/factura'
 import OrdenTrabajo from '#models/orden_trabajo'
+import Producto from '#models/producto'
 
 const OBLEA_ALERTA_DIAS = 30
 const PH_ALERTA_DIAS = 60
@@ -36,6 +38,7 @@ export default class DashboardService {
       .count('* as total')
 
     const vencimientos = await this.getVencimientos()
+    const alertasOperativas = await this.getAlertasOperativas()
 
     const produccionMes = await OrdenTrabajo.query()
       .whereNull('deleted_at')
@@ -53,6 +56,8 @@ export default class DashboardService {
       ordenesHoy: Number(ordenesHoy[0].$extras.total),
       clientesActivos: Number(clientesActivos[0].$extras.total),
       vencimientosProximos: vencimientos.length,
+      stockBajo: alertasOperativas.filter((a) => a.tipo === 'stock_bajo').length,
+      otEsperaRepuesto: alertasOperativas.filter((a) => a.tipo === 'ot_espera_repuesto').length,
       facturacionMes: Number(facturacionMesResult[0].$extras.total ?? 0),
       produccionMes: Number(produccionMes[0].$extras.total),
     }
@@ -113,6 +118,66 @@ export default class DashboardService {
     }
 
     return alertas.sort((a, b) => a.diasRestantes - b.diasRestantes)
+  }
+
+  async getAlertasOperativas(): Promise<IAlertaOperativa[]> {
+    const alertas: IAlertaOperativa[] = []
+
+    const productosStockBajo = await Producto.query()
+      .whereNull('deleted_at')
+      .where('is_active', true)
+      .whereRaw('stock_actual <= stock_minimo')
+      .orderBy('stock_actual', 'asc')
+      .limit(20)
+
+    for (const producto of productosStockBajo) {
+      const stockActual = Number(producto.stockActual)
+      const stockMinimo = Number(producto.stockMinimo)
+
+      alertas.push({
+        id: `stock-${producto.id}`,
+        tipo: 'stock_bajo',
+        titulo: `${producto.codigo} — ${producto.nombre}`,
+        descripcion:
+          stockActual === 0
+            ? 'Sin stock en depósito'
+            : `Stock en mínimo (${stockActual} ${producto.unidadMedida})`,
+        entidadId: producto.id,
+        nivel: stockActual === 0 ? 'danger' : 'warning',
+        stockActual,
+        stockMinimo,
+        unidadMedida: producto.unidadMedida,
+      })
+    }
+
+    const ordenesEspera = await OrdenTrabajo.query()
+      .whereNull('deleted_at')
+      .where('estado', 'en_espera_repuesto')
+      .preload('cliente')
+      .preload('vehiculo')
+      .orderBy('fecha_ingreso', 'asc')
+      .limit(20)
+
+    for (const orden of ordenesEspera) {
+      alertas.push({
+        id: `ot-espera-${orden.id}`,
+        tipo: 'ot_espera_repuesto',
+        titulo: `OT ${orden.numero} esperando repuesto`,
+        descripcion: `${orden.cliente.razonSocial} · ${orden.vehiculo.patente}`,
+        entidadId: orden.id,
+        nivel: orden.prioridad === 'urgente' || orden.prioridad === 'alta' ? 'danger' : 'warning',
+        ordenNumero: orden.numero,
+        clienteNombre: orden.cliente.razonSocial,
+        vehiculoPatente: orden.vehiculo.patente,
+      })
+    }
+
+    return alertas.sort((a, b) => {
+      const nivelOrden = { danger: 0, warning: 1, info: 2 }
+      const diff = nivelOrden[a.nivel] - nivelOrden[b.nivel]
+      if (diff !== 0) return diff
+      return a.titulo.localeCompare(b.titulo, 'es')
+    })
   }
 
   async getProduccion(dias = 30): Promise<IProduccionDiaria[]> {

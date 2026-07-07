@@ -23,7 +23,10 @@ export default class OrdenesTrabajoController {
 
     const result = await ordenTrabajoService.list(params)
     return response.ok(
-      ApiResponse.paginated(serializeOrdenesTrabajo(result.data), result.meta as never)
+      ApiResponse.paginated(
+        serializeOrdenesTrabajo(result.data, result.resumenesCobro),
+        result.meta as never
+      )
     )
   }
 

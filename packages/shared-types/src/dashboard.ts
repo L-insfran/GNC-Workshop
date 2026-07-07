@@ -3,8 +3,27 @@ export interface IDashboardKpi {
   ordenesHoy: number
   clientesActivos: number
   vencimientosProximos: number
+  stockBajo: number
+  otEsperaRepuesto: number
   facturacionMes: number
   produccionMes: number
+}
+
+export type AlertaOperativaTipo = 'stock_bajo' | 'ot_espera_repuesto'
+
+export interface IAlertaOperativa {
+  id: string
+  tipo: AlertaOperativaTipo
+  titulo: string
+  descripcion: string
+  entidadId: string
+  nivel: 'info' | 'warning' | 'danger'
+  stockActual?: number
+  stockMinimo?: number
+  unidadMedida?: string
+  ordenNumero?: string
+  clienteNombre?: string
+  vehiculoPatente?: string
 }
 
 export interface IVencimientoAlerta {

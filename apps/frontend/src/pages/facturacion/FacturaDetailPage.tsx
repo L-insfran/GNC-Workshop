@@ -11,10 +11,10 @@ import { MODULE_ROLES } from '@/constants/roles'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Modal } from '@/components/ui/Modal'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { Alert } from '@/components/ui/Alert'
-import { ApiError } from '@/services/api-client'
+import { RegistrarCobroModal } from '@/components/facturacion/RegistrarCobroModal'
+import { formatCurrency, formatDateTime } from '@/utils/format'
 
 export function FacturaDetailPage() {
   const { id } = useParams<{ id: string }>()
@@ -25,38 +25,45 @@ export function FacturaDetailPage() {
   const { createMovimiento } = useCajaMutations()
 
   const [cobroModalOpen, setCobroModalOpen] = useState(false)
-  const [cobroError, setCobroError] = useState<string | null>(null)
 
   if (isLoading) return <PageLoader />
   if (error || !factura) return <Alert variant="error">Factura no encontrada</Alert>
 
-  const cobrada = Boolean(factura.cobrada)
-
+  const saldoPendiente = factura.saldoPendiente ?? Number(factura.total)
+  const totalCobrado = factura.totalCobrado ?? 0
+  const estadoCobro = factura.estadoCobro ?? (factura.cobrada ? 'cobrada' : 'pendiente')
   const puedeRegistrarCobro =
-    factura.estado === 'emitida' && checkRole(MODULE_ROLES.caja) && !cobrada
+    factura.estado === 'emitida' &&
+    checkRole(MODULE_ROLES.caja) &&
+    estadoCobro !== 'cobrada'
 
   const puedeEmitirNotaCredito =
     Boolean(factura.puedeEmitirNotaCredito) && checkRole(MODULE_ROLES.facturacion)
 
-  const handleRegistrarCobro = async () => {
+  const handleRegistrarCobro = async (monto: number) => {
     if (!id) return
-    setCobroError(null)
 
-    try {
-      await createMovimiento.mutateAsync({
-        tipo: 'ingreso',
-        monto: Number(factura.total),
-        concepto: `Cobro factura ${factura.numero}`,
-        facturaId: id,
-      })
-      await queryClient.invalidateQueries({ queryKey: ['facturas', id] })
-      setCobroModalOpen(false)
-    } catch (err) {
-      setCobroError(
-        err instanceof ApiError ? err.message : 'No se pudo registrar el cobro en caja.'
-      )
-    }
+    await createMovimiento.mutateAsync({
+      tipo: 'ingreso',
+      monto,
+      concepto:
+        monto >= saldoPendiente - 0.01
+          ? `Cobro factura ${factura.numero}`
+          : `Seña factura ${factura.numero}`,
+      facturaId: id,
+    })
+    await queryClient.invalidateQueries({ queryKey: ['facturas', id] })
   }
+
+  const cobroBadgeVariant =
+    estadoCobro === 'cobrada' ? 'success' : estadoCobro === 'parcial' ? 'warning' : 'warning'
+
+  const cobroLabel =
+    estadoCobro === 'cobrada'
+      ? 'Cobrada'
+      : estadoCobro === 'parcial'
+        ? 'Cobro parcial'
+        : 'Pendiente de cobro'
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -64,11 +71,18 @@ export function FacturaDetailPage() {
         <ArrowLeft className="h-4 w-4" /> Volver
       </Link>
 
-      {cobrada && (
+      {estadoCobro === 'cobrada' && (
         <Alert variant="success" title="Cobrada">
           {factura.cobroFecha
-            ? `Cobro registrado el ${new Date(factura.cobroFecha).toLocaleString('es-AR')}.`
-            : `Cobro registrado por $${Number(factura.total).toLocaleString('es-AR')}.`}
+            ? `Último cobro el ${formatDateTime(factura.cobroFecha)}.`
+            : `Total cobrado: ${formatCurrency(totalCobrado)}.`}
+        </Alert>
+      )}
+
+      {estadoCobro === 'parcial' && (
+        <Alert variant="warning" title="Cobro parcial">
+          Cobrado {formatCurrency(totalCobrado)} de {formatCurrency(factura.total)}. Saldo pendiente:{' '}
+          {formatCurrency(saldoPendiente)}.
         </Alert>
       )}
 
@@ -90,7 +104,7 @@ export function FacturaDetailPage() {
               {puedeRegistrarCobro && (
                 <Button onClick={() => setCobroModalOpen(true)}>
                   <DollarSign className="h-4 w-4" />
-                  Registrar cobro
+                  {estadoCobro === 'parcial' ? 'Registrar saldo' : 'Registrar cobro'}
                 </Button>
               )}
             </div>
@@ -110,9 +124,7 @@ export function FacturaDetailPage() {
               {factura.estado}
             </Badge>
             {factura.estado === 'emitida' && (
-              <Badge variant={cobrada ? 'success' : 'warning'}>
-                {cobrada ? 'Cobrada' : 'Pendiente de cobro'}
-              </Badge>
+              <Badge variant={cobroBadgeVariant}>{cobroLabel}</Badge>
             )}
           </div>
 
@@ -128,10 +140,20 @@ export function FacturaDetailPage() {
             </div>
             <div>
               <p className="text-slate-500">Fecha emisión</p>
-              <p className="font-medium">
-                {new Date(factura.fechaEmision).toLocaleString('es-AR')}
-              </p>
+              <p className="font-medium">{formatDateTime(factura.fechaEmision)}</p>
             </div>
+            {factura.estado === 'emitida' && (
+              <>
+                <div>
+                  <p className="text-slate-500">Total cobrado</p>
+                  <p className="font-medium">{formatCurrency(totalCobrado)}</p>
+                </div>
+                <div>
+                  <p className="text-slate-500">Saldo pendiente</p>
+                  <p className="font-medium">{formatCurrency(saldoPendiente)}</p>
+                </div>
+              </>
+            )}
             {factura.facturaReferenciaId && (
               <div className="sm:col-span-2">
                 <p className="text-slate-500">Factura de referencia</p>
@@ -168,6 +190,22 @@ export function FacturaDetailPage() {
             )}
           </div>
 
+          {(factura.cobros?.length ?? 0) > 0 && (
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+              <p className="mb-2 text-sm font-medium text-slate-700">Cobros registrados</p>
+              <ul className="space-y-2 text-sm">
+                {factura.cobros!.map((cobro) => (
+                  <li key={cobro.id} className="flex justify-between gap-2">
+                    <span className="text-slate-600">
+                      {formatDateTime(cobro.createdAt)} — {cobro.concepto}
+                    </span>
+                    <span className="font-medium">{formatCurrency(cobro.monto)}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b text-left text-slate-500">
@@ -182,12 +220,8 @@ export function FacturaDetailPage() {
                 <tr key={item.id} className="border-b border-slate-100">
                   <td className="py-2">{item.descripcion}</td>
                   <td className="py-2 text-right">{item.cantidad}</td>
-                  <td className="py-2 text-right">
-                    ${Number(item.precioUnitario).toLocaleString('es-AR')}
-                  </td>
-                  <td className="py-2 text-right">
-                    ${Number(item.subtotal).toLocaleString('es-AR')}
-                  </td>
+                  <td className="py-2 text-right">{formatCurrency(item.precioUnitario)}</td>
+                  <td className="py-2 text-right">{formatCurrency(item.subtotal)}</td>
                 </tr>
               ))}
             </tbody>
@@ -195,47 +229,26 @@ export function FacturaDetailPage() {
 
           <div className="space-y-1 text-right text-sm">
             <p>
-              Subtotal: <strong>${Number(factura.subtotal).toLocaleString('es-AR')}</strong>
+              Subtotal: <strong>{formatCurrency(factura.subtotal)}</strong>
             </p>
             <p>
-              IVA: <strong>${Number(factura.iva).toLocaleString('es-AR')}</strong>
+              IVA: <strong>{formatCurrency(factura.iva)}</strong>
             </p>
             <p className="text-lg">
-              Total: <strong>${Number(factura.total).toLocaleString('es-AR')}</strong>
+              Total: <strong>{formatCurrency(factura.total)}</strong>
             </p>
           </div>
         </CardBody>
       </Card>
 
-      <Modal
+      <RegistrarCobroModal
         isOpen={cobroModalOpen}
-        onClose={() => {
-          setCobroModalOpen(false)
-          setCobroError(null)
-        }}
-        title="Registrar cobro en caja"
-        description={`Se registrará un ingreso por $${Number(factura.total).toLocaleString('es-AR')} correspondiente a la factura ${factura.numero}.`}
-      >
-        {cobroError && (
-          <Alert variant="error" className="mb-4">
-            {cobroError}
-          </Alert>
-        )}
-        <div className="flex justify-end gap-2">
-          <Button
-            variant="outline"
-            onClick={() => {
-              setCobroModalOpen(false)
-              setCobroError(null)
-            }}
-          >
-            Cancelar
-          </Button>
-          <Button isLoading={createMovimiento.isPending} onClick={handleRegistrarCobro}>
-            Confirmar cobro
-          </Button>
-        </div>
-      </Modal>
+        onClose={() => setCobroModalOpen(false)}
+        facturaNumero={factura.numero}
+        saldoPendiente={saldoPendiente}
+        onConfirm={handleRegistrarCobro}
+        isSubmitting={createMovimiento.isPending}
+      />
     </div>
   )
 }

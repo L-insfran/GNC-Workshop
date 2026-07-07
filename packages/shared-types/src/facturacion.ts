@@ -1,5 +1,24 @@
 export type FacturaTipo = 'factura_a' | 'factura_b' | 'factura_c' | 'nota_credito'
 export type FacturaEstado = 'borrador' | 'emitida' | 'anulada'
+export type FacturaEstadoCobro = 'pendiente' | 'parcial' | 'cobrada'
+
+export type OrdenResumenCobroEstado =
+  | 'no_aplica'
+  | 'sin_factura'
+  | 'borrador'
+  | 'pendiente'
+  | 'parcial'
+  | 'cobrada'
+  | 'anulada'
+
+export interface IOrdenCobroResumen {
+  estado: OrdenResumenCobroEstado
+  facturaId?: string
+  facturaNumero?: string
+  totalFacturado?: number
+  totalCobrado?: number
+  saldoPendiente?: number
+}
 
 export interface IFacturaItem {
   id: string
@@ -25,9 +44,20 @@ export interface IFactura {
   fechaEmision: string
   items?: IFacturaItem[]
   cobrada?: boolean
+  estadoCobro?: FacturaEstadoCobro
+  totalCobrado?: number
+  saldoPendiente?: number
   cobroFecha?: string
+  cobros?: ICajaMovimientoResumen[]
   puedeEmitirNotaCredito?: boolean
   notaCreditoId?: string
+  createdAt: string
+}
+
+export interface ICajaMovimientoResumen {
+  id: string
+  monto: number
+  concepto: string
   createdAt: string
 }
 
@@ -54,6 +84,9 @@ export interface IFacturaBorradorPreview extends CreateFacturaDTO {
 export interface IFacturaVinculadaOT {
   factura: IFactura
   cobrada: boolean
+  estadoCobro: FacturaEstadoCobro
+  totalCobrado: number
+  saldoPendiente: number
   cobroMovimientoId?: string
   puedeEmitirNotaCredito: boolean
   notaCreditoId?: string
