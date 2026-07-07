@@ -174,7 +174,7 @@ export function OrdenTrabajoDetailPage() {
         </CardBody>
       </Card>
 
-      <OtPresupuestoSection ordenTrabajoId={orden.id} />
+      <OtPresupuestoSection ordenTrabajoId={orden.id} ordenEstado={orden.estado} />
 
       <Card>
         <CardHeader title="Cambiar estado" description="Actualizar el flujo de la orden de trabajo" />

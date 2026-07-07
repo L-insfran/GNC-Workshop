@@ -1,5 +1,6 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import { ApiResponse } from '#shared/api_response'
+import { isPgUndefinedTable } from '#shared/db_error_util'
 import { serializeOtItem } from '#shared/ot_item_serializer'
 import OtItemService from '#modules/ordenes_trabajo/services/ot_item_service'
 import { createOtItemValidator } from '#modules/ordenes_trabajo/validators/create_ot_item_validator'
@@ -33,11 +34,23 @@ function mapError(error: unknown) {
 
 export default class OtItemsController {
   async index({ params, response }: HttpContext) {
-    const presupuesto = await otItemService.getPresupuesto(params.id)
-    if (!presupuesto) {
-      return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
+    try {
+      const presupuesto = await otItemService.getPresupuesto(params.id)
+      if (!presupuesto) {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
+      }
+      return response.ok(ApiResponse.success(presupuesto))
+    } catch (error) {
+      if (isPgUndefinedTable(error)) {
+        return response.internalServerError(
+          ApiResponse.error(
+            'OT_ITEMS_SIN_MIGRAR',
+            'Falta crear la tabla de presupuesto. Ejecutá: node ace migration:run'
+          )
+        )
+      }
+      throw error
     }
-    return response.ok(ApiResponse.success(presupuesto))
   }
 
   async store({ params, request, auth, response }: HttpContext) {

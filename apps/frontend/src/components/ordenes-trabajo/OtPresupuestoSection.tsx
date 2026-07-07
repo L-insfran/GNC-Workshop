@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
-import type { IOtItem, OtItemTipo } from '@gnc/shared-types'
+import type { IOtItem, OrdenEstado, OtItemTipo } from '@gnc/shared-types'
+import { OT_ITEM_DELETABLE_ESTADOS, OT_ITEM_EDITABLE_ESTADOS } from '@gnc/shared-types'
 import { useOtItemMutations, useOtPresupuesto } from '@/hooks/useOtItems'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -8,19 +9,39 @@ import { Table } from '@/components/ui/Table'
 import { Alert } from '@/components/ui/Alert'
 import { OtItemFormModal, OT_ITEM_TIPO_LABELS } from '@/components/ordenes-trabajo/OtItemFormModal'
 import { formatCurrency } from '@/utils/format'
+import { ApiError } from '@/services/api-client'
 import type { ITableColumn } from '@/types'
 
 interface OtPresupuestoSectionProps {
   ordenTrabajoId: string
+  ordenEstado: OrdenEstado
 }
 
-export function OtPresupuestoSection({ ordenTrabajoId }: OtPresupuestoSectionProps) {
-  const { data: presupuesto, isLoading, error } = useOtPresupuesto(ordenTrabajoId)
+function puedeEditarPorEstado(estado: OrdenEstado): boolean {
+  return (OT_ITEM_EDITABLE_ESTADOS as readonly OrdenEstado[]).includes(estado)
+}
+
+function puedeEliminarPorEstado(estado: OrdenEstado): boolean {
+  return (OT_ITEM_DELETABLE_ESTADOS as readonly OrdenEstado[]).includes(estado)
+}
+
+export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupuestoSectionProps) {
+  const { data: presupuesto, isLoading, error, refetch } = useOtPresupuesto(ordenTrabajoId)
   const { create, update, remove } = useOtItemMutations(ordenTrabajoId)
+
+  const puedeEditar = presupuesto?.puedeEditar ?? puedeEditarPorEstado(ordenEstado)
+  const puedeEliminar = presupuesto?.puedeEliminar ?? puedeEliminarPorEstado(ordenEstado)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [defaultTipo, setDefaultTipo] = useState<OtItemTipo>('servicio')
   const [editingItem, setEditingItem] = useState<IOtItem | undefined>()
+
+  const errorMessage =
+    error instanceof ApiError
+      ? error.message
+      : error
+        ? 'No se pudo cargar el presupuesto.'
+        : null
 
   const openCreate = (tipo: OtItemTipo) => {
     setEditingItem(undefined)
@@ -44,6 +65,7 @@ export function OtPresupuestoSection({ ordenTrabajoId }: OtPresupuestoSectionPro
     } else {
       await create.mutateAsync(data)
     }
+    await refetch()
   }
 
   const columns: ITableColumn<IOtItem>[] = [
@@ -72,12 +94,12 @@ export function OtPresupuestoSection({ ordenTrabajoId }: OtPresupuestoSectionPro
       key: 'actions',
       header: '',
       render: (item) =>
-        presupuesto?.puedeEditar ? (
+        puedeEditar ? (
           <div className="flex justify-end gap-1">
             <Button variant="ghost" size="sm" onClick={() => openEdit(item)}>
               <Pencil className="h-4 w-4" />
             </Button>
-            {presupuesto.puedeEliminar && (
+            {puedeEliminar && (
               <Button variant="ghost" size="sm" onClick={() => remove.mutate(item.id)}>
                 <Trash2 className="h-4 w-4 text-red-500" />
               </Button>
@@ -94,7 +116,7 @@ export function OtPresupuestoSection({ ordenTrabajoId }: OtPresupuestoSectionPro
           title="Presupuesto"
           description="Servicios y repuestos incluidos en la orden"
           action={
-            presupuesto?.puedeEditar ? (
+            puedeEditar ? (
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => openCreate('servicio')}>
                   <Plus className="h-4 w-4" />
@@ -109,7 +131,16 @@ export function OtPresupuestoSection({ ordenTrabajoId }: OtPresupuestoSectionPro
           }
         />
         <CardBody className="space-y-4">
-          {error && <Alert variant="error">No se pudo cargar el presupuesto.</Alert>}
+          {errorMessage && (
+            <Alert variant="error">
+              {errorMessage}
+              {error instanceof ApiError && error.code === 'OT_ITEMS_SIN_MIGRAR' && (
+                <span className="mt-1 block text-xs">
+                  En el backend ejecutá: <code className="rounded bg-red-100 px-1">node ace migration:run</code>
+                </span>
+              )}
+            </Alert>
+          )}
 
           <Table
             columns={columns}
@@ -117,7 +148,11 @@ export function OtPresupuestoSection({ ordenTrabajoId }: OtPresupuestoSectionPro
             isLoading={isLoading}
             keyExtractor={(item) => item.id}
             emptyTitle="Sin ítems cargados"
-            emptyDescription="Agregá servicios o repuestos para armar el presupuesto."
+            emptyDescription={
+              puedeEditar
+                ? 'Usá los botones Servicio o Repuesto para agregar ítems al presupuesto.'
+                : 'El presupuesto no admite cambios en el estado actual de la orden.'
+            }
           />
 
           {presupuesto && (
@@ -149,7 +184,7 @@ export function OtPresupuestoSection({ ordenTrabajoId }: OtPresupuestoSectionPro
             </div>
           )}
 
-          {presupuesto && !presupuesto.puedeEditar && (
+          {!puedeEditar && (
             <p className="text-xs text-slate-500">
               El presupuesto está cerrado en el estado actual de la orden.
             </p>

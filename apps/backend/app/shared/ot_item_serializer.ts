@@ -1,11 +1,19 @@
 import type OtItem from '#models/ot_item'
 
 export function serializeOtItem(item: OtItem) {
-  const data = item.serialize() as Record<string, unknown>
-
   return {
-    ...data,
-    productoNombre: item.producto?.nombre ?? null,
+    id: item.id,
+    ordenTrabajoId: item.ordenTrabajoId,
+    tipo: item.tipo,
+    productoId: item.productoId ?? undefined,
+    productoNombre: item.producto?.nombre ?? undefined,
+    descripcion: item.descripcion,
+    cantidad: Number(item.cantidad),
+    precioUnitario: Number(item.precioUnitario),
+    subtotal: Number(item.subtotal),
+    esEstimado: item.esEstimado,
+    createdAt: item.createdAt.toISO()!,
+    updatedAt: item.updatedAt.toISO()!,
   }
 }
 
