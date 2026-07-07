@@ -1,8 +1,10 @@
+import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
 import {
   getOrdenEstadosSiguientes,
   type CreateOrdenTrabajoDTO,
+  type IFacturaBorradorPreview,
   type OrdenEstado,
   type UpdateOrdenEstadoDTO,
 } from '@gnc/shared-types'
@@ -10,11 +12,14 @@ import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import type OrdenTrabajo from '#models/orden_trabajo'
 import EquipoGnc from '#models/equipo_gnc'
+import OtItem from '#models/ot_item'
+import Producto from '#models/producto'
 import TipoTrabajo from '#models/tipo_trabajo'
 import Vehiculo from '#models/vehiculo'
 import { BaseService } from '#shared/base_service'
 import { parseDateOnly } from '#shared/date_util'
 import { countActiveMecanicos, findActiveMecanico } from '#shared/mecanico_util'
+import OtItemService from '#modules/ordenes_trabajo/services/ot_item_service'
 import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_trabajo_repository'
 
 function resolveFechaEstimadaEntrega(
@@ -47,6 +52,36 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
 
   async getById(id: string): Promise<OrdenTrabajo | null> {
     return this.repository.findByIdWithRelations(id)
+  }
+
+  async getFacturaBorrador(id: string): Promise<IFacturaBorradorPreview | null> {
+    const orden = await this.repository.findByIdWithRelations(id)
+    if (!orden) return null
+
+    if (orden.estado !== 'finalizada' && orden.estado !== 'entregada') {
+      throw new Error('OT_ESTADO_INVALIDO_FACTURA')
+    }
+
+    const otItemService = new OtItemService()
+    const presupuesto = await otItemService.getPresupuesto(id)
+
+    if (!presupuesto?.items.length) {
+      throw new Error('OT_SIN_ITEMS')
+    }
+
+    return {
+      clienteId: orden.clienteId,
+      ordenTrabajoId: orden.id,
+      ordenNumero: orden.numero,
+      clienteNombre: orden.cliente?.razonSocial,
+      tipo: 'factura_b',
+      items: presupuesto.items.map((item) => ({
+        descripcion: item.descripcion,
+        cantidad: item.cantidad,
+        precioUnitario: item.precioUnitario,
+      })),
+      emitir: true,
+    }
   }
 
   async create(data: CreateOrdenTrabajoDTO, user: User): Promise<OrdenTrabajo> {
@@ -197,6 +232,10 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     const trx = await db.transaction()
 
     try {
+      if (estadoNuevo === 'finalizada') {
+        await this.descontarStockPorOt(id, orden.numero, user.id, trx)
+      }
+
       orden.useTransaction(trx)
       orden.merge(updateData)
       await orden.save()
@@ -227,6 +266,53 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     } catch (error) {
       await trx.rollback()
       throw error
+    }
+  }
+
+  private async descontarStockPorOt(
+    ordenTrabajoId: string,
+    ordenNumero: string,
+    userId: string,
+    trx: Awaited<ReturnType<typeof db.transaction>>
+  ): Promise<void> {
+    const items = await OtItem.query({ client: trx })
+      .where('orden_trabajo_id', ordenTrabajoId)
+      .whereNull('deleted_at')
+      .whereIn('tipo', ['repuesto', 'material'])
+      .whereNotNull('producto_id')
+
+    const now = DateTime.now().toSQL()
+
+    for (const item of items) {
+      const producto = await Producto.query({ client: trx })
+        .where('id', item.productoId!)
+        .whereNull('deleted_at')
+        .first()
+
+      if (!producto) {
+        throw new Error(`PRODUCTO_NO_ENCONTRADO_OT:${item.descripcion}`)
+      }
+
+      const cantidad = Math.ceil(Number(item.cantidad))
+
+      if (producto.stockActual < cantidad) {
+        throw new Error(`STOCK_INSUFICIENTE_OT:${producto.nombre}`)
+      }
+
+      await trx
+        .from('productos')
+        .where('id', producto.id)
+        .decrement('stock_actual', cantidad)
+
+      await trx.table('stock_movimientos').insert({
+        id: randomUUID(),
+        producto_id: producto.id,
+        tipo: 'egreso',
+        cantidad,
+        motivo: `OT ${ordenNumero}`,
+        user_id: userId,
+        created_at: now,
+      })
     }
   }
 }

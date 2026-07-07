@@ -33,6 +33,34 @@ export default class OrdenesTrabajoController {
     return response.ok(ApiResponse.success(serializeOrdenTrabajo(orden)))
   }
 
+  async facturaBorrador({ params, response }: HttpContext) {
+    try {
+      const borrador = await ordenTrabajoService.getFacturaBorrador(params.id)
+      if (!borrador) {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
+      }
+      return response.ok(ApiResponse.success(borrador))
+    } catch (error) {
+      if (error instanceof Error) {
+        const messages: Record<string, [string, string]> = {
+          OT_ESTADO_INVALIDO_FACTURA: [
+            'OT_ESTADO_INVALIDO_FACTURA',
+            'Solo se puede facturar una OT en estado finalizada o entregada',
+          ],
+          OT_SIN_ITEMS: [
+            'OT_SIN_ITEMS',
+            'La orden de trabajo no tiene ítems en el presupuesto para facturar',
+          ],
+        }
+        const mapped = messages[error.message]
+        if (mapped) {
+          return response.badRequest(ApiResponse.error(mapped[0], mapped[1]))
+        }
+      }
+      throw error
+    }
+  }
+
   async store({ request, auth, response }: HttpContext) {
     const dto = await request.validateUsing(createOrdenTrabajoValidator)
 
@@ -151,6 +179,26 @@ export default class OrdenesTrabajoController {
         const mapped = messages[error.message]
         if (mapped) {
           return response.badRequest(ApiResponse.error(mapped[0], mapped[1]))
+        }
+
+        if (error.message.startsWith('STOCK_INSUFICIENTE_OT:')) {
+          const producto = error.message.split(':').slice(1).join(':')
+          return response.badRequest(
+            ApiResponse.error(
+              'STOCK_INSUFICIENTE_OT',
+              `Stock insuficiente para el producto "${producto}". Verifique el inventario antes de finalizar la OT.`
+            )
+          )
+        }
+
+        if (error.message.startsWith('PRODUCTO_NO_ENCONTRADO_OT:')) {
+          const descripcion = error.message.split(':').slice(1).join(':')
+          return response.badRequest(
+            ApiResponse.error(
+              'PRODUCTO_NO_ENCONTRADO_OT',
+              `El producto vinculado al ítem "${descripcion}" ya no existe en inventario`
+            )
+          )
         }
       }
       throw error

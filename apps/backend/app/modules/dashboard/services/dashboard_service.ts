@@ -7,6 +7,7 @@ import type {
 import Cliente from '#models/cliente'
 import Cilindro from '#models/cilindro'
 import EquipoGnc from '#models/equipo_gnc'
+import Factura from '#models/factura'
 import OrdenTrabajo from '#models/orden_trabajo'
 
 const OBLEA_ALERTA_DIAS = 30
@@ -42,12 +43,17 @@ export default class DashboardService {
       .where('fecha_entrega_real', '>=', inicioMes.toSQL()!)
       .count('* as total')
 
+    const facturacionMesResult = await Factura.query()
+      .where('estado', 'emitida')
+      .where('fecha_emision', '>=', inicioMes.toSQL()!)
+      .sum('total as total')
+
     return {
       ordenesActivas: Number(ordenesActivas[0].$extras.total),
       ordenesHoy: Number(ordenesHoy[0].$extras.total),
       clientesActivos: Number(clientesActivos[0].$extras.total),
       vencimientosProximos: vencimientos.length,
-      facturacionMes: 0,
+      facturacionMes: Number(facturacionMesResult[0].$extras.total ?? 0),
       produccionMes: Number(produccionMes[0].$extras.total),
     }
   }

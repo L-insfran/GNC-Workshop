@@ -4,6 +4,7 @@ import type {
   UpdateOrdenEstadoDTO,
   ITipoTrabajo,
   IPaginationParams,
+  IFacturaBorradorPreview,
 } from '@gnc/shared-types'
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '@/services/api-client'
 
@@ -14,6 +15,10 @@ export const ordenTrabajoService = {
 
   getById(id: string) {
     return apiGet<IOrdenTrabajo>(`/ordenes-trabajo/${id}`)
+  },
+
+  getFacturaBorrador(id: string) {
+    return apiGet<IFacturaBorradorPreview>(`/ordenes-trabajo/${id}/factura-borrador`)
   },
 
   create(data: CreateOrdenTrabajoDTO) {

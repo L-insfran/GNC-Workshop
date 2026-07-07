@@ -39,3 +39,8 @@ export interface CreateFacturaDTO {
   items: CreateFacturaItemDTO[]
   emitir?: boolean
 }
+
+export interface IFacturaBorradorPreview extends CreateFacturaDTO {
+  ordenNumero?: string
+  clienteNombre?: string
+}

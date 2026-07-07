@@ -23,6 +23,7 @@ export const ROUTES = {
   CAJA_MOVIMIENTO_NEW: '/caja/movimiento',
   FACTURACION: '/facturacion',
   FACTURA_NEW: '/facturacion/nueva',
+  FACTURA_NEW_FROM_OT: (otId: string) => `/facturacion/nueva?otId=${otId}`,
   FACTURA_DETAIL: (id: string) => `/facturacion/${id}`,
   AGENDA: '/agenda',
   TURNO_NEW: '/agenda/nuevo',
