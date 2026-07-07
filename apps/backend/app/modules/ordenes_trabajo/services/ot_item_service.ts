@@ -95,12 +95,16 @@ export default class OtItemService {
 
     await recalcularTotalesOrden(ordenTrabajoId)
 
-    await EntityCreated.dispatch({
-      userId: user.id,
-      entityType: 'ot_item',
-      entityId: item.id,
-      newValues: { ordenTrabajoId, descripcion, subtotal },
-    })
+    try {
+      await EntityCreated.dispatch({
+        userId: user.id,
+        entityType: 'ot_item',
+        entityId: item.id,
+        newValues: { ordenTrabajoId, descripcion, subtotal },
+      })
+    } catch {
+      // La auditoría no debe impedir el alta del ítem.
+    }
 
     return (await this.repository.findByIdForOrden(ordenTrabajoId, item.id))!
   }
@@ -157,13 +161,17 @@ export default class OtItemService {
 
     await recalcularTotalesOrden(ordenTrabajoId)
 
-    await EntityUpdated.dispatch({
-      userId: user.id,
-      entityType: 'ot_item',
-      entityId: itemId,
-      oldValues: { descripcion: item.descripcion, subtotal: item.subtotal },
-      newValues: { descripcion, subtotal },
-    })
+    try {
+      await EntityUpdated.dispatch({
+        userId: user.id,
+        entityType: 'ot_item',
+        entityId: itemId,
+        oldValues: { descripcion: item.descripcion, subtotal: item.subtotal },
+        newValues: { descripcion, subtotal },
+      })
+    } catch {
+      // La auditoría no debe impedir la actualización del ítem.
+    }
 
     return this.repository.findByIdForOrden(ordenTrabajoId, itemId)
   }
@@ -188,12 +196,16 @@ export default class OtItemService {
 
     await recalcularTotalesOrden(ordenTrabajoId)
 
-    await EntityDeleted.dispatch({
-      userId: user.id,
-      entityType: 'ot_item',
-      entityId: itemId,
-      oldValues: { descripcion: item.descripcion, subtotal: item.subtotal },
-    })
+    try {
+      await EntityDeleted.dispatch({
+        userId: user.id,
+        entityType: 'ot_item',
+        entityId: itemId,
+        oldValues: { descripcion: item.descripcion, subtotal: item.subtotal },
+      })
+    } catch {
+      // La auditoría no debe impedir la eliminación del ítem.
+    }
 
     return true
   }

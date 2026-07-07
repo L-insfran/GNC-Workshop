@@ -136,7 +136,9 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
               {errorMessage}
               {error instanceof ApiError && error.code === 'OT_ITEMS_SIN_MIGRAR' && (
                 <span className="mt-1 block text-xs">
-                  En el backend ejecutá: <code className="rounded bg-red-100 px-1">node ace migration:run</code>
+                  Ejecutá en el backend: <code className="rounded bg-red-100 px-1">node ace migration:run</code>
+                  {' '}o el SQL en{' '}
+                  <code className="rounded bg-red-100 px-1">database/scripts/006_create_ot_items_manual.sql</code>
                 </span>
               )}
             </Alert>
