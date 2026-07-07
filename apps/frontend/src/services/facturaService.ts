@@ -2,6 +2,7 @@ import type {
   IFactura,
   CreateFacturaDTO,
   IPaginationParams,
+  IFacturaBorradorPreview,
 } from '@gnc/shared-types'
 import { apiGet, apiPatch, apiPost } from '@/services/api-client'
 
@@ -12,6 +13,10 @@ export const facturaService = {
 
   getById(id: string) {
     return apiGet<IFactura>(`/facturas/${id}`)
+  },
+
+  getNotaCreditoBorrador(id: string) {
+    return apiGet<IFacturaBorradorPreview>(`/facturas/${id}/nota-credito-borrador`)
   },
 
   create(data: CreateFacturaDTO) {

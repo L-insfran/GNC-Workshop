@@ -1,11 +1,9 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, FileText, Pencil } from 'lucide-react'
+import { ArrowLeft, Pencil } from 'lucide-react'
 import { useOrdenTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
 import { useMecanicos } from '@/hooks/useMecanicos'
-import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/constants/routes'
-import { MODULE_ROLES } from '@/constants/roles'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Badge, getOrdenEstadoBadgeVariant } from '@/components/ui/Badge'
@@ -27,7 +25,6 @@ import { getOrdenEstadosSiguientes, type OrdenEstado } from '@gnc/shared-types'
 export function OrdenTrabajoDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { checkRole } = useAuth()
   const { data: orden, isLoading, error } = useOrdenTrabajo(id)
   const { mecanicos, hayMecanicos } = useMecanicos()
   const { updateEstado } = useOrdenTrabajoMutations()
@@ -63,10 +60,6 @@ export function OrdenTrabajoDetailPage() {
   }))
   const puedePasarATaller =
     !requiereMecanico || (hayMecanicos && Boolean(mecanicoResuelto))
-
-  const puedeFacturar =
-    (orden.estado === 'finalizada' || orden.estado === 'entregada') &&
-    checkRole(MODULE_ROLES.facturacion)
 
   const handleEstadoChange = async () => {
     if (!nuevoEstado || !id) return
@@ -104,18 +97,10 @@ export function OrdenTrabajoDetailPage() {
           <ArrowLeft className="h-4 w-4" />
           Volver a órdenes
         </Link>
-        <div className="flex items-center gap-2">
-          {puedeFacturar && (
-            <Button onClick={() => navigate(ROUTES.FACTURA_NEW_FROM_OT(orden.id))}>
-              <FileText className="h-4 w-4" />
-              Generar factura
-            </Button>
-          )}
-          <Button onClick={() => navigate(ROUTES.ORDEN_TRABAJO_EDIT(orden.id))}>
-            <Pencil className="h-4 w-4" />
-            Editar
-          </Button>
-        </div>
+        <Button onClick={() => navigate(ROUTES.ORDEN_TRABAJO_EDIT(orden.id))}>
+          <Pencil className="h-4 w-4" />
+          Editar
+        </Button>
       </div>
 
       {!hayMecanicos && <SinMecanicosAlert />}

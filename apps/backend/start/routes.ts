@@ -27,6 +27,7 @@ router
         router.resource('vehiculos', '#modules/vehiculos/controllers/vehiculos_controller').apiOnly()
         router.resource('equipos-gnc', '#modules/equipos_gnc/controllers/equipos_gnc_controller').apiOnly()
         router.get('ordenes-trabajo/:id/factura-borrador', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.facturaBorrador')
+        router.get('ordenes-trabajo/:id/factura-vinculada', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.facturaVinculada')
         router.get('ordenes-trabajo/:id/items', '#modules/ordenes_trabajo/controllers/ot_items_controller.index')
         router.post('ordenes-trabajo/:id/items', '#modules/ordenes_trabajo/controllers/ot_items_controller.store')
         router.put('ordenes-trabajo/:id/items/:itemId', '#modules/ordenes_trabajo/controllers/ot_items_controller.update')
@@ -89,6 +90,7 @@ router
 
         // Facturación
         router.get('facturas', '#modules/facturacion/controllers/facturacion_controller.index')
+        router.get('facturas/:id/nota-credito-borrador', '#modules/facturacion/controllers/facturacion_controller.notaCreditoBorrador')
         router.get('facturas/:id', '#modules/facturacion/controllers/facturacion_controller.show')
         router.post('facturas', '#modules/facturacion/controllers/facturacion_controller.store')
         router.patch('facturas/:id/anular', '#modules/facturacion/controllers/facturacion_controller.anular')

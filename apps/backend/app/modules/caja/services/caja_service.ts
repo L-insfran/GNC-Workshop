@@ -2,10 +2,13 @@ import { DateTime } from 'luxon'
 import type { CreateCajaMovimientoDTO, IArqueo, ICajaSaldo, IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import type CajaMovimiento from '#models/caja_movimiento'
+import Factura from '#models/factura'
 import CajaRepository from '#modules/caja/repositories/caja_repository'
+import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 
 export default class CajaService {
   private repository = new CajaRepository()
+  private facturaRepository = new FacturaRepository()
 
   async getSaldo(cajaId?: string): Promise<ICajaSaldo> {
     const caja = cajaId
@@ -46,6 +49,26 @@ export default class CajaService {
       throw new Error('CAJA_NO_ENCONTRADA')
     }
 
+    if (data.facturaId && data.tipo === 'ingreso') {
+      const factura = await Factura.query()
+        .where('id', data.facturaId)
+        .whereNull('deleted_at')
+        .first()
+
+      if (!factura) {
+        throw new Error('FACTURA_NO_ENCONTRADA')
+      }
+
+      if (factura.estado !== 'emitida') {
+        throw new Error('FACTURA_NO_EMITIDA')
+      }
+
+      const cobroExistente = await this.facturaRepository.findCobroByFacturaId(factura.id)
+      if (cobroExistente) {
+        throw new Error('COBRO_YA_REGISTRADO')
+      }
+    }
+
     if (data.tipo === 'egreso') {
       const { saldo } = await this.repository.calcularSaldo(caja.id)
       if (saldo < data.monto) {
@@ -58,6 +81,7 @@ export default class CajaService {
       tipo: data.tipo,
       monto: data.monto,
       concepto: data.concepto.trim(),
+      facturaId: data.facturaId ?? null,
       userId: user.id,
     })
   }
@@ -99,6 +123,7 @@ export default class CajaService {
         tipo: m.tipo,
         monto: Number(m.monto),
         concepto: m.concepto,
+        facturaId: m.facturaId ?? undefined,
         userId: m.userId ?? undefined,
         userNombre: m.user?.fullName,
         createdAt: m.createdAt.toISO()!,

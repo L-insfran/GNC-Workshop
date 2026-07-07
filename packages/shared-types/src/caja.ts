@@ -13,6 +13,7 @@ export interface ICajaMovimiento {
   tipo: CajaMovimientoTipo
   monto: number
   concepto: string
+  facturaId?: string
   userId?: string
   userNombre?: string
   createdAt: string
@@ -23,6 +24,7 @@ export interface CreateCajaMovimientoDTO {
   tipo: CajaMovimientoTipo
   monto: number
   concepto: string
+  facturaId?: string
 }
 
 export interface ICajaSaldo {

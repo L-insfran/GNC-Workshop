@@ -8,6 +8,7 @@ import { useFacturaMutations } from '@/hooks/useFacturacion'
 import { useClientes } from '@/hooks/useClientes'
 import { ROUTES } from '@/constants/routes'
 import { ordenTrabajoService } from '@/services/ordenTrabajoService'
+import { facturaService } from '@/services/facturaService'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
@@ -36,12 +37,15 @@ export function FacturaFormPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const otId = searchParams.get('otId')
+  const ncDesde = searchParams.get('ncDesde')
+  const esNotaCredito = Boolean(ncDesde)
   const { data: clientesData } = useClientes({ perPage: 100 })
   const { create } = useFacturaMutations()
 
   const [ordenTrabajoId, setOrdenTrabajoId] = useState<string | undefined>()
+  const [facturaReferenciaId, setFacturaReferenciaId] = useState<string | undefined>()
   const [ordenNumero, setOrdenNumero] = useState<string | undefined>()
-  const [prefillLoading, setPrefillLoading] = useState(Boolean(otId))
+  const [prefillLoading, setPrefillLoading] = useState(Boolean(otId || ncDesde))
   const [prefillError, setPrefillError] = useState<string | null>(null)
 
   const {
@@ -55,7 +59,7 @@ export function FacturaFormPage() {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      tipo: 'factura_b',
+      tipo: esNotaCredito ? 'nota_credito' : 'factura_b',
       items: [{ descripcion: '', cantidad: 1, precioUnitario: 0 }],
     },
   })
@@ -73,21 +77,29 @@ export function FacturaFormPage() {
   const total = subtotal + iva
 
   useEffect(() => {
-    if (!otId) return
+    if (!otId && !ncDesde) return
 
     setPrefillLoading(true)
     setPrefillError(null)
 
-    ordenTrabajoService
-      .getFacturaBorrador(otId)
+    const loadPrefill = ncDesde
+      ? facturaService.getNotaCreditoBorrador(ncDesde)
+      : ordenTrabajoService.getFacturaBorrador(otId!)
+
+    loadPrefill
       .then((response) => {
         const borrador = response.data
         if (!borrador) {
-          setPrefillError('No se pudo cargar el borrador de factura desde la OT.')
+          setPrefillError(
+            ncDesde
+              ? 'No se pudo cargar el borrador de nota de crédito.'
+              : 'No se pudo cargar el borrador de factura desde la OT.'
+          )
           return
         }
 
         setOrdenTrabajoId(borrador.ordenTrabajoId)
+        setFacturaReferenciaId(borrador.facturaReferenciaId)
         setOrdenNumero(borrador.ordenNumero)
 
         reset({
@@ -104,11 +116,13 @@ export function FacturaFormPage() {
         const message =
           err instanceof ApiError
             ? err.message
-            : 'No se pudo cargar el borrador de factura desde la OT.'
+            : ncDesde
+              ? 'No se pudo cargar el borrador de nota de crédito.'
+              : 'No se pudo cargar el borrador de factura desde la OT.'
         setPrefillError(message)
       })
       .finally(() => setPrefillLoading(false))
-  }, [otId, reset])
+  }, [otId, ncDesde, reset])
 
   const clienteOptions = (() => {
     const options = (clientesData?.data ?? []).map((c) => ({
@@ -116,10 +130,10 @@ export function FacturaFormPage() {
       label: c.razonSocial,
     }))
 
-    if (clienteId && !options.some((option) => option.value === clienteId) && ordenNumero) {
+    if (clienteId && !options.some((option) => option.value === clienteId)) {
       options.unshift({
         value: clienteId,
-        label: `Cliente de OT ${ordenNumero}`,
+        label: ordenNumero ? `Cliente de OT ${ordenNumero}` : 'Cliente del comprobante',
       })
     }
 
@@ -131,17 +145,38 @@ export function FacturaFormPage() {
       const response = await create.mutateAsync({
         ...data,
         ordenTrabajoId,
+        facturaReferenciaId,
         emitir: true,
       })
       navigate(ROUTES.FACTURA_DETAIL(response.data!.id))
     } catch (err) {
       setError('root', {
-        message: err instanceof ApiError ? err.message : 'Error al emitir factura',
+        message:
+          err instanceof ApiError
+            ? err.message
+            : esNotaCredito
+              ? 'Error al emitir nota de crédito'
+              : 'Error al emitir factura',
       })
     }
   }
 
   if (prefillLoading) return <PageLoader />
+
+  const titulo = esNotaCredito
+    ? 'Emitir nota de crédito'
+    : otId
+      ? 'Facturar orden de trabajo'
+      : 'Nueva factura'
+
+  const descripcion = esNotaCredito
+    ? 'Se compensará la factura original con los mismos ítems. El cliente no puede modificarse.'
+    : ordenNumero
+      ? `Ítems precargados desde OT ${ordenNumero}. Podés ajustar antes de emitir.`
+      : undefined
+
+  const clienteBloqueado = Boolean(ordenTrabajoId || facturaReferenciaId)
+  const tipoBloqueado = esNotaCredito
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
@@ -149,14 +184,7 @@ export function FacturaFormPage() {
         <ArrowLeft className="h-4 w-4" /> Volver
       </Link>
       <Card>
-        <CardHeader
-          title={otId ? 'Facturar orden de trabajo' : 'Nueva factura'}
-          description={
-            ordenNumero
-              ? `Ítems precargados desde OT ${ordenNumero}. Podés ajustar antes de emitir.`
-              : undefined
-          }
-        />
+        <CardHeader title={titulo} description={descripcion} />
         <CardBody>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {prefillError && <Alert variant="error">{prefillError}</Alert>}
@@ -167,7 +195,7 @@ export function FacturaFormPage() {
                 options={clienteOptions}
                 placeholder="Seleccionar"
                 error={errors.clienteId?.message}
-                disabled={Boolean(ordenTrabajoId)}
+                disabled={clienteBloqueado}
                 {...register('clienteId')}
               />
               <Select
@@ -178,46 +206,66 @@ export function FacturaFormPage() {
                   { value: 'factura_c', label: 'Factura C' },
                   { value: 'nota_credito', label: 'Nota de crédito' },
                 ]}
+                disabled={tipoBloqueado}
                 {...register('tipo')}
               />
             </div>
 
-            {ordenTrabajoId && (
+            {ordenTrabajoId && !esNotaCredito && (
               <Alert variant="info">
                 Esta factura quedará vinculada a la OT {ordenNumero ?? ordenTrabajoId}.
+              </Alert>
+            )}
+
+            {esNotaCredito && facturaReferenciaId && (
+              <Alert variant="info">
+                Esta nota de crédito quedará vinculada a la factura original.
               </Alert>
             )}
 
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <h4 className="text-sm font-semibold">Ítems</h4>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => append({ descripcion: '', cantidad: 1, precioUnitario: 0 })}
-                >
-                  <Plus className="h-4 w-4" /> Agregar
-                </Button>
+                {!esNotaCredito && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => append({ descripcion: '', cantidad: 1, precioUnitario: 0 })}
+                  >
+                    <Plus className="h-4 w-4" /> Agregar
+                  </Button>
+                )}
               </div>
               {fields.map((field, index) => (
                 <div key={field.id} className="grid gap-2 sm:grid-cols-12 items-end">
                   <div className="sm:col-span-5">
-                    <Input label="Descripción" {...register(`items.${index}.descripcion`)} />
+                    <Input
+                      label="Descripción"
+                      disabled={esNotaCredito}
+                      {...register(`items.${index}.descripcion`)}
+                    />
                   </div>
                   <div className="sm:col-span-2">
-                    <Input label="Cant." type="number" step="0.01" {...register(`items.${index}.cantidad`)} />
+                    <Input
+                      label="Cant."
+                      type="number"
+                      step="0.01"
+                      disabled={esNotaCredito}
+                      {...register(`items.${index}.cantidad`)}
+                    />
                   </div>
                   <div className="sm:col-span-3">
                     <Input
                       label="P. unitario"
                       type="number"
                       step="0.01"
+                      disabled={esNotaCredito}
                       {...register(`items.${index}.precioUnitario`)}
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    {fields.length > 1 && (
+                    {!esNotaCredito && fields.length > 1 && (
                       <Button type="button" variant="ghost" onClick={() => remove(index)}>
                         <Trash2 className="h-4 w-4 text-red-500" />
                       </Button>
@@ -249,7 +297,7 @@ export function FacturaFormPage() {
                 </Button>
               </Link>
               <Button type="submit" isLoading={isSubmitting}>
-                Emitir factura
+                {esNotaCredito ? 'Emitir nota de crédito' : 'Emitir factura'}
               </Button>
             </div>
           </form>

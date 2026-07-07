@@ -4,10 +4,12 @@ import { ApiResponse } from '#shared/api_response'
 import { parseDateOnly } from '#shared/date_util'
 import { serializeOrdenTrabajo, serializeOrdenesTrabajo } from '#shared/orden_trabajo_serializer'
 import OrdenTrabajoService from '#modules/ordenes_trabajo/services/orden_trabajo_service'
+import FacturaService from '#modules/facturacion/services/factura_service'
 import { createOrdenTrabajoValidator } from '#modules/ordenes_trabajo/validators/create_orden_trabajo_validator'
 import { updateEstadoValidator } from '#modules/ordenes_trabajo/validators/update_estado_validator'
 
 const ordenTrabajoService = new OrdenTrabajoService()
+const facturaService = new FacturaService()
 
 export default class OrdenesTrabajoController {
   async index({ request, response }: HttpContext) {
@@ -51,6 +53,10 @@ export default class OrdenesTrabajoController {
             'OT_SIN_ITEMS',
             'La orden de trabajo no tiene ítems en el presupuesto para facturar',
           ],
+          OT_YA_FACTURADA: [
+            'OT_YA_FACTURADA',
+            'Esta orden de trabajo ya tiene una factura activa vinculada',
+          ],
         }
         const mapped = messages[error.message]
         if (mapped) {
@@ -59,6 +65,16 @@ export default class OrdenesTrabajoController {
       }
       throw error
     }
+  }
+
+  async facturaVinculada({ params, response }: HttpContext) {
+    const orden = await ordenTrabajoService.getById(params.id)
+    if (!orden) {
+      return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
+    }
+
+    const vinculada = await facturaService.getFacturaVinculadaOT(params.id)
+    return response.ok(ApiResponse.success(vinculada))
   }
 
   async store({ request, auth, response }: HttpContext) {

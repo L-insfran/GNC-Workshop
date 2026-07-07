@@ -16,6 +16,7 @@ export interface IFactura {
   clienteId: string
   clienteNombre?: string
   ordenTrabajoId?: string
+  facturaReferenciaId?: string
   tipo: FacturaTipo
   subtotal: number
   iva: number
@@ -23,6 +24,10 @@ export interface IFactura {
   estado: FacturaEstado
   fechaEmision: string
   items?: IFacturaItem[]
+  cobrada?: boolean
+  cobroFecha?: string
+  puedeEmitirNotaCredito?: boolean
+  notaCreditoId?: string
   createdAt: string
 }
 
@@ -35,6 +40,7 @@ export interface CreateFacturaItemDTO {
 export interface CreateFacturaDTO {
   clienteId: string
   ordenTrabajoId?: string
+  facturaReferenciaId?: string
   tipo: FacturaTipo
   items: CreateFacturaItemDTO[]
   emitir?: boolean
@@ -43,4 +49,13 @@ export interface CreateFacturaDTO {
 export interface IFacturaBorradorPreview extends CreateFacturaDTO {
   ordenNumero?: string
   clienteNombre?: string
+}
+
+export interface IFacturaVinculadaOT {
+  factura: IFactura
+  cobrada: boolean
+  cobroMovimientoId?: string
+  puedeEmitirNotaCredito: boolean
+  notaCreditoId?: string
+  puedeGenerarFactura: boolean
 }

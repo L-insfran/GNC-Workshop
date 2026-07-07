@@ -20,6 +20,7 @@ import { BaseService } from '#shared/base_service'
 import { parseDateOnly } from '#shared/date_util'
 import { countActiveMecanicos, findActiveMecanico } from '#shared/mecanico_util'
 import OtItemService from '#modules/ordenes_trabajo/services/ot_item_service'
+import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_trabajo_repository'
 
 function resolveFechaEstimadaEntrega(
@@ -45,6 +46,7 @@ function resolveFechaEstimadaEntrega(
 export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
   protected entityType = 'orden_trabajo'
   protected repository = new OrdenTrabajoRepository()
+  private facturaRepository = new FacturaRepository()
 
   async list(params?: IPaginationParams) {
     return this.repository.findAllWithRelations(params)
@@ -60,6 +62,11 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
 
     if (orden.estado !== 'finalizada' && orden.estado !== 'entregada') {
       throw new Error('OT_ESTADO_INVALIDO_FACTURA')
+    }
+
+    const facturaActiva = await this.facturaRepository.findActivaByOrdenTrabajoId(id)
+    if (facturaActiva) {
+      throw new Error('OT_YA_FACTURADA')
     }
 
     const otItemService = new OtItemService()

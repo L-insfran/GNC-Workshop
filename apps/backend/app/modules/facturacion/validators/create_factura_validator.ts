@@ -4,6 +4,7 @@ export const createFacturaValidator = vine.compile(
   vine.object({
     clienteId: vine.string().uuid(),
     ordenTrabajoId: vine.string().uuid().optional(),
+    facturaReferenciaId: vine.string().uuid().optional(),
     tipo: vine.enum(['factura_a', 'factura_b', 'factura_c', 'nota_credito']),
     emitir: vine.boolean().optional(),
     items: vine

@@ -5,6 +5,7 @@ import type {
   ITipoTrabajo,
   IPaginationParams,
   IFacturaBorradorPreview,
+  IFacturaVinculadaOT,
 } from '@gnc/shared-types'
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '@/services/api-client'
 
@@ -19,6 +20,10 @@ export const ordenTrabajoService = {
 
   getFacturaBorrador(id: string) {
     return apiGet<IFacturaBorradorPreview>(`/ordenes-trabajo/${id}/factura-borrador`)
+  },
+
+  getFacturaVinculada(id: string) {
+    return apiGet<IFacturaVinculadaOT | null>(`/ordenes-trabajo/${id}/factura-vinculada`)
   },
 
   create(data: CreateOrdenTrabajoDTO) {

@@ -62,6 +62,19 @@ export default class CajaController {
           ApiResponse.error('SALDO_INSUFICIENTE', 'Saldo insuficiente para el egreso')
         )
       }
+      if (error.message === 'COBRO_YA_REGISTRADO') {
+        return response.badRequest(
+          ApiResponse.error('COBRO_YA_REGISTRADO', 'Esta factura ya tiene un cobro registrado en caja')
+        )
+      }
+      if (error.message === 'FACTURA_NO_ENCONTRADA') {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Factura no encontrada'))
+      }
+      if (error.message === 'FACTURA_NO_EMITIDA') {
+        return response.badRequest(
+          ApiResponse.error('FACTURA_NO_EMITIDA', 'Solo se puede cobrar una factura emitida')
+        )
+      }
     }
     throw error
   }

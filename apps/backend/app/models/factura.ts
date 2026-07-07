@@ -21,6 +21,9 @@ export default class Factura extends BaseModel {
   declare ordenTrabajoId: string | null
 
   @column()
+  declare facturaReferenciaId: string | null
+
+  @column()
   declare tipo: 'factura_a' | 'factura_b' | 'factura_c' | 'nota_credito'
 
   @column()

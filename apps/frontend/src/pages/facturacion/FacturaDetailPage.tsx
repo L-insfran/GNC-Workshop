@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
-import { ArrowLeft, ClipboardList, DollarSign } from 'lucide-react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useQueryClient } from '@tanstack/react-query'
+import { ArrowLeft, ClipboardList, DollarSign, FileText } from 'lucide-react'
 import type { IFactura } from '@gnc/shared-types'
 import { useFactura } from '@/hooks/useFacturacion'
 import { useCajaMutations } from '@/hooks/useCaja'
@@ -17,21 +18,28 @@ import { ApiError } from '@/services/api-client'
 
 export function FacturaDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { checkRole } = useAuth()
   const { data: factura, isLoading, error } = useFactura(id)
   const { createMovimiento } = useCajaMutations()
 
   const [cobroModalOpen, setCobroModalOpen] = useState(false)
-  const [cobroSuccess, setCobroSuccess] = useState(false)
   const [cobroError, setCobroError] = useState<string | null>(null)
 
   if (isLoading) return <PageLoader />
   if (error || !factura) return <Alert variant="error">Factura no encontrada</Alert>
 
+  const cobrada = Boolean(factura.cobrada)
+
   const puedeRegistrarCobro =
-    factura.estado === 'emitida' && checkRole(MODULE_ROLES.caja) && !cobroSuccess
+    factura.estado === 'emitida' && checkRole(MODULE_ROLES.caja) && !cobrada
+
+  const puedeEmitirNotaCredito =
+    Boolean(factura.puedeEmitirNotaCredito) && checkRole(MODULE_ROLES.facturacion)
 
   const handleRegistrarCobro = async () => {
+    if (!id) return
     setCobroError(null)
 
     try {
@@ -39,8 +47,9 @@ export function FacturaDetailPage() {
         tipo: 'ingreso',
         monto: Number(factura.total),
         concepto: `Cobro factura ${factura.numero}`,
+        facturaId: id,
       })
-      setCobroSuccess(true)
+      await queryClient.invalidateQueries({ queryKey: ['facturas', id] })
       setCobroModalOpen(false)
     } catch (err) {
       setCobroError(
@@ -55,9 +64,11 @@ export function FacturaDetailPage() {
         <ArrowLeft className="h-4 w-4" /> Volver
       </Link>
 
-      {cobroSuccess && (
-        <Alert variant="success" title="Cobro registrado">
-          Se registró el ingreso en caja por ${Number(factura.total).toLocaleString('es-AR')}.
+      {cobrada && (
+        <Alert variant="success" title="Cobrada">
+          {factura.cobroFecha
+            ? `Cobro registrado el ${new Date(factura.cobroFecha).toLocaleString('es-AR')}.`
+            : `Cobro registrado por $${Number(factura.total).toLocaleString('es-AR')}.`}
         </Alert>
       )}
 
@@ -66,16 +77,27 @@ export function FacturaDetailPage() {
           title={factura.numero}
           description={`${factura.tipo.replace('_', ' ').toUpperCase()} · ${factura.estado}`}
           action={
-            puedeRegistrarCobro ? (
-              <Button onClick={() => setCobroModalOpen(true)}>
-                <DollarSign className="h-4 w-4" />
-                Registrar cobro
-              </Button>
-            ) : undefined
+            <div className="flex flex-wrap gap-2">
+              {puedeEmitirNotaCredito && (
+                <Button
+                  variant="outline"
+                  onClick={() => navigate(ROUTES.FACTURA_NEW_FROM_NC(factura.id))}
+                >
+                  <FileText className="h-4 w-4" />
+                  Emitir nota de crédito
+                </Button>
+              )}
+              {puedeRegistrarCobro && (
+                <Button onClick={() => setCobroModalOpen(true)}>
+                  <DollarSign className="h-4 w-4" />
+                  Registrar cobro
+                </Button>
+              )}
+            </div>
           }
         />
         <CardBody className="space-y-4">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Badge
               variant={
                 factura.estado === 'emitida'
@@ -87,6 +109,11 @@ export function FacturaDetailPage() {
             >
               {factura.estado}
             </Badge>
+            {factura.estado === 'emitida' && (
+              <Badge variant={cobrada ? 'success' : 'warning'}>
+                {cobrada ? 'Cobrada' : 'Pendiente de cobro'}
+              </Badge>
+            )}
           </div>
 
           <div className="grid gap-2 text-sm sm:grid-cols-2">
@@ -105,6 +132,28 @@ export function FacturaDetailPage() {
                 {new Date(factura.fechaEmision).toLocaleString('es-AR')}
               </p>
             </div>
+            {factura.facturaReferenciaId && (
+              <div className="sm:col-span-2">
+                <p className="text-slate-500">Factura de referencia</p>
+                <Link
+                  to={ROUTES.FACTURA_DETAIL(factura.facturaReferenciaId)}
+                  className="font-medium text-brand-600 hover:text-brand-700"
+                >
+                  Ver factura original
+                </Link>
+              </div>
+            )}
+            {factura.notaCreditoId && (
+              <div className="sm:col-span-2">
+                <p className="text-slate-500">Nota de crédito</p>
+                <Link
+                  to={ROUTES.FACTURA_DETAIL(factura.notaCreditoId)}
+                  className="font-medium text-brand-600 hover:text-brand-700"
+                >
+                  Ver nota de crédito emitida
+                </Link>
+              </div>
+            )}
             {factura.ordenTrabajoId && (
               <div className="sm:col-span-2">
                 <p className="text-slate-500">Orden de trabajo</p>
