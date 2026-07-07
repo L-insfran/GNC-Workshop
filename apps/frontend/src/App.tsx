@@ -18,6 +18,7 @@ import { OrdenTrabajoFormPage } from '@/pages/ordenes-trabajo/OrdenTrabajoFormPa
 import { OrdenTrabajoDetailPage } from '@/pages/ordenes-trabajo/OrdenTrabajoDetailPage'
 import { ProductosPage } from '@/pages/inventario/ProductosPage'
 import { ProductoFormPage } from '@/pages/inventario/ProductoFormPage'
+import { ProductoDetailPage } from '@/pages/inventario/ProductoDetailPage'
 import { MovimientoPage } from '@/pages/inventario/MovimientoPage'
 import { CajaPage } from '@/pages/caja/CajaPage'
 import { MovimientoCajaFormPage } from '@/pages/caja/MovimientoCajaFormPage'
@@ -78,6 +79,7 @@ export default function App() {
             <Route path="nuevo" element={<ProductoFormPage />} />
             <Route path="movimiento" element={<MovimientoPage />} />
             <Route path=":id/editar" element={<ProductoFormPage />} />
+            <Route path=":id" element={<ProductoDetailPage />} />
           </Route>
 
           <Route path="caja" element={<RoleGuard allowedRoles={MODULE_ROLES.caja} />}>

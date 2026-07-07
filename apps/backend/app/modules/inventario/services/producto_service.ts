@@ -1,5 +1,10 @@
 import db from '@adonisjs/lucid/services/db'
-import type { CreateProductoDTO, MovimientoStockDTO, UpdateProductoDTO } from '@gnc/shared-types'
+import type {
+  CreateProductoDTO,
+  IListMovimientosParams,
+  MovimientoStockDTO,
+  UpdateProductoDTO,
+} from '@gnc/shared-types'
 import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import type Producto from '#models/producto'
@@ -8,10 +13,14 @@ import CategoriaProducto from '#models/categoria_producto'
 import { BaseService } from '#shared/base_service'
 import { EntityCreated, EntityDeleted, EntityUpdated } from '#events/audit_events'
 import ProductoRepository from '#modules/inventario/repositories/producto_repository'
+import StockMovimientoRepository from '#modules/inventario/repositories/stock_movimiento_repository'
+import { getStockDisponibilidad } from '#shared/stock_util'
+import { serializeStockMovimientos } from '#shared/stock_movimiento_serializer'
 
 export default class ProductoService extends BaseService<Producto> {
   protected entityType = 'producto'
   protected repository = new ProductoRepository()
+  private movimientoRepository = new StockMovimientoRepository()
 
   async list(params?: IPaginationParams) {
     return this.repository.findAllWithCategoria(params)
@@ -27,7 +36,9 @@ export default class ProductoService extends BaseService<Producto> {
       throw new Error('CODIGO_DUPLICADO')
     }
 
-    return super.create(
+    const stockInicial = Math.max(0, Math.floor(Number(data.stockInicial ?? 0)))
+
+    const producto = await super.create(
       {
         codigo: data.codigo.trim().toUpperCase(),
         nombre: data.nombre.trim(),
@@ -35,12 +46,24 @@ export default class ProductoService extends BaseService<Producto> {
         precioCompra: data.precioCompra,
         precioVenta: data.precioVenta,
         stockMinimo: data.stockMinimo ?? 0,
-        stockActual: 0,
+        stockActual: stockInicial,
         unidadMedida: data.unidadMedida ?? 'unidad',
         isActive: data.isActive ?? true,
       },
       user
     )
+
+    if (stockInicial > 0) {
+      await StockMovimiento.create({
+        productoId: producto.id,
+        tipo: 'ingreso',
+        cantidad: stockInicial,
+        motivo: 'Stock inicial',
+        userId: user.id,
+      })
+    }
+
+    return (await this.repository.findByIdWithCategoria(producto.id))!
   }
 
   async update(id: string, data: UpdateProductoDTO, user: User): Promise<Producto | null> {
@@ -97,6 +120,23 @@ export default class ProductoService extends BaseService<Producto> {
 
   async alertasStock(): Promise<Producto[]> {
     return this.repository.findStockBajo()
+  }
+
+  async listMovimientos(params?: IListMovimientosParams) {
+    const result = await this.movimientoRepository.findAll(params)
+    return {
+      data: serializeStockMovimientos(result.data),
+      meta: result.meta,
+    }
+  }
+
+  async getDisponibilidad(productoId: string, excludeOtItemId?: string) {
+    const producto = await this.repository.findById(productoId)
+    if (!producto) {
+      throw new Error('PRODUCTO_NO_ENCONTRADO')
+    }
+
+    return getStockDisponibilidad(producto.stockActual, productoId, { excludeOtItemId })
   }
 
   async listCategorias() {

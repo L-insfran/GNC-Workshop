@@ -22,6 +22,7 @@ import { countActiveMecanicos, findActiveMecanico } from '#shared/mecanico_util'
 import OtItemService from '#modules/ordenes_trabajo/services/ot_item_service'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_trabajo_repository'
+import StockReservaService from '#modules/inventario/services/stock_reserva_service'
 
 function resolveFechaEstimadaEntrega(
   value: string | undefined,
@@ -47,6 +48,7 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
   protected entityType = 'orden_trabajo'
   protected repository = new OrdenTrabajoRepository()
   private facturaRepository = new FacturaRepository()
+  private stockReservaService = new StockReservaService()
 
   async list(params?: IPaginationParams) {
     return this.repository.findAllWithRelations(params)
@@ -239,8 +241,17 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     const trx = await db.transaction()
 
     try {
+      if (estadoNuevo === 'en_taller') {
+        await this.stockReservaService.reservarStockPorOt(id, user.id, trx)
+      }
+
       if (estadoNuevo === 'finalizada') {
         await this.descontarStockPorOt(id, orden.numero, user.id, trx)
+        await this.stockReservaService.liberarReservasPorOt(id, 'finalizada', trx)
+      }
+
+      if (estadoNuevo === 'cancelada') {
+        await this.stockReservaService.liberarReservasPorOt(id, 'cancelada', trx)
       }
 
       orden.useTransaction(trx)

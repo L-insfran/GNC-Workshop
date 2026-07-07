@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2, ArrowLeftRight } from 'lucide-react'
+import { Plus, Pencil, Trash2, ArrowLeftRight, Eye } from 'lucide-react'
 import { useProductos, useInventarioMutations, useAlertasStock } from '@/hooks/useInventario'
 import { ROUTES } from '@/constants/routes'
 import { Card } from '@/components/ui/Card'
@@ -23,7 +23,15 @@ export function ProductosPage() {
   const { remove } = useInventarioMutations()
 
   const columns: ITableColumn<IProducto>[] = [
-    { key: 'codigo', header: 'Código' },
+    { key: 'codigo', header: 'Código', render: (item) => (
+        <button
+          type="button"
+          className="font-medium text-brand-700 hover:underline"
+          onClick={() => navigate(ROUTES.PRODUCTO_DETAIL(item.id))}
+        >
+          {item.codigo}
+        </button>
+      ) },
     { key: 'nombre', header: 'Nombre' },
     {
       key: 'stockActual',
@@ -44,6 +52,22 @@ export function ProductosPage() {
       header: 'Acciones',
       render: (item) => (
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Ver detalle"
+            onClick={() => navigate(ROUTES.PRODUCTO_DETAIL(item.id))}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Movimiento de stock"
+            onClick={() => navigate(ROUTES.MOVIMIENTO_STOCK_PRODUCTO(item.id, { tipo: 'ingreso' }))}
+          >
+            <ArrowLeftRight className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.PRODUCTO_EDIT(item.id))}>
             <Pencil className="h-4 w-4" />
           </Button>

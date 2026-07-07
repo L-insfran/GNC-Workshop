@@ -235,9 +235,16 @@ export function OrdenTrabajoDetailPage() {
                       onChange={(e) => setMecanicoAsignadoId(e.target.value)}
                     />
                     <p className="text-xs text-slate-500">
-                      Es obligatorio asignar un mecánico al pasar la OT a taller.
+                      Es obligatorio asignar un mecánico al pasar la OT a taller. Los repuestos del
+                      presupuesto se reservarán automáticamente en inventario.
                     </p>
                   </div>
+                )}
+                {nuevoEstado === 'en_taller' && (
+                  <Alert variant="info">
+                    Al pasar a taller se reservará el stock de repuestos y materiales vinculados al
+                    inventario. Si no hay stock suficiente, la transición será rechazada.
+                  </Alert>
                 )}
               </div>
             </>

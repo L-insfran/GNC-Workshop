@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ArrowLeftRight } from 'lucide-react'
 import { useProducto, useCategorias, useInventarioMutations, useCategoriaMutations } from '@/hooks/useInventario'
 import { ROUTES } from '@/constants/routes'
 import { CatalogModal } from '@/components/configuracion/CatalogModal'
@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
+import { Badge } from '@/components/ui/Badge'
 import { Alert } from '@/components/ui/Alert'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { ApiError } from '@/services/api-client'
@@ -22,6 +23,7 @@ const schema = z.object({
   precioCompra: z.coerce.number().min(0),
   precioVenta: z.coerce.number().min(0),
   stockMinimo: z.coerce.number().min(0).optional(),
+  stockInicial: z.coerce.number().min(0).optional(),
   unidadMedida: z.string().optional(),
 })
 
@@ -47,7 +49,7 @@ export function ProductoFormPage() {
     setError,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { unidadMedida: 'unidad', stockMinimo: 0, precioCompra: 0, precioVenta: 0 },
+    defaultValues: { unidadMedida: 'unidad', stockMinimo: 0, stockInicial: 0, precioCompra: 0, precioVenta: 0 },
   })
 
   useEffect(() => {
@@ -73,10 +75,12 @@ export function ProductoFormPage() {
       }
       if (isEditing && id) {
         await update.mutateAsync({ id, data: payload })
+        navigate(ROUTES.PRODUCTO_DETAIL(id))
       } else {
-        await create.mutateAsync(payload)
+        const created = await create.mutateAsync(payload)
+        const newId = created.data?.id
+        navigate(newId ? ROUTES.PRODUCTO_DETAIL(newId) : ROUTES.INVENTARIO)
       }
-      navigate(ROUTES.INVENTARIO)
     } catch (err) {
       setError('root', {
         message: err instanceof ApiError ? err.message : 'Error al guardar producto',
@@ -88,7 +92,10 @@ export function ProductoFormPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
-      <Link to={ROUTES.INVENTARIO} className="inline-flex items-center gap-2 text-sm text-slate-500">
+      <Link
+        to={isEditing && id ? ROUTES.PRODUCTO_DETAIL(id) : ROUTES.INVENTARIO}
+        className="inline-flex items-center gap-2 text-sm text-slate-500"
+      >
         <ArrowLeft className="h-4 w-4" /> Volver
       </Link>
       <Card>
@@ -124,6 +131,37 @@ export function ProductoFormPage() {
               <Input label="Stock mínimo" type="number" {...register('stockMinimo')} />
               <Input label="Unidad" {...register('unidadMedida')} />
             </div>
+            {!isEditing && (
+              <Input
+                label="Stock inicial"
+                type="number"
+                hint="Opcional. Genera un ingreso automático al crear el producto."
+                error={errors.stockInicial?.message}
+                {...register('stockInicial')}
+              />
+            )}
+            {isEditing && producto && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div>
+                  <p className="text-sm text-slate-500">Stock actual</p>
+                  <Badge
+                    variant={producto.stockActual <= producto.stockMinimo ? 'danger' : 'success'}
+                    className="mt-1"
+                  >
+                    {producto.stockActual} {producto.unidadMedida}
+                  </Badge>
+                  <p className="mt-1 text-xs text-slate-500">
+                    El stock se modifica con movimientos de inventario, no desde esta pantalla.
+                  </p>
+                </div>
+                <Link to={ROUTES.MOVIMIENTO_STOCK_PRODUCTO(producto.id, { tipo: 'ingreso' })}>
+                  <Button type="button" variant="outline" size="sm">
+                    <ArrowLeftRight className="h-4 w-4" />
+                    Registrar ingreso
+                  </Button>
+                </Link>
+              </div>
+            )}
             <div className="flex justify-end gap-2">
               <Link to={ROUTES.INVENTARIO}><Button type="button" variant="outline">Cancelar</Button></Link>
               <Button type="submit" isLoading={isSubmitting}>{isEditing ? 'Guardar' : 'Crear'}</Button>

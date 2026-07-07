@@ -73,6 +73,28 @@ export default class InventarioController {
     }
   }
 
+  async movimientos({ request, response }: HttpContext) {
+    const params = {
+      page: Number(request.input('page', 1)),
+      perPage: Number(request.input('perPage', 20)),
+      productoId: request.input('productoId'),
+    }
+    const result = await productoService.listMovimientos(params)
+    return response.ok(ApiResponse.paginated(result.data, result.meta as never))
+  }
+
+  async disponibilidad({ params, request, response }: HttpContext) {
+    try {
+      const disponibilidad = await productoService.getDisponibilidad(
+        params.id,
+        request.input('excludeOtItemId')
+      )
+      return response.ok(ApiResponse.success(disponibilidad))
+    } catch (error) {
+      return this.handleError(error, response)
+    }
+  }
+
   async alertas({ response }: HttpContext) {
     const productos = await productoService.alertasStock()
     return response.ok(ApiResponse.success(productos))

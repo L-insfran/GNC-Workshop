@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import type { IOtItem, OrdenEstado, OtItemTipo } from '@gnc/shared-types'
-import { OT_ITEM_DELETABLE_ESTADOS, OT_ITEM_EDITABLE_ESTADOS } from '@gnc/shared-types'
+import { OT_ESTADOS_CON_RESERVA_STOCK, OT_ITEM_DELETABLE_ESTADOS, OT_ITEM_EDITABLE_ESTADOS } from '@gnc/shared-types'
 import { useOtItemMutations, useOtPresupuesto } from '@/hooks/useOtItems'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Table } from '@/components/ui/Table'
 import { Alert } from '@/components/ui/Alert'
-import { OtItemFormModal, OT_ITEM_TIPO_LABELS } from '@/components/ordenes-trabajo/OtItemFormModal'
+import { OtItemFormModal, OT_ITEM_TIPO_LABELS, type OtItemFormData } from '@/components/ordenes-trabajo/OtItemFormModal'
 import { formatCurrency } from '@/utils/format'
 import { ApiError } from '@/services/api-client'
 import type { ITableColumn } from '@/types'
@@ -31,6 +31,9 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
 
   const puedeEditar = presupuesto?.puedeEditar ?? puedeEditarPorEstado(ordenEstado)
   const puedeEliminar = presupuesto?.puedeEliminar ?? puedeEliminarPorEstado(ordenEstado)
+  const stockReservadoActivo = (OT_ESTADOS_CON_RESERVA_STOCK as readonly OrdenEstado[]).includes(
+    ordenEstado,
+  )
 
   const [modalOpen, setModalOpen] = useState(false)
   const [defaultTipo, setDefaultTipo] = useState<OtItemTipo>('servicio')
@@ -54,16 +57,25 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
     setModalOpen(true)
   }
 
-  const handleSubmit = async (data: {
-    tipo: OtItemTipo
-    descripcion: string
-    cantidad: number
-    precioUnitario: number
-  }) => {
+  const handleSubmit = async (data: OtItemFormData) => {
+    const payload = {
+      tipo: data.tipo,
+      descripcion: data.descripcion,
+      cantidad: data.cantidad,
+      precioUnitario: data.precioUnitario,
+      productoId: data.productoId || undefined,
+    }
+
     if (editingItem) {
-      await update.mutateAsync({ itemId: editingItem.id, data })
+      await update.mutateAsync({
+        itemId: editingItem.id,
+        data: {
+          ...payload,
+          productoId: data.productoId || null,
+        },
+      })
     } else {
-      await create.mutateAsync(data)
+      await create.mutateAsync(payload)
     }
     await refetch()
   }
@@ -74,7 +86,14 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
       header: 'Tipo',
       render: (item) => OT_ITEM_TIPO_LABELS[item.tipo],
     },
-    { key: 'descripcion', header: 'Descripción' },
+    { key: 'descripcion', header: 'Descripción', render: (item) => (
+        <div>
+          <span>{item.descripcion}</span>
+          {item.productoNombre && (
+            <p className="text-xs text-slate-500">Inventario: {item.productoNombre}</p>
+          )}
+        </div>
+      ) },
     {
       key: 'cantidad',
       header: 'Cant.',
@@ -131,6 +150,11 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
           }
         />
         <CardBody className="space-y-4">
+          {stockReservadoActivo && (
+            <Alert variant="info">
+              Los repuestos y materiales de esta OT tienen stock reservado en depósito.
+            </Alert>
+          )}
           {errorMessage && (
             <Alert variant="error">
               {errorMessage}
@@ -199,6 +223,7 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
         onClose={() => setModalOpen(false)}
         defaultTipo={defaultTipo}
         item={editingItem}
+        ordenEstado={ordenEstado}
         onSubmit={handleSubmit}
         isSubmitting={create.isPending || update.isPending}
       />

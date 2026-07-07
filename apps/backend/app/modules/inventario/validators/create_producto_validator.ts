@@ -8,6 +8,7 @@ export const createProductoValidator = vine.compile(
     precioCompra: vine.number().min(0),
     precioVenta: vine.number().min(0),
     stockMinimo: vine.number().min(0).optional(),
+    stockInicial: vine.number().min(0).optional(),
     unidadMedida: vine.string().trim().maxLength(20).optional(),
     isActive: vine.boolean().optional(),
   })

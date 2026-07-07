@@ -15,6 +15,9 @@ import {
   recalcularTotalesOrden,
 } from '#modules/ordenes_trabajo/services/orden_trabajo_totales_service'
 import { serializeOtItems } from '#shared/ot_item_serializer'
+import { validarStockParaOtItem } from '#shared/stock_util'
+import StockReservaService from '#modules/inventario/services/stock_reserva_service'
+import { OT_ESTADOS_CON_RESERVA_STOCK } from '@gnc/shared-types'
 
 function puedeEditarItems(estado: OrdenEstado): boolean {
   return (OT_ITEM_EDITABLE_ESTADOS as readonly OrdenEstado[]).includes(estado)
@@ -26,6 +29,11 @@ function puedeEliminarItems(estado: OrdenEstado): boolean {
 
 export default class OtItemService {
   private repository = new OtItemRepository()
+  private stockReservaService = new StockReservaService()
+
+  private ordenTieneReservaActiva(estado: OrdenEstado): boolean {
+    return (OT_ESTADOS_CON_RESERVA_STOCK as readonly OrdenEstado[]).includes(estado)
+  }
 
   async getPresupuesto(ordenTrabajoId: string) {
     const orden = await OrdenTrabajo.query()
@@ -57,6 +65,7 @@ export default class OtItemService {
     const descripcion = data.descripcion.trim()
     let productoId: string | null = data.productoId ?? null
     let precioUnitario = Number(data.precioUnitario)
+    const cantidad = Number(data.cantidad)
 
     if (productoId) {
       const producto = await Producto.query()
@@ -73,12 +82,12 @@ export default class OtItemService {
         throw new Error('PRODUCTO_TIPO_INVALIDO')
       }
 
+      await validarStockParaOtItem(producto.id, producto.stockActual, cantidad)
+
       if (!data.precioUnitario) {
         precioUnitario = Number(producto.precioVenta)
       }
     }
-
-    const cantidad = Number(data.cantidad)
     const subtotal = calcularSubtotal(cantidad, precioUnitario)
 
     const item = await this.repository.create({
@@ -95,6 +104,12 @@ export default class OtItemService {
 
     await recalcularTotalesOrden(ordenTrabajoId)
 
+    const itemCompleto = (await this.repository.findByIdForOrden(ordenTrabajoId, item.id))!
+
+    if (this.ordenTieneReservaActiva(orden.estado)) {
+      await this.stockReservaService.sincronizarReservaPorItem(item.id, orden.estado, user.id)
+    }
+
     try {
       await EntityCreated.dispatch({
         userId: user.id,
@@ -106,7 +121,7 @@ export default class OtItemService {
       // La auditoría no debe impedir el alta del ítem.
     }
 
-    return (await this.repository.findByIdForOrden(ordenTrabajoId, item.id))!
+    return itemCompleto
   }
 
   async update(
@@ -141,6 +156,10 @@ export default class OtItemService {
       if (tipo !== 'repuesto' && tipo !== 'material') {
         throw new Error('PRODUCTO_TIPO_INVALIDO')
       }
+
+      await validarStockParaOtItem(producto.id, producto.stockActual, cantidad, {
+        excludeOtItemId: itemId,
+      })
     } else if (tipo === 'repuesto' || tipo === 'material') {
       productoId = null
     }
@@ -160,6 +179,12 @@ export default class OtItemService {
     if (!updated) return null
 
     await recalcularTotalesOrden(ordenTrabajoId)
+
+    if (this.ordenTieneReservaActiva(orden.estado)) {
+      await this.stockReservaService.sincronizarReservaPorItem(itemId, orden.estado, user.id)
+    } else {
+      await this.stockReservaService.liberarReservaPorItem(itemId, 'item_actualizado')
+    }
 
     try {
       await EntityUpdated.dispatch({
@@ -193,6 +218,8 @@ export default class OtItemService {
 
     const deleted = await this.repository.softDelete(itemId)
     if (!deleted) return false
+
+    await this.stockReservaService.liberarReservaPorItem(itemId, 'item_eliminado')
 
     await recalcularTotalesOrden(ordenTrabajoId)
 

@@ -28,8 +28,23 @@ export interface CreateProductoDTO {
   precioCompra: number
   precioVenta: number
   stockMinimo?: number
+  stockInicial?: number
   unidadMedida?: string
   isActive?: boolean
+}
+
+export interface IStockDisponibilidad {
+  stockActual: number
+  stockReservado: number
+  /** Alias de stockReservado para compatibilidad */
+  stockComprometido: number
+  stockDisponible: number
+}
+
+export interface IListMovimientosParams {
+  page?: number
+  perPage?: number
+  productoId?: string
 }
 
 export type UpdateProductoDTO = Partial<CreateProductoDTO>
@@ -40,6 +55,7 @@ export interface IStockMovimiento {
   id: string
   productoId: string
   productoNombre?: string
+  productoCodigo?: string
   tipo: StockMovimientoTipo
   cantidad: number
   motivo?: string

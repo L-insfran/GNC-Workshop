@@ -1,10 +1,13 @@
 import type {
   IProducto,
   ICategoriaProducto,
+  IStockMovimiento,
+  IStockDisponibilidad,
   CreateProductoDTO,
   UpdateProductoDTO,
   MovimientoStockDTO,
   IPaginationParams,
+  IListMovimientosParams,
   CreateCategoriaProductoDTO,
   UpdateCategoriaProductoDTO,
 } from '@gnc/shared-types'
@@ -33,6 +36,16 @@ export const inventarioService = {
 
   movimiento(data: MovimientoStockDTO) {
     return apiPost<IProducto>('/inventario/movimientos', data)
+  },
+
+  listMovimientos(params?: IListMovimientosParams) {
+    return apiGet<IStockMovimiento[]>('/inventario/movimientos', params)
+  },
+
+  getDisponibilidad(productoId: string, excludeOtItemId?: string) {
+    return apiGet<IStockDisponibilidad>(`/inventario/productos/${productoId}/disponibilidad`, {
+      excludeOtItemId,
+    })
   },
 
   alertas() {

@@ -46,7 +46,10 @@ export function useTiposTrabajo() {
 export function useOrdenTrabajoMutations() {
   const queryClient = useQueryClient()
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
+  const invalidate = () => {
+    queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
+    queryClient.invalidateQueries({ queryKey: ['inventario'] })
+  }
 
   const create = useMutation({
     mutationFn: (data: CreateOrdenTrabajoDTO) => ordenTrabajoService.create(data),

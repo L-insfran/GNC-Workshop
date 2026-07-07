@@ -23,6 +23,7 @@ export function useOtItemMutations(ordenTrabajoId: string | undefined) {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: [QUERY_KEY, ordenTrabajoId] })
     queryClient.invalidateQueries({ queryKey: [ORDEN_QUERY_KEY] })
+    queryClient.invalidateQueries({ queryKey: ['inventario'] })
   }
 
   return {

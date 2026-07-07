@@ -22,6 +22,10 @@ const ERROR_MESSAGES: Record<string, [string, string]> = {
     'PRODUCTO_TIPO_INVALIDO',
     'Solo repuestos y materiales pueden vincularse a un producto',
   ],
+  STOCK_INSUFICIENTE_OT_ITEM: [
+    'STOCK_INSUFICIENTE_OT_ITEM',
+    'Stock insuficiente para la cantidad solicitada (considerando OTs activas)',
+  ],
   DESCRIPCION_REQUERIDA: ['DESCRIPCION_REQUERIDA', 'La descripción es obligatoria'],
 }
 

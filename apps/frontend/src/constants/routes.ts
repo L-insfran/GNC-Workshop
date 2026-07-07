@@ -17,8 +17,17 @@ export const ROUTES = {
   ORDEN_TRABAJO_EDIT: (id: string) => `/ordenes-trabajo/${id}/editar`,
   INVENTARIO: '/inventario',
   PRODUCTO_NEW: '/inventario/nuevo',
+  PRODUCTO_DETAIL: (id: string) => `/inventario/${id}`,
   PRODUCTO_EDIT: (id: string) => `/inventario/${id}/editar`,
   MOVIMIENTO_STOCK: '/inventario/movimiento',
+  MOVIMIENTO_STOCK_PRODUCTO: (
+    productoId: string,
+    params?: { tipo?: 'ingreso' | 'egreso' | 'ajuste' },
+  ) => {
+    const search = new URLSearchParams({ productoId })
+    if (params?.tipo) search.set('tipo', params.tipo)
+    return `/inventario/movimiento?${search.toString()}`
+  },
   CAJA: '/caja',
   CAJA_MOVIMIENTO_NEW: '/caja/movimiento',
   FACTURACION: '/facturacion',

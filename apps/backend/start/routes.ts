@@ -64,11 +64,16 @@ router
 
         // Inventario
         router.get('inventario/productos', '#modules/inventario/controllers/inventario_controller.index')
+        router.get(
+          'inventario/productos/:id/disponibilidad',
+          '#modules/inventario/controllers/inventario_controller.disponibilidad'
+        )
         router.get('inventario/productos/:id', '#modules/inventario/controllers/inventario_controller.show')
         router.post('inventario/productos', '#modules/inventario/controllers/inventario_controller.store')
         router.put('inventario/productos/:id', '#modules/inventario/controllers/inventario_controller.update')
         router.delete('inventario/productos/:id', '#modules/inventario/controllers/inventario_controller.destroy')
         router.post('inventario/movimientos', '#modules/inventario/controllers/inventario_controller.movimiento')
+        router.get('inventario/movimientos', '#modules/inventario/controllers/inventario_controller.movimientos')
         router.get('inventario/alertas', '#modules/inventario/controllers/inventario_controller.alertas')
         router.get('inventario/categorias', '#modules/inventario/controllers/inventario_controller.categorias')
         router

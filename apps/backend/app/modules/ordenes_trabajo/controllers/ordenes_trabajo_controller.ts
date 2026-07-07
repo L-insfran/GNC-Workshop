@@ -191,6 +191,10 @@ export default class OrdenesTrabajoController {
             'SIN_MECANICOS_REGISTRADOS',
             'No hay mecánicos registrados en el sistema. Registre al menos uno en Configuración > Usuarios',
           ],
+          STOCK_INSUFICIENTE_RESERVA: [
+            'STOCK_INSUFICIENTE_RESERVA',
+            'No hay stock disponible para reservar los repuestos de esta OT. Verifique el inventario.',
+          ],
         }
         const mapped = messages[error.message]
         if (mapped) {

@@ -15,6 +15,13 @@ export const OT_ITEM_DELETABLE_ESTADOS = [
   'en_espera_repuesto',
 ] as const
 
+/** OT en estos estados mantiene reserva formal de stock en depósito */
+export const OT_ESTADOS_CON_RESERVA_STOCK = [
+  'en_taller',
+  'en_espera_repuesto',
+  'control_calidad',
+] as const
+
 export interface IOtItem {
   id: string
   ordenTrabajoId: string

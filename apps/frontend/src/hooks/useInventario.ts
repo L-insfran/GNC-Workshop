@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type {
   CreateProductoDTO,
   IPaginationParams,
+  IListMovimientosParams,
   MovimientoStockDTO,
   UpdateProductoDTO,
   CreateCategoriaProductoDTO,
@@ -53,6 +54,29 @@ export function useAlertasStock() {
   })
 }
 
+export function useMovimientosStock(params?: IListMovimientosParams) {
+  return useQuery({
+    queryKey: [QUERY_KEY, 'movimientos', params],
+    queryFn: async () => {
+      const response = await inventarioService.listMovimientos(params)
+      return { data: response.data ?? [], meta: response.meta }
+    },
+    enabled: Boolean(params?.productoId),
+  })
+}
+
+export function useStockDisponibilidad(productoId: string | undefined, excludeOtItemId?: string) {
+  return useQuery({
+    queryKey: [QUERY_KEY, 'disponibilidad', productoId, excludeOtItemId],
+    queryFn: async () => {
+      if (!productoId) throw new Error('ID requerido')
+      const response = await inventarioService.getDisponibilidad(productoId, excludeOtItemId)
+      return response.data
+    },
+    enabled: Boolean(productoId),
+  })
+}
+
 export function useInventarioMutations() {
   const queryClient = useQueryClient()
   const invalidate = () => queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
@@ -60,7 +84,10 @@ export function useInventarioMutations() {
   return {
     create: useMutation({
       mutationFn: (data: CreateProductoDTO) => inventarioService.create(data),
-      onSuccess: invalidate,
+      onSuccess: () => {
+        invalidate()
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEY, 'movimientos'] })
+      },
     }),
     update: useMutation({
       mutationFn: ({ id, data }: { id: string; data: UpdateProductoDTO }) =>
@@ -73,7 +100,11 @@ export function useInventarioMutations() {
     }),
     movimiento: useMutation({
       mutationFn: (data: MovimientoStockDTO) => inventarioService.movimiento(data),
-      onSuccess: invalidate,
+      onSuccess: () => {
+        invalidate()
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEY, 'disponibilidad'] })
+        queryClient.invalidateQueries({ queryKey: [QUERY_KEY, 'movimientos'] })
+      },
     }),
   }
 }
