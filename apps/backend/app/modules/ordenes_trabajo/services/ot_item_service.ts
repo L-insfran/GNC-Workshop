@@ -15,6 +15,7 @@ import {
   recalcularTotalesOrden,
 } from '#modules/ordenes_trabajo/services/orden_trabajo_totales_service'
 import { serializeOtItems } from '#shared/ot_item_serializer'
+import { calcularMargenOtItems } from '#shared/ot_margen_util'
 import { validarStockParaOtItem } from '#shared/stock_util'
 import StockReservaService from '#modules/inventario/services/stock_reserva_service'
 import { OT_ESTADOS_CON_RESERVA_STOCK } from '@gnc/shared-types'
@@ -54,6 +55,7 @@ export default class OtItemService {
       totalFinal,
       ivaEstimado,
       totalConIva: Number((totalFinal + ivaEstimado).toFixed(2)),
+      margen: calcularMargenOtItems(items),
       puedeEditar: puedeEditarItems(orden.estado),
       puedeEliminar: puedeEliminarItems(orden.estado),
     }

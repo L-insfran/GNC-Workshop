@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Plus, Eye, Pencil, Trash2 } from 'lucide-react'
 import { useOrdenesTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
 import { useMecanicos } from '@/hooks/useMecanicos'
+import { useAuth } from '@/hooks/useAuth'
+import { MODULE_ROLES } from '@/constants/roles'
 import { ROUTES } from '@/constants/routes'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
@@ -11,7 +13,7 @@ import { Table, TablePagination, TableToolbar } from '@/components/ui/Table'
 import { Modal } from '@/components/ui/Modal'
 import { Alert } from '@/components/ui/Alert'
 import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
-import { formatDate, ORDEN_ESTADO_LABELS, ORDEN_PRIORIDAD_LABELS, ORDEN_COBRO_LABELS, getOrdenCobroBadgeVariant } from '@/utils/format'
+import { formatDate, ORDEN_ESTADO_LABELS, ORDEN_PRIORIDAD_LABELS, ORDEN_COBRO_LABELS, getOrdenCobroBadgeVariant, formatCurrency, formatPercent, getMargenBadgeVariant } from '@/utils/format'
 import type { IOrdenTrabajo, ITableColumn } from '@/types'
 
 export function OrdenesTrabajoPage() {
@@ -23,6 +25,8 @@ export function OrdenesTrabajoPage() {
   const { data, isLoading, error } = useOrdenesTrabajo({ page, perPage: 10, search: search || undefined })
   const { hayMecanicos } = useMecanicos()
   const { remove } = useOrdenTrabajoMutations()
+  const { checkRole } = useAuth()
+  const puedeVerMargen = checkRole(MODULE_ROLES.margenOt)
 
   const columns: ITableColumn<IOrdenTrabajo>[] = [
     { key: 'numero', header: 'N° OT' },
@@ -65,6 +69,28 @@ export function OrdenesTrabajoPage() {
         )
       },
     },
+    ...(puedeVerMargen
+      ? [
+          {
+            key: 'resumenMargen',
+            header: 'Margen',
+            render: (item: IOrdenTrabajo) => {
+              const resumen = item.resumenMargen
+              if (!resumen || resumen.ingresoTotal <= 0) {
+                return <span className="text-sm text-slate-400">—</span>
+              }
+              return (
+                <div className="space-y-0.5">
+                  <Badge variant={getMargenBadgeVariant(resumen.margenPorcentaje)}>
+                    {formatPercent(resumen.margenPorcentaje)}
+                  </Badge>
+                  <p className="text-xs text-slate-500">{formatCurrency(resumen.margenBruto)}</p>
+                </div>
+              )
+            },
+          } satisfies ITableColumn<IOrdenTrabajo>,
+        ]
+      : []),
     {
       key: 'prioridad',
       header: 'Prioridad',

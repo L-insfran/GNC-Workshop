@@ -1,4 +1,5 @@
 import type { IOrdenCobroResumen } from './facturacion'
+import type { IOrdenMargenResumen } from './ot-items'
 
 export type OrdenEstado =
   | 'borrador'
@@ -54,6 +55,7 @@ export interface IOrdenTrabajo {
   totalEstimado?: number
   totalFinal?: number
   resumenCobro?: IOrdenCobroResumen
+  resumenMargen?: IOrdenMargenResumen
   createdAt: string
   updatedAt: string
 }

@@ -31,6 +31,20 @@ export function formatCurrency(value: number): string {
   return currencyFormatter.format(value)
 }
 
+export function formatPercent(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '—'
+  return `${value.toLocaleString('es-AR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`
+}
+
+export function getMargenBadgeVariant(
+  margenPorcentaje: number | null,
+): 'success' | 'warning' | 'danger' | 'neutral' {
+  if (margenPorcentaje === null) return 'neutral'
+  if (margenPorcentaje >= 40) return 'success'
+  if (margenPorcentaje >= 20) return 'warning'
+  return 'danger'
+}
+
 export function formatDate(value: string | Date): string {
   const date = typeof value === 'string' ? new Date(value) : value
   return dateFormatter.format(date)

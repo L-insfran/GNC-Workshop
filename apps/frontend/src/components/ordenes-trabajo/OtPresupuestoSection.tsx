@@ -3,12 +3,14 @@ import { Pencil, Plus, Trash2 } from 'lucide-react'
 import type { IOtItem, OrdenEstado, OtItemTipo } from '@gnc/shared-types'
 import { OT_ESTADOS_CON_RESERVA_STOCK, OT_ITEM_DELETABLE_ESTADOS, OT_ITEM_EDITABLE_ESTADOS } from '@gnc/shared-types'
 import { useOtItemMutations, useOtPresupuesto } from '@/hooks/useOtItems'
+import { useAuth } from '@/hooks/useAuth'
+import { MODULE_ROLES } from '@/constants/roles'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Table } from '@/components/ui/Table'
 import { Alert } from '@/components/ui/Alert'
 import { OtItemFormModal, OT_ITEM_TIPO_LABELS, type OtItemFormData } from '@/components/ordenes-trabajo/OtItemFormModal'
-import { formatCurrency } from '@/utils/format'
+import { formatCurrency, formatPercent } from '@/utils/format'
 import { ApiError } from '@/services/api-client'
 import type { ITableColumn } from '@/types'
 
@@ -28,6 +30,8 @@ function puedeEliminarPorEstado(estado: OrdenEstado): boolean {
 export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupuestoSectionProps) {
   const { data: presupuesto, isLoading, error, refetch } = useOtPresupuesto(ordenTrabajoId)
   const { create, update, remove } = useOtItemMutations(ordenTrabajoId)
+  const { checkRole } = useAuth()
+  const puedeVerMargen = checkRole(MODULE_ROLES.margenOt)
 
   const puedeEditar = presupuesto?.puedeEditar ?? puedeEditarPorEstado(ordenEstado)
   const puedeEliminar = presupuesto?.puedeEliminar ?? puedeEliminarPorEstado(ordenEstado)
@@ -109,6 +113,20 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
       header: 'Subtotal',
       render: (item) => formatCurrency(item.subtotal),
     },
+    ...(puedeVerMargen
+      ? [
+          {
+            key: 'margenSubtotal',
+            header: 'Margen',
+            render: (item: IOtItem) =>
+              item.margenSubtotal === null || item.margenSubtotal === undefined ? (
+                <span className="text-sm text-slate-400">—</span>
+              ) : (
+                formatCurrency(item.margenSubtotal)
+              ),
+          } satisfies ITableColumn<IOtItem>,
+        ]
+      : []),
     {
       key: 'actions',
       header: '',
@@ -207,6 +225,45 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
                   </dd>
                 </div>
               </dl>
+
+              {puedeVerMargen && presupuesto.margen && (
+                <div className="mt-4 border-t border-slate-200 pt-4">
+                  <p className="mb-2 text-sm font-medium text-slate-700">Margen estimado</p>
+                  <dl className="grid gap-2 sm:grid-cols-2">
+                    <div className="flex justify-between sm:block">
+                      <dt className="text-sm text-slate-500">Ingreso servicios</dt>
+                      <dd className="text-sm text-slate-900">
+                        {formatCurrency(presupuesto.margen.ingresoServicios)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between sm:block">
+                      <dt className="text-sm text-slate-500">Ingreso repuestos</dt>
+                      <dd className="text-sm text-slate-900">
+                        {formatCurrency(presupuesto.margen.ingresoRepuestos)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between sm:block">
+                      <dt className="text-sm text-slate-500">Costo repuestos</dt>
+                      <dd className="text-sm text-slate-900">
+                        {formatCurrency(presupuesto.margen.costoRepuestos)}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between sm:block">
+                      <dt className="text-sm font-medium text-slate-700">Margen bruto</dt>
+                      <dd className="text-sm font-semibold text-emerald-700">
+                        {formatCurrency(presupuesto.margen.margenBruto)}{' '}
+                        <span className="font-normal text-slate-500">
+                          ({formatPercent(presupuesto.margen.margenPorcentaje)})
+                        </span>
+                      </dd>
+                    </div>
+                  </dl>
+                  <p className="mt-2 text-xs text-slate-500">
+                    El costo se calcula con el precio de compra del inventario. Repuestos sin
+                    producto vinculado no aportan costo conocido.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 

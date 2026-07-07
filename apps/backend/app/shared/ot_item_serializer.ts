@@ -1,4 +1,5 @@
 import type OtItem from '#models/ot_item'
+import { calcularMargenItem } from '#shared/ot_margen_util'
 
 export function serializeOtItem(item: OtItem) {
   return {
@@ -11,6 +12,7 @@ export function serializeOtItem(item: OtItem) {
     cantidad: Number(item.cantidad),
     precioUnitario: Number(item.precioUnitario),
     subtotal: Number(item.subtotal),
+    margenSubtotal: calcularMargenItem(item),
     esEstimado: item.esEstimado,
     createdAt: item.createdAt.toISO()!,
     updatedAt: item.updatedAt.toISO()!,

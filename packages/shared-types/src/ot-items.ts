@@ -32,9 +32,26 @@ export interface IOtItem {
   cantidad: number
   precioUnitario: number
   subtotal: number
+  margenSubtotal?: number | null
   esEstimado: boolean
   createdAt: string
   updatedAt: string
+}
+
+export interface IOtMargenResumen {
+  ingresoServicios: number
+  ingresoRepuestos: number
+  ingresoTotal: number
+  costoRepuestos: number
+  margenBruto: number
+  margenPorcentaje: number | null
+}
+
+export interface IOrdenMargenResumen {
+  ingresoTotal: number
+  costoRepuestos: number
+  margenBruto: number
+  margenPorcentaje: number | null
 }
 
 export interface IOtPresupuestoResumen {
@@ -43,6 +60,7 @@ export interface IOtPresupuestoResumen {
   totalFinal: number
   ivaEstimado: number
   totalConIva: number
+  margen: IOtMargenResumen
   puedeEditar: boolean
   puedeEliminar: boolean
 }
