@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Eye, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Eye, Pencil, Trash2, FileText } from 'lucide-react'
 import { useOrdenesTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
 import { useMecanicos } from '@/hooks/useMecanicos'
+import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/constants/routes'
+import { MODULE_ROLES } from '@/constants/roles'
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge, getOrdenEstadoBadgeVariant } from '@/components/ui/Badge'
@@ -16,6 +18,7 @@ import type { IOrdenTrabajo, ITableColumn } from '@/types'
 
 export function OrdenesTrabajoPage() {
   const navigate = useNavigate()
+  const { checkRole } = useAuth()
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<string | null>(null)
@@ -68,6 +71,17 @@ export function OrdenesTrabajoPage() {
           <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.ORDEN_TRABAJO_DETAIL(item.id))}>
             <Eye className="h-4 w-4" />
           </Button>
+          {(item.estado === 'finalizada' || item.estado === 'entregada') &&
+            checkRole(MODULE_ROLES.facturacion) && (
+              <Button
+                variant="ghost"
+                size="sm"
+                title="Generar factura"
+                onClick={() => navigate(ROUTES.FACTURA_NEW_FROM_OT(item.id))}
+              >
+                <FileText className="h-4 w-4 text-brand-600" />
+              </Button>
+            )}
           <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.ORDEN_TRABAJO_EDIT(item.id))}>
             <Pencil className="h-4 w-4" />
           </Button>

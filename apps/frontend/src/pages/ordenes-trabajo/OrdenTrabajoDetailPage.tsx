@@ -14,6 +14,7 @@ import { Alert } from '@/components/ui/Alert'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
 import { OtPresupuestoSection } from '@/components/ordenes-trabajo/OtPresupuestoSection'
+import { OtFacturacionSection } from '@/components/ordenes-trabajo/OtFacturacionSection'
 import { ApiError } from '@/services/api-client'
 import {
   formatDateOnly,
@@ -190,6 +191,12 @@ export function OrdenTrabajoDetailPage() {
       </Card>
 
       <OtPresupuestoSection ordenTrabajoId={orden.id} ordenEstado={orden.estado} />
+
+      <OtFacturacionSection
+        ordenId={orden.id}
+        ordenNumero={orden.numero}
+        ordenEstado={orden.estado}
+      />
 
       <Card>
         <CardHeader title="Cambiar estado" description="Actualizar el flujo de la orden de trabajo" />
