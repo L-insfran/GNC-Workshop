@@ -80,6 +80,20 @@ export default class CajaController {
           ApiResponse.error('FACTURA_NO_EMITIDA', 'Solo se puede cobrar una factura emitida')
         )
       }
+      if (
+        'code' in error &&
+        (error as { code?: string }).code === '23505' &&
+        String((error as { constraint?: string }).constraint ?? '').includes(
+          'caja_movimientos_factura_ingreso'
+        )
+      ) {
+        return response.badRequest(
+          ApiResponse.error(
+            'COBRO_UNICO_LEGACY',
+            'La base de datos no permite cobros parciales. Ejecutá: npm run migration:run en el backend.'
+          )
+        )
+      }
     }
     throw error
   }
