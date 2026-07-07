@@ -17,6 +17,7 @@ import { formatPatente } from '@/utils/format'
 import { ApiError } from '@/services/api-client'
 
 const cilindroSchema = z.object({
+  id: z.string().uuid().optional(),
   numeroSerie: z.string().min(1, 'Requerido'),
   capacidadM3: z.coerce.number().positive('Debe ser positivo'),
   marca: z.string().min(1, 'Requerido'),
@@ -83,6 +84,7 @@ export function EquipoGncFormPage() {
         certificadorCrpc: equipo.certificadorCrpc ?? '',
         notas: equipo.notas ?? '',
         cilindros: (equipo.cilindros ?? []).map((c) => ({
+          id: c.id,
           numeroSerie: c.numeroSerie,
           capacidadM3: c.capacidadM3,
           marca: c.marca,
@@ -180,6 +182,12 @@ export function EquipoGncFormPage() {
                   Agregar cilindro
                 </Button>
               </div>
+
+              {isEditing && (
+                <p className="mb-3 text-xs text-slate-500">
+                  Si quitás un cilindro, guardá los cambios para que se archive en el sistema.
+                </p>
+              )}
 
               {errors.cilindros?.message && (
                 <p className="mb-2 text-xs text-red-600">{errors.cilindros.message}</p>

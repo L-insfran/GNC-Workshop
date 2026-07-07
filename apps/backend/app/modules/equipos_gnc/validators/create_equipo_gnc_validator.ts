@@ -1,13 +1,5 @@
 import vine from '@vinejs/vine'
-
-const cilindroSchema = vine.object({
-  numeroSerie: vine.string().trim().minLength(1).maxLength(50),
-  capacidadM3: vine.number().min(0.1).max(200),
-  marca: vine.string().trim().minLength(1).maxLength(100),
-  fechaFabricacion: vine.string().optional(),
-  fechaUltimaPh: vine.string(),
-  posicion: vine.number().min(1).max(4),
-})
+import { cilindroInputSchema } from '#modules/equipos_gnc/validators/cilindro_schema'
 
 export const createEquipoGncValidator = vine.compile(
   vine.object({
@@ -18,6 +10,6 @@ export const createEquipoGncValidator = vine.compile(
     fechaInstalacion: vine.string(),
     certificadorCrpc: vine.string().trim().maxLength(100).optional(),
     notas: vine.string().optional(),
-    cilindros: vine.array(cilindroSchema).minLength(1).maxLength(4),
+    cilindros: vine.array(cilindroInputSchema).minLength(1).maxLength(4),
   })
 )

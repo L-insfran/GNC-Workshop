@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { CreateEquipoGncDTO, IPaginationParams } from '@gnc/shared-types'
+import type { CreateEquipoGncDTO, UpdateEquipoGncDTO, IPaginationParams } from '@gnc/shared-types'
 import { equipoGncService } from '@/services/equipoGncService'
 
 const QUERY_KEY = 'equipos-gnc'
@@ -40,7 +40,7 @@ export function useEquipoGncMutations() {
   })
 
   const update = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<CreateEquipoGncDTO> }) =>
+    mutationFn: ({ id, data }: { id: string; data: UpdateEquipoGncDTO }) =>
       equipoGncService.update(id, data),
     onSuccess: invalidate,
   })

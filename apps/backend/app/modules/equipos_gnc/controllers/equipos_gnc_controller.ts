@@ -1,5 +1,4 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import { DateTime } from 'luxon'
 import type { IPaginationParams } from '@gnc/shared-types'
 import { ApiResponse } from '#shared/api_response'
 import EquipoGncService from '#modules/equipos_gnc/services/equipo_gnc_service'
@@ -45,36 +44,7 @@ export default class EquiposGncController {
     const dto = await request.validateUsing(updateEquipoGncValidator)
 
     try {
-      const updateData: Record<string, unknown> = {}
-
-      if (dto.numeroSerieEquipo !== undefined) {
-        updateData.numeroSerieEquipo = dto.numeroSerieEquipo
-      }
-      if (dto.marcaRegulador !== undefined) {
-        updateData.marcaRegulador = dto.marcaRegulador
-      }
-      if (dto.modeloRegulador !== undefined) {
-        updateData.modeloRegulador = dto.modeloRegulador
-      }
-      if (dto.certificadorCrpc !== undefined) {
-        updateData.certificadorCrpc = dto.certificadorCrpc
-      }
-      if (dto.notas !== undefined) {
-        updateData.notas = dto.notas
-      }
-      if (dto.fechaInstalacion) {
-        const fechaInstalacion = DateTime.fromISO(dto.fechaInstalacion, { zone: 'utc' }).startOf(
-          'day'
-        )
-        if (!fechaInstalacion.isValid) {
-          throw new Error('FECHA_INVALIDA:fechaInstalacion')
-        }
-        updateData.fechaInstalacion = fechaInstalacion
-        updateData.fechaVencimientoOblea =
-          EquipoGncService.calcularVencimientoOblea(fechaInstalacion)
-      }
-
-      const equipo = await equipoGncService.update(params.id, updateData, auth.user!)
+      const equipo = await equipoGncService.update(params.id, dto, auth.user!)
 
       if (!equipo) {
         return response.notFound(ApiResponse.error('NOT_FOUND', 'Equipo GNC no encontrado'))
@@ -112,11 +82,27 @@ export default class EquiposGncController {
           ApiResponse.error('CILINDROS_REQUERIDOS', 'Debés agregar al menos un cilindro')
         )
       }
+      if (error.message === 'SERIE_EQUIPO_DUPLICADA') {
+        return response.conflict(
+          ApiResponse.error(
+            'SERIE_EQUIPO_DUPLICADA',
+            'Ya existe un equipo activo con ese número de serie'
+          )
+        )
+      }
+      if (error.message === 'SERIE_CILINDRO_DUPLICADA') {
+        return response.conflict(
+          ApiResponse.error(
+            'SERIE_CILINDRO_DUPLICADA',
+            'Ya existe un cilindro activo con ese número de serie'
+          )
+        )
+      }
       if (error.message === 'SERIE_DUPLICADA') {
         return response.conflict(
           ApiResponse.error(
             'SERIE_DUPLICADA',
-            'Ya existe un equipo o cilindro con ese número de serie'
+            'Ya existe un equipo o cilindro activo con ese número de serie'
           )
         )
       }
@@ -126,7 +112,6 @@ export default class EquiposGncController {
         )
       }
 
-      // En desarrollo devolvemos el mensaje real para diagnosticar.
       return response.internalServerError(
         ApiResponse.error('INTERNAL_ERROR', error.message || 'Error interno al guardar el equipo')
       )

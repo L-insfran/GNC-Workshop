@@ -114,6 +114,9 @@ export function EquiposGncPage() {
       </Card>
 
       <Modal isOpen={Boolean(deleteId)} onClose={() => setDeleteId(null)} title="Eliminar equipo GNC">
+        <p className="mb-4 text-sm text-slate-600">
+          El equipo y sus cilindros se archivarán. Podrás reutilizar los números de serie en registros nuevos.
+        </p>
         <div className="flex justify-end gap-2">
           <Button variant="outline" onClick={() => setDeleteId(null)}>
             Cancelar

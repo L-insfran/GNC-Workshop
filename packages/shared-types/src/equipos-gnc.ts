@@ -49,3 +49,17 @@ export interface CreateCilindroDTO {
   fechaUltimaPh: string
   posicion: number
 }
+
+export interface UpdateCilindroDTO extends CreateCilindroDTO {
+  id?: string
+}
+
+export interface UpdateEquipoGncDTO {
+  numeroSerieEquipo?: string
+  marcaRegulador?: string
+  modeloRegulador?: string
+  fechaInstalacion?: string
+  certificadorCrpc?: string
+  notas?: string
+  cilindros?: UpdateCilindroDTO[]
+}

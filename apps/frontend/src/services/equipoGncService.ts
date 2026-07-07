@@ -1,6 +1,7 @@
 import type {
   IEquipoGnc,
   CreateEquipoGncDTO,
+  UpdateEquipoGncDTO,
   IPaginationParams,
 } from '@gnc/shared-types'
 import { apiDelete, apiGet, apiPost, apiPut } from '@/services/api-client'
@@ -18,7 +19,7 @@ export const equipoGncService = {
     return apiPost<IEquipoGnc>('/equipos-gnc', data)
   },
 
-  update(id: string, data: Partial<CreateEquipoGncDTO>) {
+  update(id: string, data: UpdateEquipoGncDTO) {
     return apiPut<IEquipoGnc>(`/equipos-gnc/${id}`, data)
   },
 
