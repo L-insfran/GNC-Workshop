@@ -78,6 +78,11 @@ export default class VehiculosController {
           ApiResponse.error('MODELO_INVALIDO', 'El modelo no corresponde a la marca seleccionada')
         )
       }
+      if (error.message === 'VEHICULO_NO_PERSISTIDO') {
+        return response.internalServerError(
+          ApiResponse.error('VEHICULO_NO_PERSISTIDO', 'No se pudo recuperar el vehículo creado')
+        )
+      }
     }
     throw error
   }

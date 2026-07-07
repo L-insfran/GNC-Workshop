@@ -3,7 +3,7 @@ import vine from '@vinejs/vine'
 export const createVehiculoValidator = vine.compile(
   vine.object({
     clienteId: vine.string().uuid(),
-    patente: vine.string().minLength(5).maxLength(10),
+    patente: vine.string().trim().minLength(5).maxLength(10),
     marcaId: vine.string().uuid(),
     modeloId: vine.string().uuid(),
     anio: vine.number().min(1900).max(2100),

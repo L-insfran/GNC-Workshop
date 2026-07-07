@@ -4,6 +4,7 @@ import type User from '#models/user'
 import type Vehiculo from '#models/vehiculo'
 import VehiculoModelo from '#models/vehiculo_modelo'
 import { BaseService } from '#shared/base_service'
+import { isPgUniqueViolation } from '#shared/db_error_util'
 import VehiculoRepository from '#modules/vehiculos/repositories/vehiculo_repository'
 
 export default class VehiculoService extends BaseService<Vehiculo> {
@@ -19,7 +20,7 @@ export default class VehiculoService extends BaseService<Vehiculo> {
   }
 
   async create(data: CreateVehicleDTO, user: User): Promise<Vehiculo> {
-    const patente = data.patente.toUpperCase()
+    const patente = data.patente.trim().toUpperCase()
     const existing = await this.repository.findByPatente(patente)
     if (existing) {
       throw new Error('PATENTE_DUPLICADA')
@@ -27,16 +28,28 @@ export default class VehiculoService extends BaseService<Vehiculo> {
 
     await this.assertModeloPerteneceAMarca(data.marcaId, data.modeloId)
 
-    const vehiculo = await super.create(
-      {
-        ...data,
-        patente,
-        isActive: true,
-      },
-      user
-    )
+    try {
+      const vehiculo = await super.create(
+        {
+          ...data,
+          patente,
+          isActive: true,
+        },
+        user
+      )
 
-    return (await this.repository.findByIdWithRelations(vehiculo.id))!
+      const withRelations = await this.repository.findByIdWithRelations(vehiculo.id)
+      if (!withRelations) {
+        throw new Error('VEHICULO_NO_PERSISTIDO')
+      }
+
+      return withRelations
+    } catch (error) {
+      if (isPgUniqueViolation(error)) {
+        throw new Error('PATENTE_DUPLICADA')
+      }
+      throw error
+    }
   }
 
   async update(id: string, data: UpdateVehicleDTO, user: User): Promise<Vehiculo | null> {
@@ -60,10 +73,17 @@ export default class VehiculoService extends BaseService<Vehiculo> {
       await this.assertModeloPerteneceAMarca(marcaId, modeloId)
     }
 
-    const updated = await super.update(id, updateData, user)
-    if (!updated) return null
+    try {
+      const updated = await super.update(id, updateData, user)
+      if (!updated) return null
 
-    return this.repository.findByIdWithRelations(updated.id)
+      return this.repository.findByIdWithRelations(updated.id)
+    } catch (error) {
+      if (isPgUniqueViolation(error)) {
+        throw new Error('PATENTE_DUPLICADA')
+      }
+      throw error
+    }
   }
 
   private async assertModeloPerteneceAMarca(marcaId: string, modeloId: string): Promise<void> {

@@ -118,6 +118,7 @@ export function VehiculoFormPage() {
     try {
       const payload = {
         ...data,
+        patente: data.patente.trim().toUpperCase(),
         color: data.color || undefined,
         numeroMotor: data.numeroMotor || undefined,
         numeroChasis: data.numeroChasis || undefined,

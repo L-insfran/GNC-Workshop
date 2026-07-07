@@ -37,7 +37,6 @@ export default class VehiculoRepository extends BaseRepository<Vehiculo> {
     return Vehiculo.query()
       .where('patente', patente.toUpperCase())
       .whereNull('deleted_at')
-      .where('is_active', true)
       .first()
   }
 }

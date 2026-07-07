@@ -5,7 +5,7 @@ import vine from '@vinejs/vine'
  */
 export const updateVehiculoValidator = vine.compile(
   vine.object({
-    patente: vine.string().minLength(5).maxLength(10).optional(),
+    patente: vine.string().trim().minLength(5).maxLength(10).optional(),
     marcaId: vine.string().uuid().optional(),
     modeloId: vine.string().uuid().optional(),
     anio: vine.number().min(1900).max(2100).optional(),
