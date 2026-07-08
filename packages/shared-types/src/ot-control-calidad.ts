@@ -24,15 +24,12 @@ export interface UpsertOtControlCalidadDTO {
   observaciones?: string
 }
 
-export const OT_CONTROL_CALIDAD_CHECKS = [
-  { key: 'sinFugas', label: 'Sin fugas detectadas' },
-  { key: 'presionReguladorOk', label: 'Presión de regulador dentro de rango' },
-  { key: 'valvulasSeguridadOk', label: 'Válvulas de seguridad operativas' },
-  { key: 'estanqueidadOk', label: 'Prueba de estanqueidad aprobada' },
-  { key: 'documentacionCompleta', label: 'Documentación y etiquetas en orden' },
-] as const
-
-export type OtControlCalidadCheckKey = (typeof OT_CONTROL_CALIDAD_CHECKS)[number]['key']
+export type OtControlCalidadCheckKey =
+  | 'sinFugas'
+  | 'presionReguladorOk'
+  | 'valvulasSeguridadOk'
+  | 'estanqueidadOk'
+  | 'documentacionCompleta'
 
 export function isControlCalidadCompleto(data: Pick<
   IOtControlCalidad,

@@ -4,10 +4,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { CheckCircle2 } from 'lucide-react'
 import {
-  OT_CONTROL_CALIDAD_CHECKS,
   type OrdenEstado,
   type OtControlCalidadCheckKey,
 } from '@gnc/shared-types'
+import { OT_CONTROL_CALIDAD_CHECKS } from '@/constants/ot-control-calidad'
 import { useOtControlCalidad, useOtControlCalidadMutations } from '@/hooks/useOtControlCalidad'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
