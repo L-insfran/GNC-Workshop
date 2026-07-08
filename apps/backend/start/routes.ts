@@ -34,6 +34,14 @@ router
         router.delete('ordenes-trabajo/:id/items/:itemId', '#modules/ordenes_trabajo/controllers/ot_items_controller.destroy')
         router.resource('ordenes-trabajo', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller').apiOnly()
         router.patch('ordenes-trabajo/:id/estado', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.updateEstado')
+        router.get(
+          'ordenes-trabajo/:id/control-calidad',
+          '#modules/ordenes_trabajo/controllers/ot_control_calidad_controller.show'
+        )
+        router.put(
+          'ordenes-trabajo/:id/control-calidad',
+          '#modules/ordenes_trabajo/controllers/ot_control_calidad_controller.upsert'
+        )
         router.get('tipos-trabajo', '#modules/ordenes_trabajo/controllers/tipos_trabajo_controller.index')
 
         router.get(

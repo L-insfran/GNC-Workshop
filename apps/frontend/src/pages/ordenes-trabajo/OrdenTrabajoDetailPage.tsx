@@ -12,7 +12,9 @@ import { Alert } from '@/components/ui/Alert'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
 import { OtPresupuestoSection } from '@/components/ordenes-trabajo/OtPresupuestoSection'
+import { OtControlCalidadSection } from '@/components/ordenes-trabajo/OtControlCalidadSection'
 import { OtFacturacionSection } from '@/components/ordenes-trabajo/OtFacturacionSection'
+import { useOtControlCalidad } from '@/hooks/useOtControlCalidad'
 import { ApiError } from '@/services/api-client'
 import {
   formatDateOnly,
@@ -28,6 +30,10 @@ export function OrdenTrabajoDetailPage() {
   const { data: orden, isLoading, error } = useOrdenTrabajo(id)
   const { mecanicos, hayMecanicos } = useMecanicos()
   const { updateEstado } = useOrdenTrabajoMutations()
+  const { data: controlCalidad } = useOtControlCalidad(
+    id,
+    orden?.estado === 'control_calidad',
+  )
   const [nuevoEstado, setNuevoEstado] = useState<OrdenEstado | ''>('')
   const [mecanicoAsignadoId, setMecanicoAsignadoId] = useState('')
   const [estadoError, setEstadoError] = useState<string | null>(null)
@@ -60,6 +66,9 @@ export function OrdenTrabajoDetailPage() {
   }))
   const puedePasarATaller =
     !requiereMecanico || (hayMecanicos && Boolean(mecanicoResuelto))
+  const requiereChecklistAprobado =
+    nuevoEstado === 'finalizada' && orden.estado === 'control_calidad'
+  const puedeFinalizar = !requiereChecklistAprobado || Boolean(controlCalidad?.completo)
 
   const handleEstadoChange = async () => {
     if (!nuevoEstado || !id) return
@@ -67,6 +76,11 @@ export function OrdenTrabajoDetailPage() {
 
     if (nuevoEstado === 'en_taller' && !mecanicoResuelto) {
       setEstadoError('Debe seleccionar un mecánico para pasar la OT a taller.')
+      return
+    }
+
+    if (nuevoEstado === 'finalizada' && orden.estado === 'control_calidad' && !controlCalidad?.completo) {
+      setEstadoError('Completá y guardá el checklist de control de calidad antes de finalizar.')
       return
     }
 
@@ -177,6 +191,8 @@ export function OrdenTrabajoDetailPage() {
 
       <OtPresupuestoSection ordenTrabajoId={orden.id} ordenEstado={orden.estado} />
 
+      <OtControlCalidadSection ordenTrabajoId={orden.id} ordenEstado={orden.estado} />
+
       <OtFacturacionSection
         ordenId={orden.id}
         ordenNumero={orden.numero}
@@ -218,12 +234,24 @@ export function OrdenTrabajoDetailPage() {
                   </div>
                   <Button
                     onClick={handleEstadoChange}
-                    disabled={!nuevoEstado || nuevoEstado === orden.estado || !puedePasarATaller}
+                    disabled={
+                      !nuevoEstado ||
+                      nuevoEstado === orden.estado ||
+                      !puedePasarATaller ||
+                      !puedeFinalizar
+                    }
                     isLoading={updateEstado.isPending}
                   >
                     Actualizar estado
                   </Button>
                 </div>
+
+                {requiereChecklistAprobado && !controlCalidad?.completo && (
+                  <Alert variant="warning">
+                    Guardá el checklist de control de calidad con todos los ítems marcados para
+                    habilitar la finalización.
+                  </Alert>
+                )}
 
                 {requiereMecanico && hayMecanicos && (
                   <div className="space-y-1.5">

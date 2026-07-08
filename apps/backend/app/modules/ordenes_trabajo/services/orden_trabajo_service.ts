@@ -28,6 +28,7 @@ import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_
 import OtItemRepository from '#modules/ordenes_trabajo/repositories/ot_item_repository'
 import StockReservaService from '#modules/inventario/services/stock_reserva_service'
 import OtEquipoRegulatoryService from '#modules/ordenes_trabajo/services/ot_equipo_regulatory_service'
+import OtControlCalidadService from '#modules/ordenes_trabajo/services/ot_control_calidad_service'
 
 function resolveFechaEstimadaEntrega(
   value: string | undefined,
@@ -56,6 +57,7 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
   private otItemRepository = new OtItemRepository()
   private stockReservaService = new StockReservaService()
   private otEquipoRegulatoryService = new OtEquipoRegulatoryService()
+  private otControlCalidadService = new OtControlCalidadService()
   private kitTrabajoService = new KitTrabajoService()
   private otItemService = new OtItemService()
 
@@ -234,6 +236,10 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
 
     if (estadoNuevo === 'entregada' && estadoActual !== 'finalizada') {
       throw new Error('TRANSICION_INVALIDA')
+    }
+
+    if (estadoNuevo === 'finalizada' && estadoActual === 'control_calidad') {
+      await this.otControlCalidadService.assertAprobadoParaFinalizar(id)
     }
 
     const updateData: Partial<OrdenTrabajo> = { estado: estadoNuevo }

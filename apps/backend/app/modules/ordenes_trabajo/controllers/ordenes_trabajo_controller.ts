@@ -202,6 +202,10 @@ export default class OrdenesTrabajoController {
             'STOCK_INSUFICIENTE_RESERVA',
             'No hay stock disponible para reservar los repuestos de esta OT. Verifique el inventario.',
           ],
+          CONTROL_CALIDAD_INCOMPLETO: [
+            'CONTROL_CALIDAD_INCOMPLETO',
+            'Debe completar y aprobar el checklist de control de calidad antes de finalizar la OT',
+          ],
         }
         const mapped = messages[error.message]
         if (mapped) {
