@@ -79,4 +79,12 @@ export default class ClientesController {
 
     return response.ok(ApiResponse.success(serializeVehiculos(vehiculos)))
   }
+
+  async ficha({ params, response }: HttpContext) {
+    const ficha = await clienteService.getFichaOperativa(params.id)
+    if (!ficha) {
+      return response.notFound(ApiResponse.error('NOT_FOUND', 'Cliente no encontrado'))
+    }
+    return response.ok(ApiResponse.success(ficha))
+  }
 }

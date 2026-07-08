@@ -1,5 +1,6 @@
 import type { IOrdenCobroResumen } from './facturacion'
 import type { IOrdenMargenResumen } from './ot-items'
+import type { IOtSenaResumen } from './ot-sena'
 
 export type OrdenEstado =
   | 'borrador'
@@ -56,6 +57,7 @@ export interface IOrdenTrabajo {
   totalFinal?: number
   resumenCobro?: IOrdenCobroResumen
   resumenMargen?: IOrdenMargenResumen
+  resumenSena?: IOtSenaResumen
   createdAt: string
   updatedAt: string
 }
@@ -71,6 +73,7 @@ export interface CreateOrdenTrabajoDTO {
   kilometrajeIngreso?: number
   descripcionProblema?: string
   observacionesInternas?: string
+  montoSena?: number
 }
 
 export interface UpdateOrdenEstadoDTO {

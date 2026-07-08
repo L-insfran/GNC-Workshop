@@ -3,13 +3,16 @@ import type { IPaginationParams } from '@gnc/shared-types'
 import { ApiResponse } from '#shared/api_response'
 import { parseDateOnly } from '#shared/date_util'
 import { serializeOrdenTrabajo, serializeOrdenesTrabajo } from '#shared/orden_trabajo_serializer'
+import { buildOtSenaResumen } from '#shared/ot_sena_util'
 import OrdenTrabajoService from '#modules/ordenes_trabajo/services/orden_trabajo_service'
 import FacturaService from '#modules/facturacion/services/factura_service'
+import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 import { createOrdenTrabajoValidator } from '#modules/ordenes_trabajo/validators/create_orden_trabajo_validator'
 import { updateEstadoValidator } from '#modules/ordenes_trabajo/validators/update_estado_validator'
 
 const ordenTrabajoService = new OrdenTrabajoService()
 const facturaService = new FacturaService()
+const facturaRepository = new FacturaRepository()
 
 export default class OrdenesTrabajoController {
   async index({ request, response }: HttpContext) {
@@ -35,7 +38,20 @@ export default class OrdenesTrabajoController {
     if (!orden) {
       return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
     }
-    return response.ok(ApiResponse.success(serializeOrdenTrabajo(orden)))
+
+    const [resumenesCobro, resumenSena] = await Promise.all([
+      facturaRepository.findCobroResumenByOrdenTrabajoIds(
+        [params.id],
+        new Map([[params.id, orden.estado]])
+      ),
+      buildOtSenaResumen(params.id),
+    ])
+
+    return response.ok(
+      ApiResponse.success(
+        serializeOrdenTrabajo(orden, resumenesCobro.get(params.id), undefined, resumenSena)
+      )
+    )
   }
 
   async facturaBorrador({ params, response }: HttpContext) {
@@ -103,6 +119,10 @@ export default class OrdenesTrabajoController {
           FECHA_ENTREGA_INVALIDA: [
             'FECHA_ENTREGA_INVALIDA',
             'La fecha estimada de entrega no puede ser anterior a la fecha de ingreso',
+          ],
+          MONTO_COBRO_INVALIDO: [
+            'MONTO_COBRO_INVALIDO',
+            'El monto de la seña debe ser mayor a cero',
           ],
           MECANICO_INVALIDO: [
             'MECANICO_INVALIDO',

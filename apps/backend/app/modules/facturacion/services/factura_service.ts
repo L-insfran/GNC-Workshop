@@ -13,6 +13,7 @@ import FacturaItem from '#models/factura_item'
 import Cliente from '#models/cliente'
 import { BaseService } from '#shared/base_service'
 import { serializeFactura, buildCobroFacturaResumen } from '#shared/factura_serializer'
+import { aplicarSenasAFactura, sumAllSenasByOrdenTrabajoId } from '#shared/ot_sena_util'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 
 const IVA_RATE = 0.21
@@ -59,6 +60,7 @@ export default class FacturaService extends BaseService<Factura> {
     const notaCredito = await this.repository.findNotaCreditoByFacturaReferenciaId(factura.id)
     const hayActiva = Boolean(activa)
     const esEmitida = factura.estado === 'emitida'
+    const totalSenaOt = await sumAllSenasByOrdenTrabajoId(ordenTrabajoId)
     const cobroResumen = buildCobroFacturaResumen(Number(factura.total), cobros)
 
     return {
@@ -66,6 +68,7 @@ export default class FacturaService extends BaseService<Factura> {
       cobrada: cobroResumen.cobrada,
       estadoCobro: cobroResumen.estadoCobro,
       totalCobrado: cobroResumen.totalCobrado,
+      totalSenaOt,
       saldoPendiente: cobroResumen.saldoPendiente,
       cobroMovimientoId: cobroResumen.ultimoCobroId,
       puedeEmitirNotaCredito: esEmitida && !notaCredito,
@@ -179,6 +182,10 @@ export default class FacturaService extends BaseService<Factura> {
           },
           { client: trx }
         )
+      }
+
+      if (data.ordenTrabajoId) {
+        await aplicarSenasAFactura(data.ordenTrabajoId, factura.id, trx)
       }
     })
 

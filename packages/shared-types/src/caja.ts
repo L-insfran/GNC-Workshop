@@ -14,6 +14,7 @@ export interface ICajaMovimiento {
   monto: number
   concepto: string
   facturaId?: string
+  ordenTrabajoId?: string
   userId?: string
   userNombre?: string
   createdAt: string
@@ -25,6 +26,7 @@ export interface CreateCajaMovimientoDTO {
   monto: number
   concepto: string
   facturaId?: string
+  ordenTrabajoId?: string
 }
 
 export interface ICajaSaldo {

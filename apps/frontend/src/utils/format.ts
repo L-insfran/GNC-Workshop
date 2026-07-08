@@ -142,6 +142,7 @@ export const ORDEN_PRIORIDAD_LABELS: Record<OrdenPrioridad, string> = {
 export const ORDEN_COBRO_LABELS: Record<OrdenResumenCobroEstado, string> = {
   no_aplica: '—',
   sin_factura: 'Sin factura',
+  con_sena: 'Con seña',
   borrador: 'Borrador',
   pendiente: 'Pendiente',
   parcial: 'Cobro parcial',
@@ -162,6 +163,8 @@ export function getOrdenCobroBadgeVariant(
     case 'anulada':
       return 'danger'
     case 'sin_factura':
+      return 'info'
+    case 'con_sena':
       return 'info'
     default:
       return 'neutral'

@@ -5,6 +5,7 @@ export type FacturaEstadoCobro = 'pendiente' | 'parcial' | 'cobrada'
 export type OrdenResumenCobroEstado =
   | 'no_aplica'
   | 'sin_factura'
+  | 'con_sena'
   | 'borrador'
   | 'pendiente'
   | 'parcial'
@@ -17,6 +18,7 @@ export interface IOrdenCobroResumen {
   facturaNumero?: string
   totalFacturado?: number
   totalCobrado?: number
+  totalSena?: number
   saldoPendiente?: number
 }
 
@@ -86,6 +88,7 @@ export interface IFacturaVinculadaOT {
   cobrada: boolean
   estadoCobro: FacturaEstadoCobro
   totalCobrado: number
+  totalSenaOt: number
   saldoPendiente: number
   cobroMovimientoId?: string
   puedeEmitirNotaCredito: boolean

@@ -79,6 +79,7 @@ export default class CajaRepository {
     monto: number
     concepto: string
     facturaId?: string | null
+    ordenTrabajoId?: string | null
     userId: string
   }) {
     return CajaMovimiento.create(data)

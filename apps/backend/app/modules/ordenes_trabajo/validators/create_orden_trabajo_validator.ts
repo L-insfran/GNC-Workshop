@@ -12,5 +12,6 @@ export const createOrdenTrabajoValidator = vine.compile(
     kilometrajeIngreso: vine.number().min(0).optional(),
     descripcionProblema: vine.string().optional(),
     observacionesInternas: vine.string().optional(),
+    montoSena: vine.number().min(0.01).max(999999999).optional(),
   })
 )

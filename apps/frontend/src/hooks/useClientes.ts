@@ -64,3 +64,15 @@ export function useClienteVehiculos(clienteId: string | undefined) {
     enabled: Boolean(clienteId),
   })
 }
+
+export function useClienteFicha(clienteId: string | undefined) {
+  return useQuery({
+    queryKey: ['clientes', clienteId, 'ficha'],
+    queryFn: async () => {
+      if (!clienteId) throw new Error('ID requerido')
+      const response = await clienteService.getFicha(clienteId)
+      return response.data
+    },
+    enabled: Boolean(clienteId),
+  })
+}

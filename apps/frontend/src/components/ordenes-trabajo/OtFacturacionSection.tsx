@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { ExternalLink, FileText, Receipt, DollarSign } from 'lucide-react'
-import type { OrdenEstado } from '@gnc/shared-types'
+import type { OrdenEstado, IOtSenaResumen } from '@gnc/shared-types'
 import { useAuth } from '@/hooks/useAuth'
 import { useFacturaVinculadaOT } from '@/hooks/useFacturaVinculadaOT'
 import { ROUTES } from '@/constants/routes'
@@ -16,6 +16,7 @@ interface OtFacturacionSectionProps {
   ordenId: string
   ordenNumero: string
   ordenEstado: OrdenEstado
+  resumenSena?: IOtSenaResumen
 }
 
 const ESTADOS_FACTURABLES: OrdenEstado[] = ['finalizada', 'entregada']
@@ -24,6 +25,7 @@ export function OtFacturacionSection({
   ordenId,
   ordenNumero,
   ordenEstado,
+  resumenSena,
 }: OtFacturacionSectionProps) {
   const navigate = useNavigate()
   const { checkRole } = useAuth()
@@ -61,21 +63,36 @@ export function OtFacturacionSection({
           title="Facturación"
           description={`La OT ${ordenNumero} está lista para emitir comprobante`}
         />
-        <CardBody className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-600">
-            Se precargarán automáticamente el cliente y los ítems del presupuesto en la factura.
-          </p>
-          <Button onClick={() => navigate(ROUTES.FACTURA_NEW_FROM_OT(ordenId))}>
-            <FileText className="h-4 w-4" />
-            Generar factura
-          </Button>
+        <CardBody className="flex flex-col gap-3">
+          {resumenSena && (
+            <Alert variant="info" title="Seña registrada al ingreso">
+              Hay {formatCurrency(resumenSena.totalSena)} de seña que se descontarán al emitir la
+              factura.
+            </Alert>
+          )}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-slate-600">
+              Se precargarán automáticamente el cliente y los ítems del presupuesto en la factura.
+            </p>
+            <Button onClick={() => navigate(ROUTES.FACTURA_NEW_FROM_OT(ordenId))}>
+              <FileText className="h-4 w-4" />
+              Generar factura
+            </Button>
+          </div>
         </CardBody>
       </Card>
     )
   }
 
-  const { factura, estadoCobro, totalCobrado, saldoPendiente, puedeGenerarFactura, notaCreditoId } =
-    vinculada
+  const {
+    factura,
+    estadoCobro,
+    totalCobrado,
+    totalSenaOt,
+    saldoPendiente,
+    puedeGenerarFactura,
+    notaCreditoId,
+  } = vinculada
 
   const cobroLabel =
     estadoCobro === 'cobrada'
@@ -126,6 +143,12 @@ export function OtFacturacionSection({
           </div>
           {factura.estado === 'emitida' && (
             <>
+              {totalSenaOt > 0 && (
+                <div>
+                  <p className="text-slate-500">Seña OT (ingreso)</p>
+                  <p className="font-medium text-emerald-700">{formatCurrency(totalSenaOt)}</p>
+                </div>
+              )}
               <div>
                 <p className="text-slate-500">Cobrado</p>
                 <p className="font-medium">{formatCurrency(totalCobrado)}</p>

@@ -14,6 +14,7 @@ import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAler
 import { OtPresupuestoSection } from '@/components/ordenes-trabajo/OtPresupuestoSection'
 import { OtControlCalidadSection } from '@/components/ordenes-trabajo/OtControlCalidadSection'
 import { OtFacturacionSection } from '@/components/ordenes-trabajo/OtFacturacionSection'
+import { OtSenaSection } from '@/components/ordenes-trabajo/OtSenaSection'
 import { useOtControlCalidad } from '@/hooks/useOtControlCalidad'
 import { ApiError } from '@/services/api-client'
 import {
@@ -193,10 +194,16 @@ export function OrdenTrabajoDetailPage() {
 
       <OtControlCalidadSection ordenTrabajoId={orden.id} ordenEstado={orden.estado} />
 
+      {orden.resumenSena &&
+        !['finalizada', 'entregada'].includes(orden.estado) && (
+          <OtSenaSection ordenNumero={orden.numero} resumenSena={orden.resumenSena} />
+        )}
+
       <OtFacturacionSection
         ordenId={orden.id}
         ordenNumero={orden.numero}
         ordenEstado={orden.estado}
+        resumenSena={orden.resumenSena}
       />
 
       <Card>

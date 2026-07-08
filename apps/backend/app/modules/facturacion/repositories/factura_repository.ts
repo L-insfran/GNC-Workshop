@@ -5,6 +5,7 @@ import CajaMovimiento from '#models/caja_movimiento'
 import type { IOrdenCobroResumen } from '@gnc/shared-types'
 import { BaseRepository } from '#shared/base_repository'
 import { calcularEstadoCobro, calcularSaldoPendiente } from '#shared/factura_cobro_util'
+import { sumSenasByOrdenTrabajoIds } from '#shared/ot_sena_util'
 
 export default class FacturaRepository extends BaseRepository<Factura> {
   protected model = Factura
@@ -94,6 +95,8 @@ export default class FacturaRepository extends BaseRepository<Factura> {
       return resumenes
     }
 
+    const senasPorOt = await sumSenasByOrdenTrabajoIds(ordenesFacturables)
+
     const facturas = await Factura.query()
       .whereIn('orden_trabajo_id', ordenesFacturables)
       .whereNull('deleted_at')
@@ -132,7 +135,13 @@ export default class FacturaRepository extends BaseRepository<Factura> {
     for (const ordenId of ordenesFacturables) {
       const factura = facturaPorOt.get(ordenId)
       if (!factura) {
-        resumenes.set(ordenId, { estado: 'sin_factura' })
+        const totalSena = senasPorOt.get(ordenId) ?? 0
+        resumenes.set(
+          ordenId,
+          totalSena > 0
+            ? { estado: 'con_sena', totalSena: Number(totalSena.toFixed(2)) }
+            : { estado: 'sin_factura' }
+        )
         continue
       }
 

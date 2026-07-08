@@ -10,9 +10,20 @@ export const ROUTES = {
   VEHICULO_EDIT: (id: string) => `/vehiculos/${id}/editar`,
   EQUIPOS_GNC: '/equipos-gnc',
   EQUIPO_GNC_NEW: '/equipos-gnc/nuevo',
+  EQUIPO_GNC_NEW_FOR_VEHICULO: (vehiculoId: string) =>
+    `/equipos-gnc/nuevo?vehiculoId=${vehiculoId}`,
   EQUIPO_GNC_EDIT: (id: string) => `/equipos-gnc/${id}/editar`,
   ORDENES_TRABAJO: '/ordenes-trabajo',
   ORDEN_TRABAJO_NEW: '/ordenes-trabajo/nuevo',
+  ORDEN_TRABAJO_NEW_FROM_CLIENTE: (
+    clienteId: string,
+    params?: { vehiculoId?: string; equipoGncId?: string },
+  ) => {
+    const search = new URLSearchParams({ clienteId })
+    if (params?.vehiculoId) search.set('vehiculoId', params.vehiculoId)
+    if (params?.equipoGncId) search.set('equipoGncId', params.equipoGncId)
+    return `/ordenes-trabajo/nuevo?${search.toString()}`
+  },
   ORDEN_TRABAJO_DETAIL: (id: string) => `/ordenes-trabajo/${id}`,
   ORDEN_TRABAJO_EDIT: (id: string) => `/ordenes-trabajo/${id}/editar`,
   INVENTARIO: '/inventario',

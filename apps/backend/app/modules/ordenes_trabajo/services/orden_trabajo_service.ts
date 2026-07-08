@@ -27,6 +27,7 @@ import FacturaRepository from '#modules/facturacion/repositories/factura_reposit
 import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_trabajo_repository'
 import OtItemRepository from '#modules/ordenes_trabajo/repositories/ot_item_repository'
 import StockReservaService from '#modules/inventario/services/stock_reserva_service'
+import CajaRepository from '#modules/caja/repositories/caja_repository'
 import OtEquipoRegulatoryService from '#modules/ordenes_trabajo/services/ot_equipo_regulatory_service'
 import OtControlCalidadService from '#modules/ordenes_trabajo/services/ot_control_calidad_service'
 
@@ -58,6 +59,7 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
   private stockReservaService = new StockReservaService()
   private otEquipoRegulatoryService = new OtEquipoRegulatoryService()
   private otControlCalidadService = new OtControlCalidadService()
+  private cajaRepository = new CajaRepository()
   private kitTrabajoService = new KitTrabajoService()
   private otItemService = new OtItemService()
 
@@ -178,6 +180,18 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
       },
       user
     )
+
+    if (data.montoSena && data.montoSena > 0) {
+      const caja = await this.cajaRepository.getOrCreateDefault()
+      await this.cajaRepository.createMovimiento({
+        cajaId: caja.id,
+        tipo: 'ingreso',
+        monto: data.montoSena,
+        concepto: `Seña OT ${numero}`,
+        ordenTrabajoId: orden.id,
+        userId: user.id,
+      })
+    }
 
     try {
       const kitItems = await this.kitTrabajoService.findItemsByTipoTrabajoId(data.tipoTrabajoId)

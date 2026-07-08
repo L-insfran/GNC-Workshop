@@ -24,6 +24,7 @@ router
 
         router.resource('clientes', '#modules/clientes/controllers/clientes_controller').apiOnly()
         router.get('clientes/:id/vehiculos', '#modules/clientes/controllers/clientes_controller.vehiculos')
+        router.get('clientes/:id/ficha', '#modules/clientes/controllers/clientes_controller.ficha')
         router.resource('vehiculos', '#modules/vehiculos/controllers/vehiculos_controller').apiOnly()
         router.resource('equipos-gnc', '#modules/equipos_gnc/controllers/equipos_gnc_controller').apiOnly()
         router.get('ordenes-trabajo/:id/factura-borrador', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.facturaBorrador')

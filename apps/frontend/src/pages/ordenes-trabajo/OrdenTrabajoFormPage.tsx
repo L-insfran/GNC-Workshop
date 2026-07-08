@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import {
   useOrdenTrabajo,
@@ -12,7 +12,9 @@ import {
 import { useClientes, useClienteVehiculos } from '@/hooks/useClientes'
 import { useEquiposGnc } from '@/hooks/useEquiposGnc'
 import { useMecanicos } from '@/hooks/useMecanicos'
+import { useAuth } from '@/hooks/useAuth'
 import { ROUTES } from '@/constants/routes'
+import { MODULE_ROLES } from '@/constants/roles'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
@@ -36,6 +38,7 @@ const createOrdenSchema = (minFechaEntrega: string) =>
       mecanicoAsignadoId: z.string().optional(),
       descripcionProblema: z.string().optional(),
       observacionesInternas: z.string().optional(),
+      montoSena: z.coerce.number().min(0.01).optional().or(z.literal('')),
     })
     .superRefine((data, ctx) => {
       if (!data.fechaEstimadaEntrega) return
@@ -53,8 +56,15 @@ type OrdenForm = z.infer<ReturnType<typeof createOrdenSchema>>
 
 export function OrdenTrabajoFormPage() {
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
   const isEditing = Boolean(id)
   const navigate = useNavigate()
+  const { checkRole } = useAuth()
+
+  const prefillClienteId = searchParams.get('clienteId') ?? ''
+  const prefillVehiculoId = searchParams.get('vehiculoId') ?? ''
+  const prefillEquipoGncId = searchParams.get('equipoGncId') ?? ''
+  const puedeRegistrarSena = checkRole([...MODULE_ROLES.caja, ...MODULE_ROLES.clientes])
 
   const { data: orden, isLoading } = useOrdenTrabajo(id)
   const { data: clientesData } = useClientes({ perPage: 100 })
@@ -79,11 +89,37 @@ export function OrdenTrabajoFormPage() {
     resolver: zodResolver(createOrdenSchema(minFechaEntrega)),
     defaultValues: {
       prioridad: 'normal',
-      clienteId: '',
-      vehiculoId: '',
-      equipoGncId: '',
+      clienteId: prefillClienteId,
+      vehiculoId: prefillVehiculoId,
+      equipoGncId: prefillEquipoGncId,
     },
   })
+
+  const prefillAppliedRef = useRef(false)
+  const prevClienteIdRef = useRef<string | undefined>(prefillClienteId || undefined)
+  const isInitialLoadRef = useRef(true)
+
+  useEffect(() => {
+    if (isEditing || prefillAppliedRef.current) return
+    if (!prefillClienteId && !prefillVehiculoId && !prefillEquipoGncId) return
+
+    reset((current) => ({
+      ...current,
+      clienteId: prefillClienteId || current.clienteId,
+      vehiculoId: prefillVehiculoId || current.vehiculoId,
+      equipoGncId: prefillEquipoGncId || current.equipoGncId,
+    }))
+    if (prefillClienteId) {
+      prevClienteIdRef.current = prefillClienteId
+    }
+    prefillAppliedRef.current = true
+  }, [
+    isEditing,
+    prefillClienteId,
+    prefillVehiculoId,
+    prefillEquipoGncId,
+    reset,
+  ])
 
   const clienteId = watch('clienteId')
   const vehiculoId = watch('vehiculoId')
@@ -99,12 +135,9 @@ export function OrdenTrabajoFormPage() {
     vehiculoId ? { perPage: 100 } : undefined,
   )
 
-  const prevClienteIdRef = useRef<string | undefined>(undefined)
-  const isInitialLoadRef = useRef(isEditing)
-
   useEffect(() => {
     if (!isEditing) {
-      isInitialLoadRef.current = false
+      isInitialLoadRef.current = true
     }
   }, [isEditing])
 
@@ -164,6 +197,10 @@ export function OrdenTrabajoFormPage() {
         fechaEstimadaEntrega: data.fechaEstimadaEntrega || undefined,
         descripcionProblema: data.descripcionProblema || undefined,
         observacionesInternas: data.observacionesInternas || undefined,
+        montoSena:
+          !isEditing && data.montoSena && Number(data.montoSena) > 0
+            ? Number(data.montoSena)
+            : undefined,
       }
 
       if (isEditing && id) {
@@ -346,6 +383,23 @@ export function OrdenTrabajoFormPage() {
             </p>
 
             <Input label="Kilometraje ingreso" type="number" {...register('kilometrajeIngreso')} />
+
+            {!isEditing && puedeRegistrarSena && (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50/50 p-4">
+                <Input
+                  label="Seña al ingreso (opcional)"
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  placeholder="Ej: 50000"
+                  error={errors.montoSena?.message}
+                  {...register('montoSena')}
+                />
+                <p className="mt-1.5 text-xs text-slate-500">
+                  Se registrará un ingreso en caja vinculado a esta OT. Se descontará al facturar.
+                </p>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-slate-700">Descripción del problema</label>

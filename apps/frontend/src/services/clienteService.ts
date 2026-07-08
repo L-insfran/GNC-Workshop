@@ -1,5 +1,6 @@
 import type {
   ICliente,
+  IClienteFichaOperativa,
   CreateClienteDTO,
   UpdateClienteDTO,
   IPaginationParams,
@@ -30,5 +31,9 @@ export const clienteService = {
 
   getVehiculos(id: string, params?: IPaginationParams) {
     return apiGet<IVehiculo[]>(`/clientes/${id}/vehiculos`, params)
+  },
+
+  getFicha(id: string) {
+    return apiGet<IClienteFichaOperativa>(`/clientes/${id}/ficha`)
   },
 }

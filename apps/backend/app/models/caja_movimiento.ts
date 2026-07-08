@@ -26,6 +26,9 @@ export default class CajaMovimiento extends BaseModel {
   declare facturaId: string | null
 
   @column()
+  declare ordenTrabajoId: string | null
+
+  @column()
   declare userId: string | null
 
   @column.dateTime({ autoCreate: true })

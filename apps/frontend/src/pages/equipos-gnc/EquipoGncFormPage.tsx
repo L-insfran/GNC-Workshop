@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react'
 import { useEquipoGnc, useEquipoGncMutations } from '@/hooks/useEquiposGnc'
 import { useVehiculos } from '@/hooks/useVehiculos'
@@ -41,6 +41,8 @@ type EquipoForm = z.infer<typeof equipoSchema>
 
 export function EquipoGncFormPage() {
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
+  const prefillVehiculoId = searchParams.get('vehiculoId') ?? ''
   const isEditing = Boolean(id)
   const navigate = useNavigate()
 
@@ -72,6 +74,12 @@ export function EquipoGncFormPage() {
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: 'cilindros' })
+
+  useEffect(() => {
+    if (!isEditing && prefillVehiculoId) {
+      reset((current) => ({ ...current, vehiculoId: prefillVehiculoId }))
+    }
+  }, [isEditing, prefillVehiculoId, reset])
 
   useEffect(() => {
     if (equipo) {
