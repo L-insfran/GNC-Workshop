@@ -88,6 +88,24 @@ export interface UpdateOrdenEstadoDTO {
   mecanicoAsignadoId?: string
 }
 
+export type OrdenTrabajoFiltro = 'activas' | 'hoy' | 'espera_repuesto' | 'entregadas_mes'
+
+export interface IOrdenTrabajoListParams {
+  page?: number
+  perPage?: number
+  search?: string
+  sortBy?: string
+  sortOrder?: 'asc' | 'desc'
+  filtro?: OrdenTrabajoFiltro
+  vehiculoId?: string
+  equipoGncId?: string
+  clienteId?: string
+}
+
+export interface RegistrarOtSenaDTO {
+  monto: number
+}
+
 export interface ITipoTrabajo {
   id: string
   nombre: string

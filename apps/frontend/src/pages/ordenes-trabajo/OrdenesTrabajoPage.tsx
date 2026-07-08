@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Plus, Eye, Pencil, Trash2 } from 'lucide-react'
 import { useOrdenesTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
 import { useMecanicos } from '@/hooks/useMecanicos'
@@ -18,12 +18,35 @@ import type { IOrdenTrabajo, ITableColumn } from '@/types'
 
 export function OrdenesTrabajoPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const filtro = searchParams.get('filtro') ?? undefined
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
+
+  useEffect(() => {
+    setPage(1)
+  }, [filtro])
+
+  const { data, isLoading, error } = useOrdenesTrabajo({
+    page,
+    perPage: 10,
+    search: search || undefined,
+    filtro: filtro as import('@gnc/shared-types').OrdenTrabajoFiltro | undefined,
+  })
+  const { hayMecanicos } = useMecanicos()
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const { data, isLoading, error } = useOrdenesTrabajo({ page, perPage: 10, search: search || undefined })
-  const { hayMecanicos } = useMecanicos()
+  const filtroLabel =
+    filtro === 'activas'
+      ? 'Órdenes activas'
+      : filtro === 'hoy'
+        ? 'Órdenes de hoy'
+        : filtro === 'espera_repuesto'
+          ? 'Esperando repuesto'
+          : filtro === 'entregadas_mes'
+            ? 'Entregadas este mes'
+            : null
+
   const { remove } = useOrdenTrabajoMutations()
   const { checkRole } = useAuth()
   const puedeVerMargen = checkRole(MODULE_ROLES.margenOt)
@@ -130,8 +153,20 @@ export function OrdenesTrabajoPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-slate-900">Órdenes de Trabajo</h2>
-          <p className="text-sm text-slate-500">Gestión de OT del taller GNC</p>
+          <h2 className="text-xl font-semibold text-slate-900">
+            {filtroLabel ?? 'Órdenes de Trabajo'}
+          </h2>
+          <p className="text-sm text-slate-500">
+            {filtroLabel ? 'Listado filtrado desde el dashboard' : 'Gestión de OT del taller GNC'}
+          </p>
+          {filtroLabel && (
+            <Link
+              to={ROUTES.ORDENES_TRABAJO}
+              className="mt-1 inline-block text-sm text-brand-600 hover:text-brand-700"
+            >
+              Ver todas las órdenes
+            </Link>
+          )}
         </div>
         <Link to={ROUTES.ORDEN_TRABAJO_NEW}>
           <Button>

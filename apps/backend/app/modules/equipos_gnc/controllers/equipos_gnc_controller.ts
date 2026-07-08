@@ -29,6 +29,14 @@ export default class EquiposGncController {
     return response.ok(ApiResponse.success(equipo))
   }
 
+  async ficha({ params, response }: HttpContext) {
+    const ficha = await equipoGncService.getFichaOperativa(params.id)
+    if (!ficha) {
+      return response.notFound(ApiResponse.error('NOT_FOUND', 'Equipo GNC no encontrado'))
+    }
+    return response.ok(ApiResponse.success(ficha))
+  }
+
   async store({ request, auth, response }: HttpContext) {
     const dto = await request.validateUsing(createEquipoGncValidator)
 

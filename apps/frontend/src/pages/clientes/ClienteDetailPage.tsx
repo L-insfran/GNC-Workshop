@@ -165,7 +165,7 @@ export function ClienteDetailPage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigate(ROUTES.VEHICULO_EDIT(vehiculo.id))}
+                        onClick={() => navigate(ROUTES.VEHICULO_DETAIL(vehiculo.id))}
                       >
                         Ver vehículo
                       </Button>
@@ -226,7 +226,7 @@ export function ClienteDetailPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => navigate(ROUTES.EQUIPO_GNC_EDIT(equipo.id))}
+                              onClick={() => navigate(ROUTES.EQUIPO_GNC_DETAIL(equipo.id))}
                             >
                               Ver equipo
                             </Button>

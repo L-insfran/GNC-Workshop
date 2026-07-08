@@ -1,5 +1,5 @@
 import type { HttpContext } from '@adonisjs/core/http'
-import type { IPaginationParams } from '@gnc/shared-types'
+import type { IOrdenTrabajoListParams, IPaginationParams } from '@gnc/shared-types'
 import { ApiResponse } from '#shared/api_response'
 import { parseDateOnly } from '#shared/date_util'
 import { serializeOrdenTrabajo, serializeOrdenesTrabajo } from '#shared/orden_trabajo_serializer'
@@ -10,6 +10,7 @@ import FacturaRepository from '#modules/facturacion/repositories/factura_reposit
 import TurnoRepository from '#modules/agenda/repositories/turno_repository'
 import { createOrdenTrabajoValidator } from '#modules/ordenes_trabajo/validators/create_orden_trabajo_validator'
 import { updateEstadoValidator } from '#modules/ordenes_trabajo/validators/update_estado_validator'
+import { registrarSenaValidator } from '#modules/ordenes_trabajo/validators/registrar_sena_validator'
 
 const ordenTrabajoService = new OrdenTrabajoService()
 const facturaService = new FacturaService()
@@ -18,12 +19,16 @@ const turnoRepository = new TurnoRepository()
 
 export default class OrdenesTrabajoController {
   async index({ request, response }: HttpContext) {
-    const params: IPaginationParams = {
+    const params: IOrdenTrabajoListParams = {
       page: Number(request.input('page', 1)),
       perPage: Number(request.input('perPage', 20)),
       search: request.input('search'),
       sortBy: request.input('sortBy'),
       sortOrder: request.input('sortOrder'),
+      filtro: request.input('filtro'),
+      vehiculoId: request.input('vehiculoId'),
+      equipoGncId: request.input('equipoGncId'),
+      clienteId: request.input('clienteId'),
     }
 
     const result = await ordenTrabajoService.list(params)
@@ -259,6 +264,38 @@ export default class OrdenesTrabajoController {
               `El producto vinculado al ítem "${descripcion}" ya no existe en inventario`
             )
           )
+        }
+      }
+      throw error
+    }
+  }
+
+  async registrarSena({ params, request, auth, response }: HttpContext) {
+    const dto = await request.validateUsing(registrarSenaValidator)
+
+    try {
+      const orden = await ordenTrabajoService.registrarSena(params.id, dto.monto, auth.user!)
+      const resumenSena = await buildOtSenaResumen(params.id)
+      return response.ok(
+        ApiResponse.success(serializeOrdenTrabajo(orden, undefined, undefined, resumenSena))
+      )
+    } catch (error) {
+      if (error instanceof Error) {
+        const messages: Record<string, [string, string]> = {
+          NOT_FOUND: ['NOT_FOUND', 'Orden de trabajo no encontrada'],
+          OT_ESTADO_INVALIDO_SENA: [
+            'OT_ESTADO_INVALIDO_SENA',
+            'No se puede registrar seña en una OT cancelada o entregada',
+          ],
+          OT_YA_FACTURADA: [
+            'OT_YA_FACTURADA',
+            'Esta orden ya tiene una factura activa vinculada',
+          ],
+        }
+        const mapped = messages[error.message]
+        if (mapped) {
+          const status = error.message === 'NOT_FOUND' ? response.notFound : response.badRequest
+          return status(ApiResponse.error(mapped[0], mapped[1]))
         }
       }
       throw error

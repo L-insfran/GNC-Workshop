@@ -33,6 +33,14 @@ export default class VehiculosController {
     return response.ok(ApiResponse.success(serializeVehiculo(vehiculo)))
   }
 
+  async ficha({ params, response }: HttpContext) {
+    const ficha = await vehiculoService.getFichaOperativa(params.id)
+    if (!ficha) {
+      return response.notFound(ApiResponse.error('NOT_FOUND', 'Vehículo no encontrado'))
+    }
+    return response.ok(ApiResponse.success(ficha))
+  }
+
   async store({ request, auth, response }: HttpContext) {
     const dto = await request.validateUsing(createVehiculoValidator)
 

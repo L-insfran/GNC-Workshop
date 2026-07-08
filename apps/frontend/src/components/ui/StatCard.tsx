@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { LucideIcon } from 'lucide-react'
 import { cn } from '@/utils/cn'
 
@@ -7,13 +8,15 @@ interface StatCardProps {
   icon: LucideIcon
   trend?: string
   className?: string
+  to?: string
 }
 
-export function StatCard({ title, value, icon: Icon, trend, className }: StatCardProps) {
-  return (
+export function StatCard({ title, value, icon: Icon, trend, className, to }: StatCardProps) {
+  const content = (
     <div
       className={cn(
-        'rounded-xl border border-slate-200 bg-white p-5 shadow-card transition-shadow hover:shadow-elevated',
+        'rounded-xl border border-slate-200 bg-white p-5 shadow-card transition-shadow',
+        to && 'hover:border-brand-200 hover:shadow-elevated',
         className,
       )}
     >
@@ -29,4 +32,14 @@ export function StatCard({ title, value, icon: Icon, trend, className }: StatCar
       </div>
     </div>
   )
+
+  if (to) {
+    return (
+      <Link to={to} className="block">
+        {content}
+      </Link>
+    )
+  }
+
+  return content
 }

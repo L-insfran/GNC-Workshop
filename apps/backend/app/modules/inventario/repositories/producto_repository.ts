@@ -24,10 +24,39 @@ export default class ProductoRepository extends BaseRepository<Producto> {
       .first()
   }
 
-  async findAllWithCategoria(params = {}) {
-    const result = await this.findAll(params)
-    await Promise.all(result.data.map((producto) => producto.load('categoria')))
-    return result
+  async findAllWithCategoria(params: { stockBajo?: boolean } & Record<string, unknown> = {}) {
+    const page = Number(params.page ?? 1)
+    const perPage = Math.min(Number(params.perPage ?? 20), 100)
+
+    let query = Producto.query().whereNull('deleted_at')
+
+    if (params.stockBajo) {
+      query = query.where('is_active', true).whereRaw('stock_actual <= stock_minimo')
+    }
+
+    if (params.search) {
+      query = this.applySearch(query, String(params.search))
+    }
+
+    if (params.sortBy) {
+      query = query.orderBy(String(params.sortBy), (params.sortOrder as 'asc' | 'desc') ?? 'asc')
+    } else {
+      query = query.orderBy('created_at', 'desc')
+    }
+
+    const result = await query.paginate(page, perPage)
+    const data = result.all() as Producto[]
+    await Promise.all(data.map((producto) => producto.load('categoria')))
+
+    return {
+      data,
+      meta: {
+        page: result.currentPage,
+        perPage: result.perPage,
+        total: result.total,
+        lastPage: result.lastPage,
+      },
+    }
   }
 
   async findByCodigo(codigo: string): Promise<Producto | null> {

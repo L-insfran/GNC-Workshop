@@ -1,16 +1,17 @@
 import type {
   IOrdenTrabajo,
+  IOrdenTrabajoListParams,
   CreateOrdenTrabajoDTO,
   UpdateOrdenEstadoDTO,
+  RegistrarOtSenaDTO,
   ITipoTrabajo,
-  IPaginationParams,
   IFacturaBorradorPreview,
   IFacturaVinculadaOT,
 } from '@gnc/shared-types'
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '@/services/api-client'
 
 export const ordenTrabajoService = {
-  list(params?: IPaginationParams) {
+  list(params?: IOrdenTrabajoListParams) {
     return apiGet<IOrdenTrabajo[]>('/ordenes-trabajo', params)
   },
 
@@ -36,6 +37,10 @@ export const ordenTrabajoService = {
 
   updateEstado(id: string, data: UpdateOrdenEstadoDTO) {
     return apiPatch<IOrdenTrabajo>(`/ordenes-trabajo/${id}/estado`, data)
+  },
+
+  registrarSena(id: string, data: RegistrarOtSenaDTO) {
+    return apiPost<IOrdenTrabajo>(`/ordenes-trabajo/${id}/sena`, data)
   },
 
   remove(id: string) {

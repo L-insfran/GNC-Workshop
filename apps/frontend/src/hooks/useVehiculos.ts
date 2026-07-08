@@ -37,6 +37,18 @@ export function useVehiculo(id: string | undefined) {
   })
 }
 
+export function useVehiculoFicha(vehiculoId: string | undefined) {
+  return useQuery({
+    queryKey: [QUERY_KEY, vehiculoId, 'ficha'],
+    queryFn: async () => {
+      if (!vehiculoId) throw new Error('ID requerido')
+      const response = await vehiculoService.getFicha(vehiculoId)
+      return response.data
+    },
+    enabled: Boolean(vehiculoId),
+  })
+}
+
 export function useVehiculoMarcas() {
   return useQuery({
     queryKey: ['vehiculo-marcas'],

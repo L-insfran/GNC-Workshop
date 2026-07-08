@@ -1,14 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type {
   CreateOrdenTrabajoDTO,
-  IPaginationParams,
+  IOrdenTrabajoListParams,
+  RegistrarOtSenaDTO,
   UpdateOrdenEstadoDTO,
 } from '@gnc/shared-types'
 import { ordenTrabajoService } from '@/services/ordenTrabajoService'
 
 const QUERY_KEY = 'ordenes-trabajo'
 
-export function useOrdenesTrabajo(params?: IPaginationParams) {
+export function useOrdenesTrabajo(params?: IOrdenTrabajoListParams) {
   return useQuery({
     queryKey: [QUERY_KEY, params],
     queryFn: async () => {
@@ -49,6 +50,7 @@ export function useOrdenTrabajoMutations() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: [QUERY_KEY] })
     queryClient.invalidateQueries({ queryKey: ['inventario'] })
+    queryClient.invalidateQueries({ queryKey: ['caja'] })
   }
 
   const create = useMutation({
@@ -68,10 +70,16 @@ export function useOrdenTrabajoMutations() {
     onSuccess: invalidate,
   })
 
+  const registrarSena = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: RegistrarOtSenaDTO }) =>
+      ordenTrabajoService.registrarSena(id, data),
+    onSuccess: invalidate,
+  })
+
   const remove = useMutation({
     mutationFn: (id: string) => ordenTrabajoService.remove(id),
     onSuccess: invalidate,
   })
 
-  return { create, update, updateEstado, remove }
+  return { create, update, updateEstado, registrarSena, remove }
 }

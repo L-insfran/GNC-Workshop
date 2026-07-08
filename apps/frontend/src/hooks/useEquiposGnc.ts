@@ -29,6 +29,18 @@ export function useEquipoGnc(id: string | undefined) {
   })
 }
 
+export function useEquipoGncFicha(equipoId: string | undefined) {
+  return useQuery({
+    queryKey: [QUERY_KEY, equipoId, 'ficha'],
+    queryFn: async () => {
+      if (!equipoId) throw new Error('ID requerido')
+      const response = await equipoGncService.getFicha(equipoId)
+      return response.data
+    },
+    enabled: Boolean(equipoId),
+  })
+}
+
 export function useEquipoGncMutations() {
   const queryClient = useQueryClient()
 

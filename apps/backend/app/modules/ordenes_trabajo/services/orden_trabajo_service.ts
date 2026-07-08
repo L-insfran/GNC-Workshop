@@ -5,10 +5,10 @@ import {
   getOrdenEstadosSiguientes,
   type CreateOrdenTrabajoDTO,
   type IFacturaBorradorPreview,
+  type IOrdenTrabajoListParams,
   type OrdenEstado,
   type UpdateOrdenEstadoDTO,
 } from '@gnc/shared-types'
-import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import type OrdenTrabajo from '#models/orden_trabajo'
 import EquipoGnc from '#models/equipo_gnc'
@@ -63,7 +63,7 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
   private kitTrabajoService = new KitTrabajoService()
   private otItemService = new OtItemService()
 
-  async list(params?: IPaginationParams) {
+  async list(params?: IOrdenTrabajoListParams) {
     const result = await this.repository.findAllWithRelations(params)
     const ordenIds = result.data.map((orden) => orden.id)
     const estados = new Map(result.data.map((orden) => [orden.id, orden.estado]))
@@ -201,6 +201,34 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     }
 
     return (await this.repository.findByIdWithRelations(orden.id))!
+  }
+
+  async registrarSena(ordenId: string, monto: number, user: User): Promise<OrdenTrabajo> {
+    const orden = await this.repository.findById(ordenId)
+    if (!orden) {
+      throw new Error('NOT_FOUND')
+    }
+
+    if (orden.estado === 'cancelada' || orden.estado === 'entregada') {
+      throw new Error('OT_ESTADO_INVALIDO_SENA')
+    }
+
+    const facturaActiva = await this.facturaRepository.findActivaByOrdenTrabajoId(ordenId)
+    if (facturaActiva) {
+      throw new Error('OT_YA_FACTURADA')
+    }
+
+    const caja = await this.cajaRepository.getOrCreateDefault()
+    await this.cajaRepository.createMovimiento({
+      cajaId: caja.id,
+      tipo: 'ingreso',
+      monto,
+      concepto: `Seña OT ${orden.numero}`,
+      ordenTrabajoId: orden.id,
+      userId: user.id,
+    })
+
+    return (await this.repository.findByIdWithRelations(ordenId))!
   }
 
   async update(id: string, data: Partial<OrdenTrabajo>, user: User): Promise<OrdenTrabajo | null> {

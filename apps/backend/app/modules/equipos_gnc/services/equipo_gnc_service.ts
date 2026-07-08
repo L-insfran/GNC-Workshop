@@ -1,13 +1,19 @@
 import { randomUUID } from 'node:crypto'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
-import type { CreateEquipoGncDTO, UpdateCilindroDTO, UpdateEquipoGncDTO } from '@gnc/shared-types'
+import type {
+  CreateEquipoGncDTO,
+  IEquipoGncFichaOperativa,
+  UpdateCilindroDTO,
+  UpdateEquipoGncDTO,
+} from '@gnc/shared-types'
 import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import type EquipoGnc from '#models/equipo_gnc'
 import Vehiculo from '#models/vehiculo'
 import EquipoGncModel from '#models/equipo_gnc'
 import Cilindro from '#models/cilindro'
+import OrdenTrabajo from '#models/orden_trabajo'
 import { BaseService } from '#shared/base_service'
 import { isPgUniqueViolation } from '#shared/db_error_util'
 import EquipoGncRepository from '#modules/equipos_gnc/repositories/equipo_gnc_repository'
@@ -64,6 +70,60 @@ export default class EquipoGncService extends BaseService<EquipoGnc> {
 
   async getById(id: string): Promise<EquipoGnc | null> {
     return this.repository.findByIdWithCilindros(id)
+  }
+
+  async getFichaOperativa(equipoId: string): Promise<IEquipoGncFichaOperativa | null> {
+    const equipo = await this.repository.findByIdWithCilindros(equipoId)
+    if (!equipo || !equipo.vehiculo) return null
+
+    const hoy = DateTime.now().startOf('day')
+    const obleaVencida = equipo.fechaVencimientoOblea.startOf('day') < hoy
+    const cilindrosActivos = (equipo.cilindros ?? []).filter((c) => c.estado !== 'retirado')
+    const phVencida = cilindrosActivos.some((c) => c.fechaVencimientoPh.startOf('day') < hoy)
+
+    const ordenes = await OrdenTrabajo.query()
+      .where('equipo_gnc_id', equipoId)
+      .whereNull('deleted_at')
+      .preload('tipoTrabajo')
+      .orderBy('fecha_ingreso', 'desc')
+      .limit(15)
+
+    return {
+      id: equipo.id,
+      vehiculoId: equipo.vehiculoId,
+      vehiculoPatente: equipo.vehiculo.patente,
+      clienteId: equipo.vehiculo.clienteId,
+      clienteNombre: equipo.vehiculo.cliente?.razonSocial ?? '',
+      numeroSerieEquipo: equipo.numeroSerieEquipo,
+      marcaRegulador: equipo.marcaRegulador,
+      modeloRegulador: equipo.modeloRegulador,
+      fechaInstalacion: equipo.fechaInstalacion.toISODate()!,
+      fechaVencimientoOblea: equipo.fechaVencimientoOblea.toISODate()!,
+      estado: equipo.estado,
+      certificadorCrpc: equipo.certificadorCrpc ?? undefined,
+      notas: equipo.notas ?? undefined,
+      obleaVencida,
+      phVencida,
+      cilindros: (equipo.cilindros ?? []).map((cilindro) => ({
+        id: cilindro.id,
+        numeroSerie: cilindro.numeroSerie,
+        capacidadM3: Number(cilindro.capacidadM3),
+        marca: cilindro.marca,
+        fechaUltimaPh: cilindro.fechaUltimaPh.toISODate()!,
+        fechaVencimientoPh: cilindro.fechaVencimientoPh.toISODate()!,
+        estado: cilindro.estado,
+        posicion: cilindro.posicion,
+        phVencida: cilindro.fechaVencimientoPh.startOf('day') < hoy,
+      })),
+      ordenesRecientes: ordenes.map((orden) => ({
+        id: orden.id,
+        numero: orden.numero,
+        estado: orden.estado,
+        tipoTrabajoNombre: orden.tipoTrabajo?.nombre,
+        fechaIngreso: orden.fechaIngreso.toISO()!,
+        totalEstimado: orden.totalEstimado ? Number(orden.totalEstimado) : undefined,
+      })),
+    }
   }
 
   async create(data: CreateEquipoGncDTO, user: User): Promise<EquipoGnc> {

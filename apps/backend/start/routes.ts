@@ -26,7 +26,9 @@ router
         router.get('clientes/:id/vehiculos', '#modules/clientes/controllers/clientes_controller.vehiculos')
         router.get('clientes/:id/ficha', '#modules/clientes/controllers/clientes_controller.ficha')
         router.resource('vehiculos', '#modules/vehiculos/controllers/vehiculos_controller').apiOnly()
+        router.get('vehiculos/:id/ficha', '#modules/vehiculos/controllers/vehiculos_controller.ficha')
         router.resource('equipos-gnc', '#modules/equipos_gnc/controllers/equipos_gnc_controller').apiOnly()
+        router.get('equipos-gnc/:id/ficha', '#modules/equipos_gnc/controllers/equipos_gnc_controller.ficha')
         router.get('ordenes-trabajo/:id/factura-borrador', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.facturaBorrador')
         router.get('ordenes-trabajo/:id/factura-vinculada', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.facturaVinculada')
         router.get('ordenes-trabajo/:id/items', '#modules/ordenes_trabajo/controllers/ot_items_controller.index')
@@ -35,6 +37,7 @@ router
         router.delete('ordenes-trabajo/:id/items/:itemId', '#modules/ordenes_trabajo/controllers/ot_items_controller.destroy')
         router.resource('ordenes-trabajo', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller').apiOnly()
         router.patch('ordenes-trabajo/:id/estado', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.updateEstado')
+        router.post('ordenes-trabajo/:id/sena', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.registrarSena')
         router.get(
           'ordenes-trabajo/:id/control-calidad',
           '#modules/ordenes_trabajo/controllers/ot_control_calidad_controller.show'

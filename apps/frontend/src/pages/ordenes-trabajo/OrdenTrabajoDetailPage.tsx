@@ -15,6 +15,7 @@ import { OtPresupuestoSection } from '@/components/ordenes-trabajo/OtPresupuesto
 import { OtControlCalidadSection } from '@/components/ordenes-trabajo/OtControlCalidadSection'
 import { OtFacturacionSection } from '@/components/ordenes-trabajo/OtFacturacionSection'
 import { OtSenaSection } from '@/components/ordenes-trabajo/OtSenaSection'
+import { OtRegistrarSenaSection } from '@/components/ordenes-trabajo/OtRegistrarSenaSection'
 import { useOtControlCalidad } from '@/hooks/useOtControlCalidad'
 import { ApiError } from '@/services/api-client'
 import {
@@ -157,7 +158,7 @@ export function OrdenTrabajoDetailPage() {
               <dt className="text-xs font-medium uppercase text-slate-500">Vehículo</dt>
               <dd className="mt-1 text-sm">
                 <Link
-                  to={ROUTES.VEHICULO_EDIT(orden.vehiculoId)}
+                  to={ROUTES.VEHICULO_DETAIL(orden.vehiculoId)}
                   className="font-medium text-brand-600 hover:text-brand-700"
                 >
                   {vehiculoDescripcion || 'Ver vehículo'}
@@ -173,7 +174,7 @@ export function OrdenTrabajoDetailPage() {
               <dd className="mt-1 text-sm text-slate-900">
                 {orden.equipoGncId ? (
                   <Link
-                    to={ROUTES.EQUIPO_GNC_EDIT(orden.equipoGncId)}
+                    to={ROUTES.EQUIPO_GNC_DETAIL(orden.equipoGncId)}
                     className="font-medium text-brand-600 hover:text-brand-700"
                   >
                     {orden.equipoGncNumeroSerie}
@@ -241,10 +242,15 @@ export function OrdenTrabajoDetailPage() {
 
       <OtControlCalidadSection ordenTrabajoId={orden.id} ordenEstado={orden.estado} />
 
-      {orden.resumenSena &&
-        !['finalizada', 'entregada'].includes(orden.estado) && (
-          <OtSenaSection ordenNumero={orden.numero} resumenSena={orden.resumenSena} />
-        )}
+      <OtRegistrarSenaSection
+        ordenId={orden.id}
+        ordenNumero={orden.numero}
+        ordenEstado={orden.estado}
+      />
+
+      {orden.resumenSena && (
+        <OtSenaSection ordenNumero={orden.numero} resumenSena={orden.resumenSena} />
+      )}
 
       <OtFacturacionSection
         ordenId={orden.id}

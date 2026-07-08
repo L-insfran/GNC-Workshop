@@ -7,13 +7,16 @@ export const ROUTES = {
   CLIENTE_EDIT: (id: string) => `/clientes/${id}/editar`,
   VEHICULOS: '/vehiculos',
   VEHICULO_NEW: '/vehiculos/nuevo',
+  VEHICULO_DETAIL: (id: string) => `/vehiculos/${id}`,
   VEHICULO_EDIT: (id: string) => `/vehiculos/${id}/editar`,
   EQUIPOS_GNC: '/equipos-gnc',
   EQUIPO_GNC_NEW: '/equipos-gnc/nuevo',
+  EQUIPO_GNC_DETAIL: (id: string) => `/equipos-gnc/${id}`,
   EQUIPO_GNC_NEW_FOR_VEHICULO: (vehiculoId: string) =>
     `/equipos-gnc/nuevo?vehiculoId=${vehiculoId}`,
   EQUIPO_GNC_EDIT: (id: string) => `/equipos-gnc/${id}/editar`,
   ORDENES_TRABAJO: '/ordenes-trabajo',
+  ORDENES_TRABAJO_FILTRO: (filtro: string) => `/ordenes-trabajo?filtro=${filtro}`,
   ORDEN_TRABAJO_NEW: '/ordenes-trabajo/nuevo',
   ORDEN_TRABAJO_NEW_FROM_CLIENTE: (
     clienteId: string,
@@ -24,9 +27,15 @@ export const ROUTES = {
     if (params?.equipoGncId) search.set('equipoGncId', params.equipoGncId)
     return `/ordenes-trabajo/nuevo?${search.toString()}`
   },
+  ORDEN_TRABAJO_NEW_FROM_VEHICULO: (clienteId: string, vehiculoId: string, equipoGncId?: string) => {
+    const search = new URLSearchParams({ clienteId, vehiculoId })
+    if (equipoGncId) search.set('equipoGncId', equipoGncId)
+    return `/ordenes-trabajo/nuevo?${search.toString()}`
+  },
   ORDEN_TRABAJO_DETAIL: (id: string) => `/ordenes-trabajo/${id}`,
   ORDEN_TRABAJO_EDIT: (id: string) => `/ordenes-trabajo/${id}/editar`,
   INVENTARIO: '/inventario',
+  INVENTARIO_STOCK_BAJO: '/inventario?stockBajo=1',
   PRODUCTO_NEW: '/inventario/nuevo',
   PRODUCTO_DETAIL: (id: string) => `/inventario/${id}`,
   PRODUCTO_EDIT: (id: string) => `/inventario/${id}/editar`,

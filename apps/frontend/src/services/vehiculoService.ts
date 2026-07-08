@@ -1,5 +1,6 @@
 import type {
   IVehiculo,
+  IVehiculoFichaOperativa,
   CreateVehicleDTO,
   UpdateVehicleDTO,
   IPaginationParams,
@@ -19,6 +20,10 @@ export const vehiculoService = {
 
   getById(id: string) {
     return apiGet<IVehiculo>(`/vehiculos/${id}`)
+  },
+
+  getFicha(id: string) {
+    return apiGet<IVehiculoFichaOperativa>(`/vehiculos/${id}/ficha`)
   },
 
   create(data: CreateVehicleDTO) {

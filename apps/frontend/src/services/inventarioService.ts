@@ -14,8 +14,14 @@ import type {
 import { apiDelete, apiGet, apiPost, apiPut } from '@/services/api-client'
 
 export const inventarioService = {
-  list(params?: IPaginationParams) {
-    return apiGet<IProducto[]>('/inventario/productos', params)
+  list(params?: IPaginationParams & { stockBajo?: boolean }) {
+    const query = params
+      ? {
+          ...params,
+          stockBajo: params.stockBajo ? '1' : undefined,
+        }
+      : undefined
+    return apiGet<IProducto[]>('/inventario/productos', query)
   },
 
   getById(id: string) {

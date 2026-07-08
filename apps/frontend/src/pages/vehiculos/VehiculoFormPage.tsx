@@ -130,7 +130,7 @@ export function VehiculoFormPage() {
       } else {
         await create.mutateAsync(payload)
       }
-      navigate(ROUTES.VEHICULOS)
+      navigate(isEditing && id ? ROUTES.VEHICULO_DETAIL(id) : ROUTES.VEHICULOS)
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Error al guardar vehículo'
       setError('root', { message })
@@ -149,7 +149,10 @@ export function VehiculoFormPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-4">
-      <Link to={ROUTES.VEHICULOS} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900">
+      <Link
+        to={isEditing && id ? ROUTES.VEHICULO_DETAIL(id) : ROUTES.VEHICULOS}
+        className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900"
+      >
         <ArrowLeft className="h-4 w-4" />
         Volver
       </Link>

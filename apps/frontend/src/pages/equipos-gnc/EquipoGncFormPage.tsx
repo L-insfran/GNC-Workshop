@@ -121,7 +121,7 @@ export function EquipoGncFormPage() {
       } else {
         await create.mutateAsync(payload)
       }
-      navigate(ROUTES.EQUIPOS_GNC)
+      navigate(isEditing && id ? ROUTES.EQUIPO_GNC_DETAIL(id) : ROUTES.EQUIPOS_GNC)
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Error al guardar equipo'
       setError('root', { message })
@@ -137,7 +137,10 @@ export function EquipoGncFormPage() {
 
   return (
     <div className="mx-auto max-w-4xl space-y-4">
-      <Link to={ROUTES.EQUIPOS_GNC} className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900">
+      <Link
+        to={isEditing && id ? ROUTES.EQUIPO_GNC_DETAIL(id) : ROUTES.EQUIPOS_GNC}
+        className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900"
+      >
         <ArrowLeft className="h-4 w-4" />
         Volver
       </Link>

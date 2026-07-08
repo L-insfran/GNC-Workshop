@@ -11,8 +11,10 @@ import { ClienteFormPage } from '@/pages/clientes/ClienteFormPage'
 import { ClienteDetailPage } from '@/pages/clientes/ClienteDetailPage'
 import { VehiculosPage } from '@/pages/vehiculos/VehiculosPage'
 import { VehiculoFormPage } from '@/pages/vehiculos/VehiculoFormPage'
+import { VehiculoDetailPage } from '@/pages/vehiculos/VehiculoDetailPage'
 import { EquiposGncPage } from '@/pages/equipos-gnc/EquiposGncPage'
 import { EquipoGncFormPage } from '@/pages/equipos-gnc/EquipoGncFormPage'
+import { EquipoGncDetailPage } from '@/pages/equipos-gnc/EquipoGncDetailPage'
 import { OrdenesTrabajoPage } from '@/pages/ordenes-trabajo/OrdenesTrabajoPage'
 import { OrdenTrabajoFormPage } from '@/pages/ordenes-trabajo/OrdenTrabajoFormPage'
 import { OrdenTrabajoDetailPage } from '@/pages/ordenes-trabajo/OrdenTrabajoDetailPage'
@@ -61,12 +63,14 @@ export default function App() {
             <Route index element={<VehiculosPage />} />
             <Route path="nuevo" element={<VehiculoFormPage />} />
             <Route path=":id/editar" element={<VehiculoFormPage />} />
+            <Route path=":id" element={<VehiculoDetailPage />} />
           </Route>
 
           <Route path="equipos-gnc" element={<RoleGuard allowedRoles={MODULE_ROLES.equiposGnc} />}>
             <Route index element={<EquiposGncPage />} />
             <Route path="nuevo" element={<EquipoGncFormPage />} />
             <Route path=":id/editar" element={<EquipoGncFormPage />} />
+            <Route path=":id" element={<EquipoGncDetailPage />} />
           </Route>
 
           <Route path="ordenes-trabajo" element={<RoleGuard allowedRoles={MODULE_ROLES.ordenesTrabajo} />}>

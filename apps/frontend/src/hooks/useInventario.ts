@@ -12,7 +12,7 @@ import { inventarioService } from '@/services/inventarioService'
 
 const QUERY_KEY = 'inventario'
 
-export function useProductos(params?: IPaginationParams) {
+export function useProductos(params?: IPaginationParams & { stockBajo?: boolean }) {
   return useQuery({
     queryKey: [QUERY_KEY, 'productos', params],
     queryFn: async () => {

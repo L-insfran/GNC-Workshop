@@ -5,8 +5,7 @@ import { z } from 'zod'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useTurno, useAgendaMutations } from '@/hooks/useAgenda'
-import { useClientes } from '@/hooks/useClientes'
-import { useVehiculos } from '@/hooks/useVehiculos'
+import { useClientes, useClienteVehiculos } from '@/hooks/useClientes'
 import { useTiposTrabajo } from '@/hooks/useOrdenesTrabajo'
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
@@ -45,7 +44,6 @@ export function TurnoFormPage() {
   const navigate = useNavigate()
   const { data: turno, isLoading } = useTurno(id)
   const { data: clientesData } = useClientes({ perPage: 100 })
-  const { data: vehiculosData } = useVehiculos({ perPage: 100 })
   const { data: tiposTrabajo } = useTiposTrabajo()
   const { create, update } = useAgendaMutations()
 
@@ -54,6 +52,7 @@ export function TurnoFormPage() {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
     setError,
   } = useForm<FormData>({
@@ -66,6 +65,15 @@ export function TurnoFormPage() {
       tipoTrabajoId: '',
     },
   })
+
+  const clienteId = watch('clienteId')
+  const { data: vehiculosCliente } = useClienteVehiculos(clienteId || undefined)
+
+  useEffect(() => {
+    if (!clienteId) {
+      setValue('vehiculoId', '')
+    }
+  }, [clienteId, setValue])
 
   useEffect(() => {
     if (!isEditing && clienteIdParam) {
@@ -134,11 +142,14 @@ export function TurnoFormPage() {
             />
             <Select
               label="Vehículo"
-              options={(vehiculosData?.data ?? []).map((v) => ({
+              options={(vehiculosCliente ?? []).map((v) => ({
                 value: v.id,
                 label: formatPatente(v.patente),
               }))}
-              placeholder="Opcional (requerido para generar OT)"
+              placeholder={
+                clienteId ? 'Opcional (requerido para generar OT)' : 'Seleccioná un cliente primero'
+              }
+              disabled={!clienteId}
               {...register('vehiculoId')}
             />
             <Select

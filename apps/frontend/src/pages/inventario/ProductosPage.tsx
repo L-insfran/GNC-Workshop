@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Plus, Pencil, Trash2, ArrowLeftRight, Eye } from 'lucide-react'
 import { useProductos, useInventarioMutations, useAlertasStock } from '@/hooks/useInventario'
 import { ROUTES } from '@/constants/routes'
@@ -14,11 +14,22 @@ import type { ITableColumn } from '@/types'
 
 export function ProductosPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const stockBajo = searchParams.get('stockBajo') === '1'
   const [page, setPage] = useState(1)
   const [search, setSearch] = useState('')
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const { data, isLoading, error } = useProductos({ page, perPage: 10, search: search || undefined })
+  useEffect(() => {
+    setPage(1)
+  }, [stockBajo])
+
+  const { data, isLoading, error } = useProductos({
+    page,
+    perPage: 10,
+    search: search || undefined,
+    stockBajo: stockBajo || undefined,
+  })
   const { data: alertas } = useAlertasStock()
   const { remove } = useInventarioMutations()
 
@@ -102,7 +113,16 @@ export function ProductosPage() {
         </div>
       </div>
 
-      {(alertas?.length ?? 0) > 0 && (
+      {stockBajo && (
+        <Alert variant="warning" title="Filtro activo">
+          Mostrando productos con stock bajo o en el mínimo.{' '}
+          <Link to={ROUTES.INVENTARIO} className="font-medium underline">
+            Ver todo el inventario
+          </Link>
+        </Alert>
+      )}
+
+      {!stockBajo && (alertas?.length ?? 0) > 0 && (
         <Alert variant="warning">{alertas!.length} producto(s) con stock bajo o en mínimo</Alert>
       )}
 

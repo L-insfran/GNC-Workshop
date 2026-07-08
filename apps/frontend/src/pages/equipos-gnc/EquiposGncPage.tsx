@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
 import { useEquiposGnc, useEquipoGncMutations } from '@/hooks/useEquiposGnc'
 import { ROUTES } from '@/constants/routes'
 import { Card } from '@/components/ui/Card'
@@ -36,7 +36,15 @@ export function EquiposGncPage() {
   const { remove } = useEquipoGncMutations()
 
   const columns: ITableColumn<IEquipoGnc>[] = [
-    { key: 'numeroSerieEquipo', header: 'N° serie' },
+    { key: 'numeroSerieEquipo', header: 'N° serie', render: (item) => (
+        <button
+          type="button"
+          className="font-medium text-brand-700 hover:underline"
+          onClick={() => navigate(ROUTES.EQUIPO_GNC_DETAIL(item.id))}
+        >
+          {item.numeroSerieEquipo}
+        </button>
+      ) },
     {
       key: 'regulador',
       header: 'Regulador',
@@ -66,6 +74,14 @@ export function EquiposGncPage() {
       header: 'Acciones',
       render: (item) => (
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Ver ficha"
+            onClick={() => navigate(ROUTES.EQUIPO_GNC_DETAIL(item.id))}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.EQUIPO_GNC_EDIT(item.id))}>
             <Pencil className="h-4 w-4" />
           </Button>

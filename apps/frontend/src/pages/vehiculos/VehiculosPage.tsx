@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye } from 'lucide-react'
 import { useVehiculos, useVehiculoMutations } from '@/hooks/useVehiculos'
 import { ROUTES } from '@/constants/routes'
 import { Card } from '@/components/ui/Card'
@@ -25,7 +25,15 @@ export function VehiculosPage() {
     {
       key: 'patente',
       header: 'Patente',
-      render: (item) => formatPatente(item.patente),
+      render: (item) => (
+        <button
+          type="button"
+          className="font-medium text-brand-700 hover:underline"
+          onClick={() => navigate(ROUTES.VEHICULO_DETAIL(item.id))}
+        >
+          {formatPatente(item.patente)}
+        </button>
+      ),
     },
     {
       key: 'marca',
@@ -48,6 +56,14 @@ export function VehiculosPage() {
       header: 'Acciones',
       render: (item) => (
         <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            title="Ver ficha"
+            onClick={() => navigate(ROUTES.VEHICULO_DETAIL(item.id))}
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.VEHICULO_EDIT(item.id))}>
             <Pencil className="h-4 w-4" />
           </Button>

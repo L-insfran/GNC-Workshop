@@ -1,5 +1,6 @@
 import type {
   IEquipoGnc,
+  IEquipoGncFichaOperativa,
   CreateEquipoGncDTO,
   UpdateEquipoGncDTO,
   IPaginationParams,
@@ -13,6 +14,10 @@ export const equipoGncService = {
 
   getById(id: string) {
     return apiGet<IEquipoGnc>(`/equipos-gnc/${id}`)
+  },
+
+  getFicha(id: string) {
+    return apiGet<IEquipoGncFichaOperativa>(`/equipos-gnc/${id}/ficha`)
   },
 
   create(data: CreateEquipoGncDTO) {

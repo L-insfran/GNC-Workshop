@@ -35,7 +35,7 @@ import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { formatCurrency, formatDateOnly } from '@/utils/format'
 
 function vencimientoLink(alerta: IVencimientoAlerta): string {
-  return ROUTES.CLIENTE_DETAIL(alerta.clienteId)
+  return ROUTES.EQUIPO_GNC_DETAIL(alerta.equipoGncId)
 }
 
 function getAlertaOperativaBadgeVariant(nivel: IAlertaOperativa['nivel']) {
@@ -79,36 +79,51 @@ export function DashboardPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard title="Órdenes activas" value={kpis.ordenesActivas} icon={ClipboardList} />
-        <StatCard title="Órdenes hoy" value={kpis.ordenesHoy} icon={Wrench} />
-        <StatCard title="Clientes activos" value={kpis.clientesActivos} icon={Users} />
+        <StatCard
+          title="Órdenes activas"
+          value={kpis.ordenesActivas}
+          icon={ClipboardList}
+          to={ROUTES.ORDENES_TRABAJO_FILTRO('activas')}
+        />
+        <StatCard
+          title="Órdenes hoy"
+          value={kpis.ordenesHoy}
+          icon={Wrench}
+          to={ROUTES.ORDENES_TRABAJO_FILTRO('hoy')}
+        />
+        <StatCard title="Clientes activos" value={kpis.clientesActivos} icon={Users} to={ROUTES.CLIENTES} />
         <StatCard
           title="Vencimientos próximos"
           value={kpis.vencimientosProximos}
           icon={AlertTriangle}
+          to={`${ROUTES.DASHBOARD}#vencimientos`}
         />
         <StatCard
           title="Stock bajo o en mínimo"
           value={kpis.stockBajo}
           icon={Package}
           trend={kpis.stockBajo > 0 ? 'Revisar depósito' : 'Sin alertas'}
+          to={ROUTES.INVENTARIO_STOCK_BAJO}
         />
         <StatCard
           title="OT esperando repuesto"
           value={kpis.otEsperaRepuesto}
           icon={PauseCircle}
           trend={kpis.otEsperaRepuesto > 0 ? 'Trabajos detenidos' : 'Sin demoras'}
+          to={ROUTES.ORDENES_TRABAJO_FILTRO('espera_repuesto')}
         />
         <StatCard
           title="Facturación del mes"
           value={formatCurrency(kpis.facturacionMes)}
           icon={DollarSign}
+          to={ROUTES.FACTURACION}
         />
         <StatCard
           title="Producción del mes"
           value={kpis.produccionMes}
           icon={BarChart3}
           trend="Órdenes entregadas"
+          to={ROUTES.ORDENES_TRABAJO_FILTRO('entregadas_mes')}
         />
       </div>
 
@@ -175,7 +190,7 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      <Card>
+      <Card id="vencimientos">
         <CardHeader
           title="Alertas de vencimiento"
           description="Obleas GNC y pruebas hidráulicas"

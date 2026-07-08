@@ -12,12 +12,13 @@ const productoService = new ProductoService()
 
 export default class InventarioController {
   async index({ request, response }: HttpContext) {
-    const params: IPaginationParams = {
+    const params: IPaginationParams & { stockBajo?: boolean } = {
       page: Number(request.input('page', 1)),
       perPage: Number(request.input('perPage', 20)),
       search: request.input('search'),
       sortBy: request.input('sortBy'),
       sortOrder: request.input('sortOrder'),
+      stockBajo: request.input('stockBajo') === '1' || request.input('stockBajo') === true,
     }
 
     const result = await productoService.list(params)
