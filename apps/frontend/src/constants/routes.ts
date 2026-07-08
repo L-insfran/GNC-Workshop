@@ -45,6 +45,7 @@ export const ROUTES = {
   CONFIG_MARCAS_MODELOS: '/configuracion/marcas-modelos',
   CONFIG_CATEGORIAS: '/configuracion/categorias',
   CONFIG_KITS: '/configuracion/kits-trabajo',
+  CONFIG_TIPOS_TRABAJO: '/configuracion/tipos-trabajo',
 } as const
 
 export type RouteKey = keyof typeof ROUTES

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Users, Car, Package, Settings, Wrench } from 'lucide-react'
+import { Users, Car, Package, Settings, Wrench, ClipboardList } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { Card, CardBody } from '@/components/ui/Card'
 import { useAuth } from '@/hooks/useAuth'
@@ -26,6 +26,13 @@ const SECTIONS = [
     path: ROUTES.CONFIG_CATEGORIAS,
     icon: Package,
     roles: [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR, ROLES.DEPOSITO],
+  },
+  {
+    title: 'Tipos de trabajo',
+    description: 'Catálogo de trabajos GNC para órdenes y agenda',
+    path: ROUTES.CONFIG_TIPOS_TRABAJO,
+    icon: ClipboardList,
+    roles: [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR],
   },
   {
     title: 'Kits de trabajo',

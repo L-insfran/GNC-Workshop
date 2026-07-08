@@ -43,6 +43,15 @@ router
           '#modules/ordenes_trabajo/controllers/ot_control_calidad_controller.upsert'
         )
         router.get('tipos-trabajo', '#modules/ordenes_trabajo/controllers/tipos_trabajo_controller.index')
+        router
+          .post('tipos-trabajo', '#modules/ordenes_trabajo/controllers/tipos_trabajo_controller.store')
+          .use(middleware.role(catalogManagers))
+        router
+          .put('tipos-trabajo/:id', '#modules/ordenes_trabajo/controllers/tipos_trabajo_controller.update')
+          .use(middleware.role(catalogManagers))
+        router
+          .delete('tipos-trabajo/:id', '#modules/ordenes_trabajo/controllers/tipos_trabajo_controller.destroy')
+          .use(middleware.role(catalogManagers))
 
         router.get(
           'kit-trabajos/:tipoTrabajoId/items',

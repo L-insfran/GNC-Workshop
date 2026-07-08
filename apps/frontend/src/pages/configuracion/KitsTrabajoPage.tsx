@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { Plus, Pencil, Trash2, ArrowLeft } from 'lucide-react'
 import type { IKitTrabajoItem, OtItemTipo } from '@gnc/shared-types'
 import { useTiposTrabajo } from '@/hooks/useOrdenesTrabajo'
@@ -19,6 +19,7 @@ import { formatCurrency } from '@/utils/format'
 import { ApiError } from '@/services/api-client'
 
 export function KitsTrabajoPage() {
+  const [searchParams] = useSearchParams()
   const [selectedTipoId, setSelectedTipoId] = useState<string | null>(null)
   const [itemModal, setItemModal] = useState<IKitTrabajoItem | 'new' | null>(null)
   const [defaultTipo, setDefaultTipo] = useState<OtItemTipo>('servicio')
@@ -28,6 +29,13 @@ export function KitsTrabajoPage() {
   const { data: tiposTrabajo, isLoading: loadingTipos } = useTiposTrabajo()
   const { data: kitItems, isLoading: loadingItems } = useKitItems(selectedTipoId)
   const { create, update, remove } = useKitTrabajoMutations(selectedTipoId)
+
+  useEffect(() => {
+    const tipoFromUrl = searchParams.get('tipo')
+    if (tipoFromUrl && tiposTrabajo?.some((t) => t.id === tipoFromUrl)) {
+      setSelectedTipoId(tipoFromUrl)
+    }
+  }, [searchParams, tiposTrabajo])
 
   const selectedTipo = tiposTrabajo?.find((t) => t.id === selectedTipoId)
 

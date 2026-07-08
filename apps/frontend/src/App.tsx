@@ -33,6 +33,7 @@ import { UsuarioFormPage } from '@/pages/configuracion/usuarios/UsuarioFormPage'
 import { MarcasModelosPage } from '@/pages/configuracion/MarcasModelosPage'
 import { CategoriasPage } from '@/pages/configuracion/CategoriasPage'
 import { KitsTrabajoPage } from '@/pages/configuracion/KitsTrabajoPage'
+import { TiposTrabajoPage } from '@/pages/configuracion/TiposTrabajoPage'
 
 export default function App() {
   return (
@@ -118,6 +119,12 @@ export default function App() {
               element={<RoleGuard allowedRoles={MODULE_ROLES.configuracionCatalogos} />}
             >
               <Route index element={<CategoriasPage />} />
+            </Route>
+            <Route
+              path="tipos-trabajo"
+              element={<RoleGuard allowedRoles={MODULE_ROLES.kitsTrabajo} />}
+            >
+              <Route index element={<TiposTrabajoPage />} />
             </Route>
             <Route
               path="kits-trabajo"
