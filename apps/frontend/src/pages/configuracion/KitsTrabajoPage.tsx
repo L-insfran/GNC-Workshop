@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { Plus, Pencil, Trash2, ArrowLeft } from 'lucide-react'
-import type { IKitTrabajoItem, OtItemTipo } from '@gnc/shared-types'
+import type { IKitTrabajoItem } from '@gnc/shared-types'
 import { useTiposTrabajo } from '@/hooks/useOrdenesTrabajo'
 import { useKitItems, useKitTrabajoMutations } from '@/hooks/useKitsTrabajo'
 import { ROUTES } from '@/constants/routes'
@@ -22,7 +22,6 @@ export function KitsTrabajoPage() {
   const [searchParams] = useSearchParams()
   const [selectedTipoId, setSelectedTipoId] = useState<string | null>(null)
   const [itemModal, setItemModal] = useState<IKitTrabajoItem | 'new' | null>(null)
-  const [defaultTipo, setDefaultTipo] = useState<OtItemTipo>('servicio')
   const [deleteItemId, setDeleteItemId] = useState<string | null>(null)
   const [deleteError, setDeleteError] = useState<string | null>(null)
 
@@ -123,29 +122,10 @@ export function KitsTrabajoPage() {
             title={selectedTipo ? `Kit: ${selectedTipo.nombre}` : 'Ítems del kit'}
             action={
               selectedTipoId ? (
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      setDefaultTipo('servicio')
-                      setItemModal('new')
-                    }}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Servicio
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => {
-                      setDefaultTipo('repuesto')
-                      setItemModal('new')
-                    }}
-                  >
-                    <Plus className="h-4 w-4" />
-                    Repuesto
-                  </Button>
-                </div>
+                <Button size="sm" onClick={() => setItemModal('new')}>
+                  <Plus className="h-4 w-4" />
+                  Agregar ítem
+                </Button>
               ) : undefined
             }
           />
@@ -187,8 +167,8 @@ export function KitsTrabajoPage() {
               ))}
             {selectedTipoId && !loadingItems && kitItems?.length === 0 && (
               <Alert variant="info" className="m-4">
-                Este tipo aún no tiene ítems. Agregá servicios o repuestos para precargar el
-                presupuesto al crear una OT.
+                Este tipo aún no tiene ítems. Usá &quot;Agregar ítem&quot; para precargar servicios,
+                repuestos o materiales al crear una OT.
               </Alert>
             )}
           </CardBody>
@@ -199,7 +179,7 @@ export function KitsTrabajoPage() {
         isOpen={itemModal !== null}
         onClose={() => setItemModal(null)}
         item={itemModal !== null && itemModal !== 'new' ? itemModal : undefined}
-        defaultTipo={defaultTipo}
+        defaultTipo="servicio"
         onSubmit={handleSubmitItem}
         isSubmitting={create.isPending || update.isPending}
       />
