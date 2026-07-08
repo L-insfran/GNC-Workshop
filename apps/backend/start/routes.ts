@@ -36,6 +36,29 @@ router
         router.patch('ordenes-trabajo/:id/estado', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.updateEstado')
         router.get('tipos-trabajo', '#modules/ordenes_trabajo/controllers/tipos_trabajo_controller.index')
 
+        router.get(
+          'kit-trabajos/:tipoTrabajoId/items',
+          '#modules/ordenes_trabajo/controllers/kit_trabajo_controller.index'
+        )
+        router
+          .post(
+            'kit-trabajos/:tipoTrabajoId/items',
+            '#modules/ordenes_trabajo/controllers/kit_trabajo_controller.store'
+          )
+          .use(middleware.role(catalogManagers))
+        router
+          .put(
+            'kit-trabajos/items/:itemId',
+            '#modules/ordenes_trabajo/controllers/kit_trabajo_controller.update'
+          )
+          .use(middleware.role(catalogManagers))
+        router
+          .delete(
+            'kit-trabajos/items/:itemId',
+            '#modules/ordenes_trabajo/controllers/kit_trabajo_controller.destroy'
+          )
+          .use(middleware.role(catalogManagers))
+
         router.get('vehiculo-marcas', '#modules/vehiculos/controllers/vehiculo_marcas_controller.index')
         router
           .post('vehiculo-marcas', '#modules/vehiculos/controllers/vehiculo_marcas_controller.store')
@@ -108,6 +131,10 @@ router
         router.get('agenda/turnos', '#modules/agenda/controllers/agenda_controller.index')
         router.get('agenda/por-fecha', '#modules/agenda/controllers/agenda_controller.porFecha')
         router.get('agenda/turnos/:id', '#modules/agenda/controllers/agenda_controller.show')
+        router.post(
+          'agenda/turnos/:id/generar-ot',
+          '#modules/agenda/controllers/agenda_controller.generarOt'
+        )
         router.post('agenda/turnos', '#modules/agenda/controllers/agenda_controller.store')
         router.put('agenda/turnos/:id', '#modules/agenda/controllers/agenda_controller.update')
         router.delete('agenda/turnos/:id', '#modules/agenda/controllers/agenda_controller.destroy')

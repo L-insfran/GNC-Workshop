@@ -20,6 +20,7 @@ import { BaseService } from '#shared/base_service'
 import { parseDateOnly } from '#shared/date_util'
 import { countActiveMecanicos, findActiveMecanico } from '#shared/mecanico_util'
 import OtItemService from '#modules/ordenes_trabajo/services/ot_item_service'
+import KitTrabajoService from '#modules/ordenes_trabajo/services/kit_trabajo_service'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_trabajo_repository'
 import OtItemRepository from '#modules/ordenes_trabajo/repositories/ot_item_repository'
@@ -51,6 +52,8 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
   private facturaRepository = new FacturaRepository()
   private otItemRepository = new OtItemRepository()
   private stockReservaService = new StockReservaService()
+  private kitTrabajoService = new KitTrabajoService()
+  private otItemService = new OtItemService()
 
   async list(params?: IPaginationParams) {
     const result = await this.repository.findAllWithRelations(params)
@@ -81,8 +84,7 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
       throw new Error('OT_YA_FACTURADA')
     }
 
-    const otItemService = new OtItemService()
-    const presupuesto = await otItemService.getPresupuesto(id)
+    const presupuesto = await this.otItemService.getPresupuesto(id)
 
     if (!presupuesto?.items.length) {
       throw new Error('OT_SIN_ITEMS')
@@ -171,6 +173,13 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
       },
       user
     )
+
+    try {
+      const kitItems = await this.kitTrabajoService.findItemsByTipoTrabajoId(data.tipoTrabajoId)
+      await this.otItemService.createManyFromKit(orden.id, kitItems, user)
+    } catch {
+      // La OT ya fue creada; un fallo al aplicar el kit no debe revertir el alta.
+    }
 
     return (await this.repository.findByIdWithRelations(orden.id))!
   }

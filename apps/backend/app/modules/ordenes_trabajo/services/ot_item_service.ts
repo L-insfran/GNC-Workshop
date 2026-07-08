@@ -5,6 +5,7 @@ import {
 } from '@gnc/shared-types'
 import type User from '#models/user'
 import type OtItem from '#models/ot_item'
+import type KitTrabajoItem from '#models/kit_trabajo_item'
 import OrdenTrabajo from '#models/orden_trabajo'
 import Producto from '#models/producto'
 import { EntityCreated, EntityDeleted, EntityUpdated } from '#events/audit_events'
@@ -124,6 +125,61 @@ export default class OtItemService {
     }
 
     return itemCompleto
+  }
+
+  /**
+   * Crea ítems estimados desde un kit sin validar stock.
+   * La reserva/validación ocurre al pasar la OT a taller.
+   */
+  async createManyFromKit(
+    ordenTrabajoId: string,
+    kitItems: KitTrabajoItem[],
+    user: User
+  ): Promise<void> {
+    if (kitItems.length === 0) return
+
+    for (const kitItem of kitItems) {
+      let productoId: string | null = kitItem.productoId
+      let precioUnitario =
+        kitItem.precioUnitario !== null && kitItem.precioUnitario !== undefined
+          ? Number(kitItem.precioUnitario)
+          : null
+
+      if (productoId) {
+        const producto = await Producto.query()
+          .where('id', productoId)
+          .whereNull('deleted_at')
+          .where('is_active', true)
+          .first()
+
+        if (!producto) {
+          productoId = null
+        } else if (precioUnitario === null) {
+          precioUnitario = Number(producto.precioVenta)
+        }
+      }
+
+      if (precioUnitario === null) {
+        precioUnitario = 0
+      }
+
+      const cantidad = Number(kitItem.cantidad)
+      const subtotal = calcularSubtotal(cantidad, precioUnitario)
+
+      await this.repository.create({
+        ordenTrabajoId,
+        tipo: kitItem.tipo,
+        productoId,
+        descripcion: kitItem.descripcion,
+        cantidad,
+        precioUnitario,
+        subtotal,
+        esEstimado: kitItem.esEstimado ?? true,
+        createdBy: user.id,
+      })
+    }
+
+    await recalcularTotalesOrden(ordenTrabajoId)
   }
 
   async update(

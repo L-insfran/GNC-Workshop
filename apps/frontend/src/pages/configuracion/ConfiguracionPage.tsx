@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Users, Car, Package, Settings } from 'lucide-react'
+import { Users, Car, Package, Settings, Wrench } from 'lucide-react'
 import { ROUTES } from '@/constants/routes'
 import { Card, CardBody } from '@/components/ui/Card'
 import { useAuth } from '@/hooks/useAuth'
@@ -26,6 +26,13 @@ const SECTIONS = [
     path: ROUTES.CONFIG_CATEGORIAS,
     icon: Package,
     roles: [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR, ROLES.DEPOSITO],
+  },
+  {
+    title: 'Kits de trabajo',
+    description: 'Plantillas de servicios y repuestos por tipo de OT',
+    path: ROUTES.CONFIG_KITS,
+    icon: Wrench,
+    roles: [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR],
   },
 ]
 

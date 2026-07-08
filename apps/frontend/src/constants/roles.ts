@@ -80,6 +80,7 @@ export const MODULE_ROLES: Record<string, RoleName[]> = {
   configuracionMarcas: [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR],
   /** Margen bruto y costos de repuestos (dato sensible) */
   margenOt: [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR],
+  kitsTrabajo: [ROLES.ADMINISTRADOR, ROLES.SUPERVISOR],
 }
 
 export function hasRole(
