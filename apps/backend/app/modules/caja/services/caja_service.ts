@@ -6,6 +6,7 @@ import Factura from '#models/factura'
 import CajaRepository from '#modules/caja/repositories/caja_repository'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 import { validarMontoCobro } from '#shared/factura_cobro_util'
+import { serializeCajaMovimientos } from '#shared/caja_movimiento_serializer'
 
 export default class CajaService {
   private repository = new CajaRepository()
@@ -38,7 +39,13 @@ export default class CajaService {
       throw new Error('CAJA_NO_ENCONTRADA')
     }
 
-    return this.repository.listMovimientos(caja.id, params)
+    const result = await this.repository.listMovimientos(caja.id, params)
+    const data = await serializeCajaMovimientos(result.data)
+
+    return {
+      data,
+      meta: result.meta,
+    }
   }
 
   async createMovimiento(data: CreateCajaMovimientoDTO, user: User): Promise<CajaMovimiento> {
@@ -96,6 +103,7 @@ export default class CajaService {
 
     const dia = fecha ? DateTime.fromISO(fecha, { zone: 'utc' }) : DateTime.utc()
     const movimientos = await this.repository.movimientosDelDia(caja.id, dia)
+    const movimientosSerializados = await serializeCajaMovimientos(movimientos)
 
     const ingresos = movimientos
       .filter((m) => m.tipo === 'ingreso')
@@ -116,17 +124,7 @@ export default class CajaService {
       ingresos,
       egresos,
       saldoFinal,
-      movimientos: movimientos.map((m) => ({
-        id: m.id,
-        cajaId: m.cajaId,
-        tipo: m.tipo,
-        monto: Number(m.monto),
-        concepto: m.concepto,
-        facturaId: m.facturaId ?? undefined,
-        userId: m.userId ?? undefined,
-        userNombre: m.user?.fullName,
-        createdAt: m.createdAt.toISO()!,
-      })),
+      movimientos: movimientosSerializados,
     }
   }
 }

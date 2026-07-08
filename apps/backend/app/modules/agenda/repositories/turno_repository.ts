@@ -63,4 +63,11 @@ export default class TurnoRepository extends BaseRepository<Turno> {
 
     return query.first()
   }
+
+  async findByOrdenTrabajoId(ordenTrabajoId: string): Promise<Turno | null> {
+    return Turno.query()
+      .where('orden_trabajo_id', ordenTrabajoId)
+      .whereNull('deleted_at')
+      .first()
+  }
 }

@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { useTurno, useAgendaMutations } from '@/hooks/useAgenda'
 import { useClientes } from '@/hooks/useClientes'
@@ -38,6 +38,9 @@ function toLocalInputValue(iso: string) {
 
 export function TurnoFormPage() {
   const { id } = useParams<{ id: string }>()
+  const [searchParams] = useSearchParams()
+  const clienteIdParam = searchParams.get('clienteId') ?? ''
+  const vehiculoIdParam = searchParams.get('vehiculoId') ?? ''
   const isEditing = Boolean(id)
   const navigate = useNavigate()
   const { data: turno, isLoading } = useTurno(id)
@@ -50,16 +53,28 @@ export function TurnoFormPage() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
     setError,
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
+      clienteId: clienteIdParam,
+      vehiculoId: vehiculoIdParam,
       estado: 'pendiente',
       fechaHora: toLocalInputValue(new Date().toISOString()),
       tipoTrabajoId: '',
     },
   })
+
+  useEffect(() => {
+    if (!isEditing && clienteIdParam) {
+      setValue('clienteId', clienteIdParam)
+    }
+    if (!isEditing && vehiculoIdParam) {
+      setValue('vehiculoId', vehiculoIdParam)
+    }
+  }, [isEditing, clienteIdParam, vehiculoIdParam, setValue])
 
   useEffect(() => {
     if (turno) {

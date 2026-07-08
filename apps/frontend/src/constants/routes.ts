@@ -48,6 +48,14 @@ export const ROUTES = {
   FACTURA_DETAIL: (id: string) => `/facturacion/${id}`,
   AGENDA: '/agenda',
   TURNO_NEW: '/agenda/nuevo',
+  TURNO_NEW_FROM_CLIENTE: (
+    clienteId: string,
+    params?: { vehiculoId?: string },
+  ) => {
+    const search = new URLSearchParams({ clienteId })
+    if (params?.vehiculoId) search.set('vehiculoId', params.vehiculoId)
+    return `/agenda/nuevo?${search.toString()}`
+  },
   TURNO_EDIT: (id: string) => `/agenda/${id}/editar`,
   CONFIGURACION: '/configuracion',
   CONFIG_USUARIOS: '/configuracion/usuarios',

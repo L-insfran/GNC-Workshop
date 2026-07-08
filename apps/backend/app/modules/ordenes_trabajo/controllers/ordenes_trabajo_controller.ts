@@ -7,12 +7,14 @@ import { buildOtSenaResumen } from '#shared/ot_sena_util'
 import OrdenTrabajoService from '#modules/ordenes_trabajo/services/orden_trabajo_service'
 import FacturaService from '#modules/facturacion/services/factura_service'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
+import TurnoRepository from '#modules/agenda/repositories/turno_repository'
 import { createOrdenTrabajoValidator } from '#modules/ordenes_trabajo/validators/create_orden_trabajo_validator'
 import { updateEstadoValidator } from '#modules/ordenes_trabajo/validators/update_estado_validator'
 
 const ordenTrabajoService = new OrdenTrabajoService()
 const facturaService = new FacturaService()
 const facturaRepository = new FacturaRepository()
+const turnoRepository = new TurnoRepository()
 
 export default class OrdenesTrabajoController {
   async index({ request, response }: HttpContext) {
@@ -39,17 +41,24 @@ export default class OrdenesTrabajoController {
       return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
     }
 
-    const [resumenesCobro, resumenSena] = await Promise.all([
+    const [resumenesCobro, resumenSena, turnoOrigen] = await Promise.all([
       facturaRepository.findCobroResumenByOrdenTrabajoIds(
         [params.id],
         new Map([[params.id, orden.estado]])
       ),
       buildOtSenaResumen(params.id),
+      turnoRepository.findByOrdenTrabajoId(params.id),
     ])
 
     return response.ok(
       ApiResponse.success(
-        serializeOrdenTrabajo(orden, resumenesCobro.get(params.id), undefined, resumenSena)
+        serializeOrdenTrabajo(
+          orden,
+          resumenesCobro.get(params.id),
+          undefined,
+          resumenSena,
+          turnoOrigen
+        )
       )
     )
   }

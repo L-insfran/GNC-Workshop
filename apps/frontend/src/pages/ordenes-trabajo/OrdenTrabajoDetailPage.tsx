@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Pencil } from 'lucide-react'
+import { ArrowLeft, Calendar, Pencil } from 'lucide-react'
 import { useOrdenTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
 import { useMecanicos } from '@/hooks/useMecanicos'
 import { ROUTES } from '@/constants/routes'
@@ -143,13 +143,60 @@ export function OrdenTrabajoDetailPage() {
         <CardBody>
           <dl className="grid gap-4 sm:grid-cols-2">
             <div>
+              <dt className="text-xs font-medium uppercase text-slate-500">Cliente</dt>
+              <dd className="mt-1 text-sm">
+                <Link
+                  to={ROUTES.CLIENTE_DETAIL(orden.clienteId)}
+                  className="font-medium text-brand-600 hover:text-brand-700"
+                >
+                  {orden.clienteNombre ?? 'Ver cliente'}
+                </Link>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs font-medium uppercase text-slate-500">Vehículo</dt>
+              <dd className="mt-1 text-sm">
+                <Link
+                  to={ROUTES.VEHICULO_EDIT(orden.vehiculoId)}
+                  className="font-medium text-brand-600 hover:text-brand-700"
+                >
+                  {vehiculoDescripcion || 'Ver vehículo'}
+                </Link>
+              </dd>
+            </div>
+            <div>
               <dt className="text-xs font-medium uppercase text-slate-500">Tipo de trabajo</dt>
               <dd className="mt-1 text-sm text-slate-900">{orden.tipoTrabajoNombre ?? '-'}</dd>
             </div>
             <div>
               <dt className="text-xs font-medium uppercase text-slate-500">Equipo GNC</dt>
-              <dd className="mt-1 text-sm text-slate-900">{orden.equipoGncNumeroSerie ?? 'Sin equipo'}</dd>
+              <dd className="mt-1 text-sm text-slate-900">
+                {orden.equipoGncId ? (
+                  <Link
+                    to={ROUTES.EQUIPO_GNC_EDIT(orden.equipoGncId)}
+                    className="font-medium text-brand-600 hover:text-brand-700"
+                  >
+                    {orden.equipoGncNumeroSerie}
+                  </Link>
+                ) : (
+                  'Sin equipo'
+                )}
+              </dd>
             </div>
+            {orden.turnoOrigen && (
+              <div className="sm:col-span-2">
+                <dt className="text-xs font-medium uppercase text-slate-500">Turno de origen</dt>
+                <dd className="mt-1 text-sm">
+                  <Link
+                    to={ROUTES.TURNO_EDIT(orden.turnoOrigen.id)}
+                    className="inline-flex items-center gap-1.5 font-medium text-brand-600 hover:text-brand-700"
+                  >
+                    <Calendar className="h-4 w-4" />
+                    {formatDateTime(orden.turnoOrigen.fechaHora)}
+                  </Link>
+                </dd>
+              </div>
+            )}
             <div>
               <dt className="text-xs font-medium uppercase text-slate-500">Prioridad</dt>
               <dd className="mt-1 text-sm text-slate-900">{ORDEN_PRIORIDAD_LABELS[orden.prioridad]}</dd>

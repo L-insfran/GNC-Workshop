@@ -19,7 +19,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts'
-import type { IAlertaOperativa } from '@gnc/shared-types'
+import type { IAlertaOperativa, IVencimientoAlerta } from '@gnc/shared-types'
 import {
   useDashboardKpis,
   useDashboardProduccion,
@@ -33,6 +33,10 @@ import { Alert } from '@/components/ui/Alert'
 import { Badge, getVencimientoBadgeVariant } from '@/components/ui/Badge'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { formatCurrency, formatDateOnly } from '@/utils/format'
+
+function vencimientoLink(alerta: IVencimientoAlerta): string {
+  return ROUTES.CLIENTE_DETAIL(alerta.clienteId)
+}
 
 function getAlertaOperativaBadgeVariant(nivel: IAlertaOperativa['nivel']) {
   return getVencimientoBadgeVariant(nivel)
@@ -184,9 +188,10 @@ export function DashboardPage() {
           ) : (
             <div className="grid gap-3 md:grid-cols-2">
               {(vencimientos ?? []).slice(0, 8).map((alerta) => (
-                <div
+                <Link
                   key={alerta.id}
-                  className="flex items-start justify-between gap-3 rounded-lg border border-slate-100 p-3"
+                  to={vencimientoLink(alerta)}
+                  className="flex items-start justify-between gap-3 rounded-lg border border-slate-100 p-3 transition-colors hover:border-brand-200 hover:bg-slate-50"
                 >
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-slate-900">{alerta.descripcion}</p>
@@ -194,13 +199,13 @@ export function DashboardPage() {
                       {alerta.clienteNombre} · {alerta.vehiculoPatente}
                     </p>
                     <p className="text-xs text-slate-400">
-                      Vence: {formatDate(alerta.fechaVencimiento)}
+                      Vence: {formatDateOnly(alerta.fechaVencimiento)}
                     </p>
                   </div>
                   <Badge variant={getVencimientoBadgeVariant(alerta.nivel)}>
                     {alerta.diasRestantes}d
                   </Badge>
-                </div>
+                </Link>
               ))}
             </div>
           )}

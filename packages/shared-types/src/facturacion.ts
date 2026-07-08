@@ -61,6 +61,10 @@ export interface ICajaMovimientoResumen {
   monto: number
   concepto: string
   createdAt: string
+  facturaId?: string
+  facturaNumero?: string
+  ordenTrabajoId?: string
+  ordenTrabajoNumero?: string
 }
 
 export interface CreateFacturaItemDTO {

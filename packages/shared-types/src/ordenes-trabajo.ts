@@ -1,6 +1,7 @@
 import type { IOrdenCobroResumen } from './facturacion'
 import type { IOrdenMargenResumen } from './ot-items'
 import type { IOtSenaResumen } from './ot-sena'
+import type { TurnoEstado } from './agenda'
 
 export type OrdenEstado =
   | 'borrador'
@@ -58,6 +59,11 @@ export interface IOrdenTrabajo {
   resumenCobro?: IOrdenCobroResumen
   resumenMargen?: IOrdenMargenResumen
   resumenSena?: IOtSenaResumen
+  turnoOrigen?: {
+    id: string
+    fechaHora: string
+    estado: TurnoEstado
+  }
   createdAt: string
   updatedAt: string
 }

@@ -11,6 +11,7 @@ import { Table, TablePagination } from '@/components/ui/Table'
 import { Alert } from '@/components/ui/Alert'
 import type { ICajaMovimiento } from '@gnc/shared-types'
 import type { ITableColumn } from '@/types'
+import { MovimientoVinculo } from '@/components/caja/MovimientoVinculo'
 
 export function CajaPage() {
   const [page, setPage] = useState(1)
@@ -34,6 +35,18 @@ export function CajaPage() {
       ),
     },
     { key: 'concepto', header: 'Concepto' },
+    {
+      key: 'vinculo',
+      header: 'Vinculado a',
+      render: (item) => (
+        <MovimientoVinculo
+          facturaId={item.facturaId}
+          facturaNumero={item.facturaNumero}
+          ordenTrabajoId={item.ordenTrabajoId}
+          ordenTrabajoNumero={item.ordenTrabajoNumero}
+        />
+      ),
+    },
     {
       key: 'monto',
       header: 'Monto',

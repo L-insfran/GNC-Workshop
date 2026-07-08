@@ -34,6 +34,8 @@ export interface IVencimientoAlerta {
   descripcion: string
   vehiculoPatente: string
   clienteNombre: string
+  clienteId: string
+  equipoGncId: string
   fechaVencimiento: string
   diasRestantes: number
   nivel: 'info' | 'warning' | 'danger'

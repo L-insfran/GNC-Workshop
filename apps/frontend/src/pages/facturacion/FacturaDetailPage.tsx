@@ -131,12 +131,15 @@ export function FacturaDetailPage() {
           <div className="grid gap-2 text-sm sm:grid-cols-2">
             <div>
               <p className="text-slate-500">Cliente</p>
-              <p className="font-medium">
+              <Link
+                to={ROUTES.CLIENTE_DETAIL(factura.clienteId)}
+                className="font-medium text-brand-600 hover:text-brand-700"
+              >
                 {factura.clienteNombre ??
                   (factura as IFactura & { cliente?: { razonSocial?: string } }).cliente
                     ?.razonSocial ??
-                  factura.clienteId}
-              </p>
+                  'Ver cliente'}
+              </Link>
             </div>
             <div>
               <p className="text-slate-500">Fecha emisión</p>
@@ -195,10 +198,25 @@ export function FacturaDetailPage() {
               <p className="mb-2 text-sm font-medium text-slate-700">Cobros registrados</p>
               <ul className="space-y-2 text-sm">
                 {factura.cobros!.map((cobro) => (
-                  <li key={cobro.id} className="flex justify-between gap-2">
-                    <span className="text-slate-600">
-                      {formatDateTime(cobro.createdAt)} — {cobro.concepto}
-                    </span>
+                  <li key={cobro.id} className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="min-w-0">
+                      <span className="text-slate-600">
+                        {formatDateTime(cobro.createdAt)} — {cobro.concepto}
+                      </span>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-x-2 text-xs">
+                        <Link to={ROUTES.CAJA} className="text-brand-600 hover:text-brand-700">
+                          Ver en caja
+                        </Link>
+                        {cobro.ordenTrabajoId && (
+                          <Link
+                            to={ROUTES.ORDEN_TRABAJO_DETAIL(cobro.ordenTrabajoId)}
+                            className="text-brand-600 hover:text-brand-700"
+                          >
+                            OT {cobro.ordenTrabajoNumero ?? cobro.ordenTrabajoId.slice(0, 8)}
+                          </Link>
+                        )}
+                      </div>
+                    </div>
                     <span className="font-medium">{formatCurrency(cobro.monto)}</span>
                   </li>
                 ))}

@@ -13,12 +13,15 @@ interface SerializeFacturaOptions {
   notaCredito?: Factura | null
 }
 
-function mapCobros(cobros: CajaMovimiento[]): ICajaMovimientoResumen[] {
+function mapCobros(cobros: CajaMovimiento[], factura?: Factura): ICajaMovimientoResumen[] {
   return cobros.map((cobro) => ({
     id: cobro.id,
     monto: Number(cobro.monto),
     concepto: cobro.concepto,
     createdAt: cobro.createdAt.toISO()!,
+    facturaId: cobro.facturaId ?? factura?.id,
+    facturaNumero: factura?.numero,
+    ordenTrabajoId: cobro.ordenTrabajoId ?? undefined,
   }))
 }
 
@@ -70,7 +73,7 @@ export function serializeFactura(
     totalCobrado: esEmitida ? Number(totalCobrado.toFixed(2)) : undefined,
     saldoPendiente: esEmitida ? calcularSaldoPendiente(total, totalCobrado) : undefined,
     cobroFecha: ultimoCobro?.createdAt.toISO() ?? undefined,
-    cobros: cobros.length > 0 ? mapCobros(cobros) : undefined,
+    cobros: cobros.length > 0 ? mapCobros(cobros, factura) : undefined,
     puedeEmitirNotaCredito: esEmitida && factura.tipo !== 'nota_credito' && !notaCredito,
     notaCreditoId: notaCredito?.id,
     createdAt: factura.createdAt.toISO()!,

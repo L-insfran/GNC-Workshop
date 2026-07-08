@@ -14,7 +14,9 @@ export interface ICajaMovimiento {
   monto: number
   concepto: string
   facturaId?: string
+  facturaNumero?: string
   ordenTrabajoId?: string
+  ordenTrabajoNumero?: string
   userId?: string
   userNombre?: string
   createdAt: string

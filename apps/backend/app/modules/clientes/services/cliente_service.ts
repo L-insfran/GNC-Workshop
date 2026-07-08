@@ -5,13 +5,18 @@ import type Cliente from '#models/cliente'
 import Vehiculo from '#models/vehiculo'
 import EquipoGnc from '#models/equipo_gnc'
 import OrdenTrabajo from '#models/orden_trabajo'
+import Turno from '#models/turno'
+import Factura from '#models/factura'
 import { BaseService } from '#shared/base_service'
 import { sumSenasByOrdenTrabajoIds } from '#shared/ot_sena_util'
+import { calcularEstadoCobro, calcularSaldoPendiente } from '#shared/factura_cobro_util'
+import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 import ClienteRepository from '#modules/clientes/repositories/cliente_repository'
 
 export default class ClienteService extends BaseService<Cliente> {
   protected entityType = 'cliente'
   protected repository = new ClienteRepository()
+  private facturaRepository = new FacturaRepository()
 
   async getFichaOperativa(clienteId: string): Promise<IClienteFichaOperativa | null> {
     const cliente = await this.repository.findById(clienteId)
@@ -52,6 +57,48 @@ export default class ClienteService extends BaseService<Cliente> {
 
     const senasPorOt = await sumSenasByOrdenTrabajoIds(ordenes.map((o) => o.id))
 
+    const turnos = await Turno.query()
+      .where('cliente_id', clienteId)
+      .whereNull('deleted_at')
+      .whereIn('estado', ['pendiente', 'confirmado'])
+      .where('fecha_hora', '>=', DateTime.now().toSQL()!)
+      .preload('vehiculo')
+      .preload('tipoTrabajo')
+      .preload('ordenTrabajo')
+      .orderBy('fecha_hora', 'asc')
+      .limit(10)
+
+    const facturas = await Factura.query()
+      .where('cliente_id', clienteId)
+      .whereNull('deleted_at')
+      .orderBy('fecha_emision', 'desc')
+      .limit(10)
+
+    const facturasRecientes = await Promise.all(
+      facturas.map(async (factura) => {
+        const totalCobrado =
+          factura.estado === 'emitida'
+            ? await this.facturaRepository.sumCobradoByFacturaId(factura.id)
+            : 0
+        const total = Number(factura.total)
+
+        return {
+          id: factura.id,
+          numero: factura.numero,
+          estado: factura.estado,
+          estadoCobro:
+            factura.estado === 'emitida'
+              ? calcularEstadoCobro(total, totalCobrado)
+              : undefined,
+          total,
+          saldoPendiente:
+            factura.estado === 'emitida' ? calcularSaldoPendiente(total, totalCobrado) : undefined,
+          fechaEmision: factura.fechaEmision.toISO()!,
+          ordenTrabajoId: factura.ordenTrabajoId ?? undefined,
+        }
+      })
+    )
+
     return {
       vehiculos: vehiculos.map((vehiculo) => ({
         id: vehiculo.id,
@@ -86,6 +133,16 @@ export default class ClienteService extends BaseService<Cliente> {
         totalEstimado: orden.totalEstimado ? Number(orden.totalEstimado) : undefined,
         totalSena: senasPorOt.get(orden.id) ?? undefined,
       })),
+      turnosProximos: turnos.map((turno) => ({
+        id: turno.id,
+        fechaHora: turno.fechaHora.toISO()!,
+        estado: turno.estado,
+        vehiculoPatente: turno.vehiculo?.patente,
+        tipoTrabajoNombre: turno.tipoTrabajo?.nombre,
+        ordenTrabajoId: turno.ordenTrabajoId ?? undefined,
+        ordenTrabajoNumero: turno.ordenTrabajo?.numero,
+      })),
+      facturasRecientes,
     }
   }
 

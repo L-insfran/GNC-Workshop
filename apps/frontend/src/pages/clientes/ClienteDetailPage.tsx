@@ -7,6 +7,7 @@ import {
   ClipboardList,
   AlertTriangle,
   Plus,
+  Calendar,
 } from 'lucide-react'
 import { useCliente, useClienteFicha } from '@/hooks/useClientes'
 import { ROUTES } from '@/constants/routes'
@@ -23,6 +24,7 @@ import {
   formatCurrency,
   formatDate,
   formatDateOnly,
+  formatDateTime,
   formatPatente,
   formatVehiculoMarcaModelo,
 } from '@/utils/format'
@@ -50,6 +52,13 @@ export function ClienteDetailPage() {
           Volver a clientes
         </Link>
         <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => navigate(ROUTES.TURNO_NEW_FROM_CLIENTE(cliente.id))}
+          >
+            <Calendar className="h-4 w-4" />
+            Agendar turno
+          </Button>
           <Button
             variant="outline"
             onClick={() => navigate(ROUTES.ORDEN_TRABAJO_NEW_FROM_CLIENTE(cliente.id))}
@@ -228,6 +237,109 @@ export function ClienteDetailPage() {
                   )}
                 </div>
               ))}
+            </div>
+          )}
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader
+          title="Turnos próximos"
+          description="Agenda confirmada o pendiente del cliente"
+        />
+        <CardBody>
+          {fichaLoading ? (
+            <PageLoader />
+          ) : (ficha?.turnosProximos ?? []).length === 0 ? (
+            <p className="text-sm text-slate-500">Sin turnos programados.</p>
+          ) : (
+            <ul className="divide-y divide-slate-100 text-sm">
+              {(ficha?.turnosProximos ?? []).map((turno) => (
+                <li
+                  key={turno.id}
+                  className="flex cursor-pointer flex-wrap items-center justify-between gap-2 py-2.5 hover:bg-slate-50"
+                  onClick={() => navigate(ROUTES.TURNO_EDIT(turno.id))}
+                >
+                  <div>
+                    <p className="font-medium text-slate-900">{formatDateTime(turno.fechaHora)}</p>
+                    <p className="text-xs text-slate-500">
+                      {[turno.tipoTrabajoNombre, turno.vehiculoPatente ? formatPatente(turno.vehiculoPatente) : null]
+                        .filter(Boolean)
+                        .join(' · ') || 'Sin detalle'}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant={turno.estado === 'confirmado' ? 'success' : 'warning'}>
+                      {turno.estado}
+                    </Badge>
+                    {turno.ordenTrabajoId && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          navigate(ROUTES.ORDEN_TRABAJO_DETAIL(turno.ordenTrabajoId!))
+                        }}
+                      >
+                        OT {turno.ordenTrabajoNumero}
+                      </Button>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader title="Facturas recientes" description="Últimos comprobantes del cliente" />
+        <CardBody>
+          {fichaLoading ? (
+            <PageLoader />
+          ) : (ficha?.facturasRecientes ?? []).length === 0 ? (
+            <p className="text-sm text-slate-500">Sin facturas registradas.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left text-xs uppercase text-slate-500">
+                    <th className="pb-2 pr-4 font-medium">Número</th>
+                    <th className="pb-2 pr-4 font-medium">Estado</th>
+                    <th className="pb-2 pr-4 font-medium">Cobro</th>
+                    <th className="pb-2 pr-4 font-medium">Emisión</th>
+                    <th className="pb-2 font-medium">Total</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {(ficha?.facturasRecientes ?? []).map((factura) => (
+                    <tr
+                      key={factura.id}
+                      className="cursor-pointer hover:bg-slate-50"
+                      onClick={() => navigate(ROUTES.FACTURA_DETAIL(factura.id))}
+                    >
+                      <td className="py-2.5 pr-4 font-medium text-brand-700">{factura.numero}</td>
+                      <td className="py-2.5 pr-4">
+                        <Badge variant={factura.estado === 'emitida' ? 'success' : 'neutral'}>
+                          {factura.estado}
+                        </Badge>
+                      </td>
+                      <td className="py-2.5 pr-4 text-slate-600">
+                        {factura.estadoCobro ?? '—'}
+                        {factura.saldoPendiente != null && factura.saldoPendiente > 0 && (
+                          <span className="ml-1 text-xs text-amber-600">
+                            ({formatCurrency(factura.saldoPendiente)} pend.)
+                          </span>
+                        )}
+                      </td>
+                      <td className="py-2.5 pr-4 text-slate-600">
+                        {formatDateOnly(factura.fechaEmision)}
+                      </td>
+                      <td className="py-2.5 text-slate-600">{formatCurrency(factura.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </CardBody>
