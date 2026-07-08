@@ -25,6 +25,7 @@ import FacturaRepository from '#modules/facturacion/repositories/factura_reposit
 import OrdenTrabajoRepository from '#modules/ordenes_trabajo/repositories/orden_trabajo_repository'
 import OtItemRepository from '#modules/ordenes_trabajo/repositories/ot_item_repository'
 import StockReservaService from '#modules/inventario/services/stock_reserva_service'
+import OtEquipoRegulatoryService from '#modules/ordenes_trabajo/services/ot_equipo_regulatory_service'
 
 function resolveFechaEstimadaEntrega(
   value: string | undefined,
@@ -52,6 +53,7 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
   private facturaRepository = new FacturaRepository()
   private otItemRepository = new OtItemRepository()
   private stockReservaService = new StockReservaService()
+  private otEquipoRegulatoryService = new OtEquipoRegulatoryService()
   private kitTrabajoService = new KitTrabajoService()
   private otItemService = new OtItemService()
 
@@ -266,6 +268,16 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
 
       if (estadoNuevo === 'finalizada') {
         await this.descontarStockPorOt(id, orden.numero, user.id, trx)
+
+        if (orden.equipoGncId) {
+          const tipoTrabajo = await TipoTrabajo.findOrFail(orden.tipoTrabajoId)
+          await this.otEquipoRegulatoryService.aplicarAlFinalizar(
+            orden.equipoGncId,
+            tipoTrabajo,
+            trx
+          )
+        }
+
         await this.stockReservaService.liberarReservasPorOt(id, 'finalizada', trx)
       }
 
