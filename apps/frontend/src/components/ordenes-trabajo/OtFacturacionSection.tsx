@@ -47,7 +47,10 @@ export function OtFacturacionSection({
 
   if (isLoading) return <PageLoader />
 
-  if (!checkRole(MODULE_ROLES.facturacion)) {
+  const puedeFacturar = checkRole(MODULE_ROLES.facturacion)
+  const puedeCobrar = checkRole(MODULE_ROLES.caja)
+
+  if (!vinculada && !puedeFacturar) {
     return (
       <Alert variant="warning" title="Facturación pendiente">
         La OT {ordenNumero} está lista para facturar. Un usuario con rol de Caja o
@@ -162,14 +165,16 @@ export function OtFacturacionSection({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Link to={ROUTES.FACTURA_DETAIL(factura.id)}>
-            <Button variant="outline" size="sm">
-              <ExternalLink className="h-4 w-4" />
-              Ver comprobante
-            </Button>
-          </Link>
+          {puedeFacturar && (
+            <Link to={ROUTES.FACTURA_DETAIL(factura.id)}>
+              <Button variant="outline" size="sm">
+                <ExternalLink className="h-4 w-4" />
+                Ver comprobante
+              </Button>
+            </Link>
+          )}
 
-          {factura.estado === 'emitida' && estadoCobro !== 'cobrada' && checkRole(MODULE_ROLES.caja) && (
+          {factura.estado === 'emitida' && estadoCobro !== 'cobrada' && puedeCobrar && (
             <Link to={ROUTES.FACTURA_DETAIL(factura.id)}>
               <Button size="sm">
                 <DollarSign className="h-4 w-4" />
@@ -178,14 +183,14 @@ export function OtFacturacionSection({
             </Link>
           )}
 
-          {puedeGenerarFactura && factura.estado === 'anulada' && (
+          {puedeFacturar && puedeGenerarFactura && factura.estado === 'anulada' && (
             <Button size="sm" onClick={() => navigate(ROUTES.FACTURA_NEW_FROM_OT(ordenId))}>
               <FileText className="h-4 w-4" />
               Re-facturar
             </Button>
           )}
 
-          {factura.estado === 'borrador' && (
+          {puedeFacturar && factura.estado === 'borrador' && (
             <Link to={ROUTES.FACTURA_DETAIL(factura.id)}>
               <Button size="sm">
                 <Receipt className="h-4 w-4" />
@@ -194,7 +199,7 @@ export function OtFacturacionSection({
             </Link>
           )}
 
-          {notaCreditoId && (
+          {puedeFacturar && notaCreditoId && (
             <Link to={ROUTES.FACTURA_DETAIL(notaCreditoId)}>
               <Button variant="outline" size="sm">
                 Ver nota de crédito
@@ -203,7 +208,7 @@ export function OtFacturacionSection({
           )}
         </div>
 
-        {factura.estado === 'emitida' && !puedeGenerarFactura && (
+        {puedeFacturar && factura.estado === 'emitida' && !puedeGenerarFactura && (
           <p className="text-xs text-slate-500">
             Esta OT ya tiene una factura activa. Para corregir el monto, emití una nota de crédito
             desde el detalle del comprobante.
