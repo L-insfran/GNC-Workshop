@@ -40,7 +40,7 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
   )
 
   const [modalOpen, setModalOpen] = useState(false)
-  const [defaultTipo, setDefaultTipo] = useState<OtItemTipo>('servicio')
+  const [defaultTipo] = useState<OtItemTipo>('servicio')
   const [editingItem, setEditingItem] = useState<IOtItem | undefined>()
 
   const errorMessage =
@@ -50,9 +50,8 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
         ? 'No se pudo cargar el presupuesto.'
         : null
 
-  const openCreate = (tipo: OtItemTipo) => {
+  const openCreate = () => {
     setEditingItem(undefined)
-    setDefaultTipo(tipo)
     setModalOpen(true)
   }
 
@@ -154,16 +153,10 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
           description="Servicios y repuestos incluidos en la orden"
           action={
             puedeEditar ? (
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => openCreate('servicio')}>
-                  <Plus className="h-4 w-4" />
-                  Servicio
-                </Button>
-                <Button size="sm" onClick={() => openCreate('repuesto')}>
-                  <Plus className="h-4 w-4" />
-                  Repuesto
-                </Button>
-              </div>
+              <Button size="sm" onClick={openCreate}>
+                <Plus className="h-4 w-4" />
+                Agregar ítem
+              </Button>
             ) : undefined
           }
         />
@@ -194,7 +187,7 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
             emptyTitle="Sin ítems cargados"
             emptyDescription={
               puedeEditar
-                ? 'Usá los botones Servicio o Repuesto para agregar ítems al presupuesto.'
+                ? 'Usá el botón Agregar ítem para incluir servicios, repuestos o materiales.'
                 : 'El presupuesto no admite cambios en el estado actual de la orden.'
             }
           />

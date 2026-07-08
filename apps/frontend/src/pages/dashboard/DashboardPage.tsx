@@ -32,7 +32,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Alert } from '@/components/ui/Alert'
 import { Badge, getVencimientoBadgeVariant } from '@/components/ui/Badge'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
-import { formatCurrency, formatDate } from '@/utils/format'
+import { formatCurrency, formatDateOnly } from '@/utils/format'
 
 function getAlertaOperativaBadgeVariant(nivel: IAlertaOperativa['nivel']) {
   return getVencimientoBadgeVariant(nivel)
@@ -62,7 +62,7 @@ export function DashboardPage() {
   }
 
   const chartData = (produccion ?? []).map((item) => ({
-    fecha: formatDate(item.fecha),
+    fecha: formatDateOnly(item.fecha),
     Completadas: item.ordenesCompletadas,
     Ingresadas: item.ordenesIngresadas,
   }))
