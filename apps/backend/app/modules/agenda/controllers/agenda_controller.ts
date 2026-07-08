@@ -127,6 +127,11 @@ export default class AgendaController {
           'No se puede crear la OT: oblea vencida. Solo permitido para renovación de oblea',
           'badRequest',
         ],
+        PH_VENCIDA: [
+          'PH_VENCIDA',
+          'No se puede crear la OT: hay cilindros con PH vencida. Solo permitido para prueba hidráulica o reparación de cilindro',
+          'badRequest',
+        ],
       }
 
       const mapped = messages[error.message]

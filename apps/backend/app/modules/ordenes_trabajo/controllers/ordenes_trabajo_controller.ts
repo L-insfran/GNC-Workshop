@@ -96,6 +96,10 @@ export default class OrdenesTrabajoController {
             'OBLEA_VENCIDA',
             'No se puede crear la OT: oblea vencida. Solo permitido para renovación de oblea',
           ],
+          PH_VENCIDA: [
+            'PH_VENCIDA',
+            'No se puede crear la OT: hay cilindros con PH vencida. Solo permitido para prueba hidráulica o reparación de cilindro',
+          ],
           FECHA_ENTREGA_INVALIDA: [
             'FECHA_ENTREGA_INVALIDA',
             'La fecha estimada de entrega no puede ser anterior a la fecha de ingreso',

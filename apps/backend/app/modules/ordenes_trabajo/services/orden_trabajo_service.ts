@@ -12,12 +12,14 @@ import type { IPaginationParams } from '@gnc/shared-types'
 import type User from '#models/user'
 import type OrdenTrabajo from '#models/orden_trabajo'
 import EquipoGnc from '#models/equipo_gnc'
+import Cilindro from '#models/cilindro'
 import OtItem from '#models/ot_item'
 import Producto from '#models/producto'
 import TipoTrabajo from '#models/tipo_trabajo'
 import Vehiculo from '#models/vehiculo'
 import { BaseService } from '#shared/base_service'
 import { parseDateOnly } from '#shared/date_util'
+import { validarEquipoParaNuevaOt } from '#shared/equipo_gnc_validacion_util'
 import { countActiveMecanicos, findActiveMecanico } from '#shared/mecanico_util'
 import OtItemService from '#modules/ordenes_trabajo/services/ot_item_service'
 import KitTrabajoService from '#modules/ordenes_trabajo/services/kit_trabajo_service'
@@ -134,12 +136,11 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
         throw new Error('EQUIPO_INVALIDO')
       }
 
-      const esRenovacionOblea = tipoTrabajo.nombre.toLowerCase().includes('renovación de oblea')
-      const obleaVencida = equipo.fechaVencimientoOblea < DateTime.now()
+      const cilindros = await Cilindro.query()
+        .where('equipo_gnc_id', equipo.id)
+        .whereNull('deleted_at')
 
-      if (obleaVencida && !esRenovacionOblea) {
-        throw new Error('OBLEA_VENCIDA')
-      }
+      validarEquipoParaNuevaOt(equipo, cilindros, tipoTrabajo.nombre)
     }
 
     const numero = await this.repository.generateNumero()
