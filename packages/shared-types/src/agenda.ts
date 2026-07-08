@@ -6,6 +6,10 @@ export interface ITurno {
   clienteNombre?: string
   vehiculoId?: string
   vehiculoPatente?: string
+  tipoTrabajoId?: string
+  tipoTrabajoNombre?: string
+  ordenTrabajoId?: string
+  ordenTrabajoNumero?: string
   fechaHora: string
   estado: TurnoEstado
   notas?: string
@@ -16,6 +20,7 @@ export interface ITurno {
 export interface CreateTurnoDTO {
   clienteId: string
   vehiculoId?: string
+  tipoTrabajoId?: string
   fechaHora: string
   estado?: TurnoEstado
   notas?: string

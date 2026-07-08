@@ -13,13 +13,14 @@ export default class TurnoRepository extends BaseRepository<Turno> {
     return query.whereILike('notas', `%${search}%`)
   }
 
+  private withRelations(query: ReturnType<typeof Turno.query>) {
+    return query.preload('cliente').preload('vehiculo').preload('tipoTrabajo').preload('ordenTrabajo')
+  }
+
   async findByIdWithRelations(id: string): Promise<Turno | null> {
-    return Turno.query()
-      .where('id', id)
-      .whereNull('deleted_at')
-      .preload('cliente')
-      .preload('vehiculo')
-      .first()
+    return this.withRelations(
+      Turno.query().where('id', id).whereNull('deleted_at')
+    ).first()
   }
 
   async findAllWithRelations(params = {}) {
@@ -28,6 +29,8 @@ export default class TurnoRepository extends BaseRepository<Turno> {
       result.data.map(async (turno) => {
         await turno.load('cliente')
         await turno.load('vehiculo')
+        await turno.load('tipoTrabajo')
+        await turno.load('ordenTrabajo')
       })
     )
     return result
@@ -37,12 +40,12 @@ export default class TurnoRepository extends BaseRepository<Turno> {
     const inicio = fecha.startOf('day').toSQL()
     const fin = fecha.endOf('day').toSQL()
 
-    return Turno.query()
-      .whereNull('deleted_at')
-      .whereBetween('fecha_hora', [inicio!, fin!])
-      .preload('cliente')
-      .preload('vehiculo')
-      .orderBy('fecha_hora', 'asc')
+    return this.withRelations(
+      Turno.query()
+        .whereNull('deleted_at')
+        .whereBetween('fecha_hora', [inicio!, fin!])
+        .orderBy('fecha_hora', 'asc')
+    )
   }
 
   async findSolapamiento(fechaHora: DateTime, excludeId?: string): Promise<Turno | null> {

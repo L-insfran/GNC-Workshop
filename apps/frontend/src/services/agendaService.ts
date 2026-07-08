@@ -1,5 +1,6 @@
 import type {
   ITurno,
+  IOrdenTrabajo,
   CreateTurnoDTO,
   UpdateTurnoDTO,
   IPaginationParams,
@@ -29,5 +30,9 @@ export const agendaService = {
 
   remove(id: string) {
     return apiDelete<void>(`/agenda/turnos/${id}`)
+  },
+
+  generarOt(id: string) {
+    return apiPost<IOrdenTrabajo>(`/agenda/turnos/${id}/generar-ot`)
   },
 }

@@ -3,12 +3,16 @@ import type { CreateTurnoDTO, IPaginationParams, UpdateTurnoDTO } from '@gnc/sha
 import type User from '#models/user'
 import type Turno from '#models/turno'
 import Cliente from '#models/cliente'
+import TipoTrabajo from '#models/tipo_trabajo'
 import { BaseService } from '#shared/base_service'
 import TurnoRepository from '#modules/agenda/repositories/turno_repository'
+import OrdenTrabajoService from '#modules/ordenes_trabajo/services/orden_trabajo_service'
+import type OrdenTrabajo from '#models/orden_trabajo'
 
 export default class TurnoService extends BaseService<Turno> {
   protected entityType = 'turno'
   protected repository = new TurnoRepository()
+  private ordenTrabajoService = new OrdenTrabajoService()
 
   async list(params?: IPaginationParams) {
     return this.repository.findAllWithRelations(params)
@@ -46,10 +50,13 @@ export default class TurnoService extends BaseService<Turno> {
       throw new Error('TURNO_SOLAPADO')
     }
 
+    const tipoTrabajoId = await this.resolveTipoTrabajoId(data.tipoTrabajoId)
+
     const turno = await super.create(
       {
         clienteId: data.clienteId,
         vehiculoId: data.vehiculoId ?? null,
+        tipoTrabajoId,
         fechaHora,
         estado: data.estado ?? 'pendiente',
         notas: data.notas ?? null,
@@ -70,6 +77,9 @@ export default class TurnoService extends BaseService<Turno> {
     if (data.vehiculoId !== undefined) updateData.vehiculoId = data.vehiculoId ?? null
     if (data.estado) updateData.estado = data.estado
     if (data.notas !== undefined) updateData.notas = data.notas ?? null
+    if (data.tipoTrabajoId !== undefined) {
+      updateData.tipoTrabajoId = await this.resolveTipoTrabajoId(data.tipoTrabajoId)
+    }
 
     if (data.fechaHora) {
       const fechaHora = DateTime.fromISO(data.fechaHora, { setZone: true })
@@ -89,5 +99,57 @@ export default class TurnoService extends BaseService<Turno> {
     if (!updated) return null
 
     return this.repository.findByIdWithRelations(updated.id)
+  }
+
+  async generarOrdenDesdeTurno(turnoId: string, user: User): Promise<OrdenTrabajo> {
+    const turno = await this.repository.findByIdWithRelations(turnoId)
+    if (!turno) {
+      throw new Error('TURNO_NO_ENCONTRADO')
+    }
+
+    if (turno.estado === 'cancelado') {
+      throw new Error('TURNO_CANCELADO')
+    }
+
+    if (turno.ordenTrabajoId) {
+      throw new Error('TURNO_YA_ATENDIDO')
+    }
+
+    if (!turno.vehiculoId) {
+      throw new Error('VEHICULO_REQUERIDO')
+    }
+
+    if (!turno.tipoTrabajoId) {
+      throw new Error('TIPO_TRABAJO_REQUERIDO')
+    }
+
+    const orden = await this.ordenTrabajoService.create(
+      {
+        clienteId: turno.clienteId,
+        vehiculoId: turno.vehiculoId,
+        tipoTrabajoId: turno.tipoTrabajoId,
+        descripcionProblema: turno.notas ?? undefined,
+      },
+      user
+    )
+
+    turno.merge({
+      estado: 'completado',
+      ordenTrabajoId: orden.id,
+    })
+    await turno.save()
+
+    return orden
+  }
+
+  private async resolveTipoTrabajoId(tipoTrabajoId?: string | null): Promise<string | null> {
+    if (!tipoTrabajoId) return null
+
+    const tipo = await TipoTrabajo.find(tipoTrabajoId)
+    if (!tipo || !tipo.isActive) {
+      throw new Error('TIPO_TRABAJO_INVALIDO')
+    }
+
+    return tipo.id
   }
 }

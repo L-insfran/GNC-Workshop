@@ -7,6 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useTurno, useAgendaMutations } from '@/hooks/useAgenda'
 import { useClientes } from '@/hooks/useClientes'
 import { useVehiculos } from '@/hooks/useVehiculos'
+import { useTiposTrabajo } from '@/hooks/useOrdenesTrabajo'
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -20,6 +21,7 @@ import { formatPatente } from '@/utils/format'
 const schema = z.object({
   clienteId: z.string().min(1, 'Seleccioná un cliente'),
   vehiculoId: z.string().optional(),
+  tipoTrabajoId: z.string().optional(),
   fechaHora: z.string().min(1, 'Requerido'),
   estado: z.enum(['pendiente', 'confirmado', 'cancelado', 'completado']).optional(),
   notas: z.string().optional(),
@@ -41,6 +43,7 @@ export function TurnoFormPage() {
   const { data: turno, isLoading } = useTurno(id)
   const { data: clientesData } = useClientes({ perPage: 100 })
   const { data: vehiculosData } = useVehiculos({ perPage: 100 })
+  const { data: tiposTrabajo } = useTiposTrabajo()
   const { create, update } = useAgendaMutations()
 
   const {
@@ -54,6 +57,7 @@ export function TurnoFormPage() {
     defaultValues: {
       estado: 'pendiente',
       fechaHora: toLocalInputValue(new Date().toISOString()),
+      tipoTrabajoId: '',
     },
   })
 
@@ -62,6 +66,7 @@ export function TurnoFormPage() {
       reset({
         clienteId: turno.clienteId,
         vehiculoId: turno.vehiculoId ?? '',
+        tipoTrabajoId: turno.tipoTrabajoId ?? '',
         fechaHora: toLocalInputValue(turno.fechaHora),
         estado: turno.estado,
         notas: turno.notas ?? '',
@@ -74,6 +79,7 @@ export function TurnoFormPage() {
       const payload = {
         clienteId: data.clienteId,
         vehiculoId: data.vehiculoId || undefined,
+        tipoTrabajoId: data.tipoTrabajoId || undefined,
         fechaHora: new Date(data.fechaHora).toISOString(),
         estado: data.estado,
         notas: data.notas || undefined,
@@ -117,10 +123,24 @@ export function TurnoFormPage() {
                 value: v.id,
                 label: formatPatente(v.patente),
               }))}
-              placeholder="Opcional"
+              placeholder="Opcional (requerido para generar OT)"
               {...register('vehiculoId')}
             />
-            <Input label="Fecha y hora" type="datetime-local" error={errors.fechaHora?.message} {...register('fechaHora')} />
+            <Select
+              label="Tipo de trabajo"
+              options={(tiposTrabajo ?? []).map((t) => ({
+                value: t.id,
+                label: t.nombre,
+              }))}
+              placeholder="Opcional (requerido para generar OT)"
+              {...register('tipoTrabajoId')}
+            />
+            <Input
+              label="Fecha y hora"
+              type="datetime-local"
+              error={errors.fechaHora?.message}
+              {...register('fechaHora')}
+            />
             {isEditing && (
               <Select
                 label="Estado"
@@ -134,9 +154,26 @@ export function TurnoFormPage() {
               />
             )}
             <Input label="Notas" {...register('notas')} />
+            {turno?.ordenTrabajoId && (
+              <Alert variant="info">
+                Turno vinculado a la OT{' '}
+                <Link
+                  to={ROUTES.ORDEN_TRABAJO_DETAIL(turno.ordenTrabajoId)}
+                  className="font-medium underline"
+                >
+                  {turno.ordenTrabajoNumero ?? turno.ordenTrabajoId.slice(0, 8)}
+                </Link>
+              </Alert>
+            )}
             <div className="flex justify-end gap-2">
-              <Link to={ROUTES.AGENDA}><Button type="button" variant="outline">Cancelar</Button></Link>
-              <Button type="submit" isLoading={isSubmitting}>{isEditing ? 'Guardar' : 'Crear'}</Button>
+              <Link to={ROUTES.AGENDA}>
+                <Button type="button" variant="outline">
+                  Cancelar
+                </Button>
+              </Link>
+              <Button type="submit" isLoading={isSubmitting}>
+                {isEditing ? 'Guardar' : 'Crear'}
+              </Button>
             </div>
           </form>
         </CardBody>

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Pencil, Trash2, ClipboardList, ExternalLink } from 'lucide-react'
 import { useTurnosPorFecha, useAgendaMutations } from '@/hooks/useAgenda'
 import { ROUTES } from '@/constants/routes'
 import { Card } from '@/components/ui/Card'
@@ -12,6 +12,7 @@ import { Modal } from '@/components/ui/Modal'
 import { Alert } from '@/components/ui/Alert'
 import type { ITurno, TurnoEstado } from '@gnc/shared-types'
 import type { ITableColumn } from '@/types'
+import { ApiError } from '@/services/api-client'
 
 const ESTADO_VARIANT: Record<TurnoEstado, 'neutral' | 'success' | 'warning' | 'danger'> = {
   pendiente: 'warning',
@@ -24,9 +25,27 @@ export function AgendaPage() {
   const navigate = useNavigate()
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]!)
   const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [generarError, setGenerarError] = useState<string | null>(null)
+  const [generandoId, setGenerandoId] = useState<string | null>(null)
 
   const { data: turnos, isLoading, error } = useTurnosPorFecha(fecha)
-  const { remove } = useAgendaMutations()
+  const { remove, generarOt } = useAgendaMutations()
+
+  const handleGenerarOt = async (turno: ITurno) => {
+    setGenerarError(null)
+    setGenerandoId(turno.id)
+    try {
+      const response = await generarOt.mutateAsync(turno.id)
+      const orden = response.data
+      if (orden?.id) {
+        navigate(ROUTES.ORDEN_TRABAJO_DETAIL(orden.id))
+      }
+    } catch (err) {
+      setGenerarError(err instanceof ApiError ? err.message : 'No se pudo generar la OT')
+    } finally {
+      setGenerandoId(null)
+    }
+  }
 
   const columns: ITableColumn<ITurno>[] = [
     {
@@ -41,18 +60,17 @@ export function AgendaPage() {
     {
       key: 'cliente',
       header: 'Cliente',
-      render: (item) => {
-        const row = item as ITurno & { cliente?: { razonSocial?: string } }
-        return row.clienteNombre ?? row.cliente?.razonSocial ?? item.clienteId.slice(0, 8)
-      },
+      render: (item) => item.clienteNombre ?? item.clienteId.slice(0, 8),
     },
     {
       key: 'vehiculo',
       header: 'Vehículo',
-      render: (item) => {
-        const row = item as ITurno & { vehiculo?: { patente?: string } }
-        return row.vehiculoPatente ?? row.vehiculo?.patente ?? '—'
-      },
+      render: (item) => item.vehiculoPatente ?? '—',
+    },
+    {
+      key: 'tipoTrabajo',
+      header: 'Tipo',
+      render: (item) => item.tipoTrabajoNombre ?? '—',
     },
     {
       key: 'estado',
@@ -63,16 +81,43 @@ export function AgendaPage() {
     {
       key: 'actions',
       header: 'Acciones',
-      render: (item) => (
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.TURNO_EDIT(item.id))}>
-            <Pencil className="h-4 w-4" />
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => setDeleteId(item.id)}>
-            <Trash2 className="h-4 w-4 text-red-500" />
-          </Button>
-        </div>
-      ),
+      render: (item) => {
+        const puedeGenerar =
+          !item.ordenTrabajoId && item.estado !== 'cancelado' && item.estado !== 'completado'
+        const yaAtendido = Boolean(item.ordenTrabajoId)
+
+        return (
+          <div className="flex items-center gap-1">
+            {yaAtendido && item.ordenTrabajoId && (
+              <Button
+                variant="ghost"
+                size="sm"
+                title={`Ver OT ${item.ordenTrabajoNumero ?? ''}`}
+                onClick={() => navigate(ROUTES.ORDEN_TRABAJO_DETAIL(item.ordenTrabajoId!))}
+              >
+                <ExternalLink className="h-4 w-4 text-brand-600" />
+              </Button>
+            )}
+            {puedeGenerar && (
+              <Button
+                variant="ghost"
+                size="sm"
+                title="Generar OT"
+                isLoading={generandoId === item.id}
+                onClick={() => handleGenerarOt(item)}
+              >
+                <ClipboardList className="h-4 w-4 text-brand-600" />
+              </Button>
+            )}
+            <Button variant="ghost" size="sm" onClick={() => navigate(ROUTES.TURNO_EDIT(item.id))}>
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setDeleteId(item.id)}>
+              <Trash2 className="h-4 w-4 text-red-500" />
+            </Button>
+          </div>
+        )
+      },
     },
   ]
 
@@ -100,6 +145,11 @@ export function AgendaPage() {
       </div>
 
       {error && <Alert variant="error">Error al cargar turnos</Alert>}
+      {generarError && (
+        <Alert variant="error" title="No se pudo generar la OT">
+          {generarError}
+        </Alert>
+      )}
 
       <Card>
         <Table
@@ -118,7 +168,9 @@ export function AgendaPage() {
         description="¿Confirmás eliminar este turno?"
       >
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={() => setDeleteId(null)}>Cancelar</Button>
+          <Button variant="outline" onClick={() => setDeleteId(null)}>
+            Cancelar
+          </Button>
           <Button
             variant="danger"
             isLoading={remove.isPending}

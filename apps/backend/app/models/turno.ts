@@ -3,6 +3,8 @@ import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Cliente from '#models/cliente'
 import Vehiculo from '#models/vehiculo'
+import TipoTrabajo from '#models/tipo_trabajo'
+import OrdenTrabajo from '#models/orden_trabajo'
 
 export default class Turno extends BaseModel {
   static table = 'turnos'
@@ -15,6 +17,12 @@ export default class Turno extends BaseModel {
 
   @column()
   declare vehiculoId: string | null
+
+  @column()
+  declare tipoTrabajoId: string | null
+
+  @column()
+  declare ordenTrabajoId: string | null
 
   @column.dateTime()
   declare fechaHora: DateTime
@@ -39,4 +47,10 @@ export default class Turno extends BaseModel {
 
   @belongsTo(() => Vehiculo)
   declare vehiculo: BelongsTo<typeof Vehiculo>
+
+  @belongsTo(() => TipoTrabajo)
+  declare tipoTrabajo: BelongsTo<typeof TipoTrabajo>
+
+  @belongsTo(() => OrdenTrabajo)
+  declare ordenTrabajo: BelongsTo<typeof OrdenTrabajo>
 }

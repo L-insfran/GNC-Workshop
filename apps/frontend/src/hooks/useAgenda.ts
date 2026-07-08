@@ -55,5 +55,9 @@ export function useAgendaMutations() {
       mutationFn: (id: string) => agendaService.remove(id),
       onSuccess: invalidate,
     }),
+    generarOt: useMutation({
+      mutationFn: (id: string) => agendaService.generarOt(id),
+      onSuccess: invalidate,
+    }),
   }
 }
