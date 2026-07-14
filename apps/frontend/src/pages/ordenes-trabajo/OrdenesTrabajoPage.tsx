@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Plus, Eye, Pencil, Trash2 } from 'lucide-react'
+import { Plus, Eye, Pencil, Trash2, LayoutGrid } from 'lucide-react'
 import { useOrdenesTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
 import { useMecanicos } from '@/hooks/useMecanicos'
 import { useAuth } from '@/hooks/useAuth'
@@ -168,12 +168,20 @@ export function OrdenesTrabajoPage() {
             </Link>
           )}
         </div>
-        <Link to={ROUTES.ORDEN_TRABAJO_NEW}>
-          <Button>
-            <Plus className="h-4 w-4" />
-            Nueva OT
-          </Button>
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link to={ROUTES.ORDENES_TRABAJO_TABLERO}>
+            <Button variant="outline">
+              <LayoutGrid className="h-4 w-4" />
+              Tablero
+            </Button>
+          </Link>
+          <Link to={ROUTES.ORDEN_TRABAJO_NEW}>
+            <Button>
+              <Plus className="h-4 w-4" />
+              Nueva OT
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {error && <Alert variant="error">Error al cargar órdenes de trabajo.</Alert>}

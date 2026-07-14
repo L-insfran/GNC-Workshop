@@ -13,6 +13,10 @@ export default class StockMovimientoRepository {
       query = query.where('producto_id', params.productoId)
     }
 
+    if (params.ordenTrabajoId) {
+      query = query.where('orden_trabajo_id', params.ordenTrabajoId)
+    }
+
     const result = await query.paginate(page, perPage)
 
     const meta: IPaginationMeta = {

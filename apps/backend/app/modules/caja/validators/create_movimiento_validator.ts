@@ -7,5 +7,6 @@ export const createMovimientoValidator = vine.compile(
     monto: vine.number().min(0.01),
     concepto: vine.string().trim().minLength(2).maxLength(255),
     facturaId: vine.string().uuid().optional(),
+    ordenTrabajoId: vine.string().uuid().optional(),
   })
 )

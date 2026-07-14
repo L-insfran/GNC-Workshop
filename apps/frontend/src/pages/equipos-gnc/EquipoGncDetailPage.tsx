@@ -6,6 +6,7 @@ import {
   AlertTriangle,
   Car,
   Users,
+  Calendar,
 } from 'lucide-react'
 import { useEquipoGncFicha } from '@/hooks/useEquiposGnc'
 import { ROUTES } from '@/constants/routes'
@@ -51,6 +52,19 @@ export function EquipoGncDetailPage() {
           Volver a equipos
         </Link>
         <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate(
+                ROUTES.TURNO_NEW_FROM_CLIENTE(ficha.clienteId, {
+                  vehiculoId: ficha.vehiculoId,
+                })
+              )
+            }
+          >
+            <Calendar className="h-4 w-4" />
+            Agendar turno
+          </Button>
           <Button
             variant="outline"
             onClick={() =>

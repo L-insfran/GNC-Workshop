@@ -19,10 +19,13 @@ import { OtRegistrarSenaSection } from '@/components/ordenes-trabajo/OtRegistrar
 import { useOtControlCalidad } from '@/hooks/useOtControlCalidad'
 import { ApiError } from '@/services/api-client'
 import {
+  formatCurrency,
   formatDateOnly,
   formatDateTime,
+  ORDEN_COBRO_LABELS,
   ORDEN_ESTADO_LABELS,
   ORDEN_PRIORIDAD_LABELS,
+  getOrdenCobroBadgeVariant,
 } from '@/utils/format'
 import { getOrdenEstadosSiguientes, type OrdenEstado } from '@gnc/shared-types'
 
@@ -71,6 +74,13 @@ export function OrdenTrabajoDetailPage() {
   const requiereChecklistAprobado =
     nuevoEstado === 'finalizada' && orden.estado === 'control_calidad'
   const puedeFinalizar = !requiereChecklistAprobado || Boolean(controlCalidad?.completo)
+  const cobro = orden.resumenCobro
+  const entregaBloqueadaPorCobro =
+    nuevoEstado === 'entregada' &&
+    (cobro?.estado === 'pendiente' || cobro?.estado === 'parcial' || cobro?.estado === 'borrador')
+  const entregaSinFactura =
+    nuevoEstado === 'entregada' &&
+    (cobro?.estado === 'sin_factura' || cobro?.estado === 'con_sena' || cobro?.estado === 'anulada')
 
   const handleEstadoChange = async () => {
     if (!nuevoEstado || !id) return
@@ -83,6 +93,15 @@ export function OrdenTrabajoDetailPage() {
 
     if (nuevoEstado === 'finalizada' && orden.estado === 'control_calidad' && !controlCalidad?.completo) {
       setEstadoError('Completá y guardá el checklist de control de calidad antes de finalizar.')
+      return
+    }
+
+    if (entregaBloqueadaPorCobro) {
+      setEstadoError(
+        cobro?.estado === 'borrador'
+          ? 'Emití la factura y registrá el cobro antes de entregar el vehículo.'
+          : 'Hay saldo pendiente de cobro. Registrá el cobro antes de entregar el vehículo.',
+      )
       return
     }
 
@@ -259,6 +278,32 @@ export function OrdenTrabajoDetailPage() {
         resumenSena={orden.resumenSena}
       />
 
+      {(orden.estado === 'finalizada' || orden.estado === 'entregada') && cobro && (
+        <Card>
+          <CardHeader title="Estado de cobro" description="Requisito para la entrega del vehículo" />
+          <CardBody>
+            <div className="flex flex-wrap items-center gap-3">
+              <Badge variant={getOrdenCobroBadgeVariant(cobro.estado)}>
+                {ORDEN_COBRO_LABELS[cobro.estado]}
+              </Badge>
+              {cobro.facturaNumero && (
+                <Link
+                  to={ROUTES.FACTURA_DETAIL(cobro.facturaId!)}
+                  className="text-sm font-medium text-brand-600 hover:text-brand-700"
+                >
+                  Factura {cobro.facturaNumero}
+                </Link>
+              )}
+              {typeof cobro.saldoPendiente === 'number' && cobro.saldoPendiente > 0 && (
+                <span className="text-sm text-slate-600">
+                  Saldo: {formatCurrency(cobro.saldoPendiente)}
+                </span>
+              )}
+            </div>
+          </CardBody>
+        </Card>
+      )}
+
       <Card>
         <CardHeader title="Cambiar estado" description="Actualizar el flujo de la orden de trabajo" />
         <CardBody>
@@ -298,7 +343,8 @@ export function OrdenTrabajoDetailPage() {
                       !nuevoEstado ||
                       nuevoEstado === orden.estado ||
                       !puedePasarATaller ||
-                      !puedeFinalizar
+                      !puedeFinalizar ||
+                      entregaBloqueadaPorCobro
                     }
                     isLoading={updateEstado.isPending}
                   >
@@ -310,6 +356,31 @@ export function OrdenTrabajoDetailPage() {
                   <Alert variant="warning">
                     Guardá el checklist de control de calidad con todos los ítems marcados para
                     habilitar la finalización.
+                  </Alert>
+                )}
+
+                {entregaBloqueadaPorCobro && (
+                  <Alert variant="warning">
+                    No se puede entregar el vehículo mientras haya factura en borrador o saldo
+                    pendiente de cobro.
+                    {cobro?.facturaId && (
+                      <>
+                        {' '}
+                        <Link
+                          to={ROUTES.FACTURA_DETAIL(cobro.facturaId)}
+                          className="font-medium underline"
+                        >
+                          Ir a la factura
+                        </Link>
+                      </>
+                    )}
+                  </Alert>
+                )}
+
+                {entregaSinFactura && (
+                  <Alert variant="info">
+                    Esta OT no tiene factura emitida cobrada. Se permitirá la entrega, pero
+                    recomendamos facturar el trabajo.
                   </Alert>
                 )}
 

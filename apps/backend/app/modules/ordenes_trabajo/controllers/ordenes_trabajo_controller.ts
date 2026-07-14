@@ -240,6 +240,14 @@ export default class OrdenesTrabajoController {
             'CONTROL_CALIDAD_INCOMPLETO',
             'Debe completar y aprobar el checklist de control de calidad antes de finalizar la OT',
           ],
+          COBRO_PENDIENTE_ENTREGA: [
+            'COBRO_PENDIENTE_ENTREGA',
+            'No se puede entregar el vehículo: la factura vinculada tiene saldo pendiente de cobro',
+          ],
+          FACTURA_BORRADOR_ENTREGA: [
+            'FACTURA_BORRADOR_ENTREGA',
+            'No se puede entregar el vehículo: hay una factura en borrador. Emitila y registrá el cobro primero',
+          ],
         }
         const mapped = messages[error.message]
         if (mapped) {

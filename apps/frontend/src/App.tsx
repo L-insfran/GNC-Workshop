@@ -16,6 +16,7 @@ import { EquiposGncPage } from '@/pages/equipos-gnc/EquiposGncPage'
 import { EquipoGncFormPage } from '@/pages/equipos-gnc/EquipoGncFormPage'
 import { EquipoGncDetailPage } from '@/pages/equipos-gnc/EquipoGncDetailPage'
 import { OrdenesTrabajoPage } from '@/pages/ordenes-trabajo/OrdenesTrabajoPage'
+import { OrdenesTrabajoBoardPage } from '@/pages/ordenes-trabajo/OrdenesTrabajoBoardPage'
 import { OrdenTrabajoFormPage } from '@/pages/ordenes-trabajo/OrdenTrabajoFormPage'
 import { OrdenTrabajoDetailPage } from '@/pages/ordenes-trabajo/OrdenTrabajoDetailPage'
 import { ProductosPage } from '@/pages/inventario/ProductosPage'
@@ -75,6 +76,7 @@ export default function App() {
 
           <Route path="ordenes-trabajo" element={<RoleGuard allowedRoles={MODULE_ROLES.ordenesTrabajo} />}>
             <Route index element={<OrdenesTrabajoPage />} />
+            <Route path="tablero" element={<OrdenesTrabajoBoardPage />} />
             <Route path="nuevo" element={<OrdenTrabajoFormPage />} />
             <Route path=":id" element={<OrdenTrabajoDetailPage />} />
             <Route path=":id/editar" element={<OrdenTrabajoFormPage />} />

@@ -5,6 +5,7 @@ import {
   Car,
   Gauge,
   ClipboardList,
+  LayoutGrid,
   Wrench,
   Package,
   DollarSign,
@@ -42,6 +43,12 @@ const NAV_ITEMS: NavItemConfig[] = [
     icon: ClipboardList,
     roles: MODULE_ROLES.ordenesTrabajo,
   },
+  {
+    label: 'Tablero taller',
+    path: ROUTES.ORDENES_TRABAJO_TABLERO,
+    icon: LayoutGrid,
+    roles: MODULE_ROLES.ordenesTrabajo,
+  },
   { label: 'Inventario', path: ROUTES.INVENTARIO, icon: Package, roles: MODULE_ROLES.inventario },
   { label: 'Caja', path: ROUTES.CAJA, icon: DollarSign, roles: MODULE_ROLES.caja },
   { label: 'Facturación', path: ROUTES.FACTURACION, icon: FileText, roles: MODULE_ROLES.facturacion },
@@ -70,7 +77,7 @@ export function Sidebar() {
           <NavLink
             key={item.path}
             to={item.path}
-            end={item.path === ROUTES.DASHBOARD}
+            end={item.path === ROUTES.DASHBOARD || item.path === ROUTES.ORDENES_TRABAJO}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',

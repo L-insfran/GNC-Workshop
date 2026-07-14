@@ -1,10 +1,12 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import type { IOtItem, OrdenEstado, OtItemTipo } from '@gnc/shared-types'
 import { OT_ESTADOS_CON_RESERVA_STOCK, OT_ITEM_DELETABLE_ESTADOS, OT_ITEM_EDITABLE_ESTADOS } from '@gnc/shared-types'
 import { useOtItemMutations, useOtPresupuesto } from '@/hooks/useOtItems'
 import { useAuth } from '@/hooks/useAuth'
 import { MODULE_ROLES } from '@/constants/roles'
+import { ROUTES } from '@/constants/routes'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Table } from '@/components/ui/Table'
@@ -92,7 +94,18 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
     { key: 'descripcion', header: 'Descripción', render: (item) => (
         <div>
           <span>{item.descripcion}</span>
-          {item.productoNombre && (
+          {item.productoId && item.productoNombre && (
+            <p className="text-xs text-slate-500">
+              Inventario:{' '}
+              <Link
+                to={ROUTES.PRODUCTO_DETAIL(item.productoId)}
+                className="font-medium text-brand-600 hover:text-brand-700"
+              >
+                {item.productoNombre}
+              </Link>
+            </p>
+          )}
+          {!item.productoId && item.productoNombre && (
             <p className="text-xs text-slate-500">Inventario: {item.productoNombre}</p>
           )}
         </div>

@@ -51,6 +51,7 @@ export function FacturaDetailPage() {
           ? `Cobro factura ${factura.numero}`
           : `Seña factura ${factura.numero}`,
       facturaId: id,
+      ordenTrabajoId: factura.ordenTrabajoId,
     })
     await queryClient.invalidateQueries({ queryKey: ['facturas', id] })
   }

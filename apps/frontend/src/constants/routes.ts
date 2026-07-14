@@ -16,6 +16,7 @@ export const ROUTES = {
     `/equipos-gnc/nuevo?vehiculoId=${vehiculoId}`,
   EQUIPO_GNC_EDIT: (id: string) => `/equipos-gnc/${id}/editar`,
   ORDENES_TRABAJO: '/ordenes-trabajo',
+  ORDENES_TRABAJO_TABLERO: '/ordenes-trabajo/tablero',
   ORDENES_TRABAJO_FILTRO: (filtro: string) => `/ordenes-trabajo?filtro=${filtro}`,
   ORDEN_TRABAJO_NEW: '/ordenes-trabajo/nuevo',
   ORDEN_TRABAJO_NEW_FROM_CLIENTE: (

@@ -45,6 +45,7 @@ export interface IListMovimientosParams {
   page?: number
   perPage?: number
   productoId?: string
+  ordenTrabajoId?: string
 }
 
 export type UpdateProductoDTO = Partial<CreateProductoDTO>
@@ -59,6 +60,8 @@ export interface IStockMovimiento {
   tipo: StockMovimientoTipo
   cantidad: number
   motivo?: string
+  ordenTrabajoId?: string
+  ordenTrabajoNumero?: string
   userId?: string
   userNombre?: string
   createdAt: string

@@ -7,6 +7,7 @@ import {
   Plus,
   AlertTriangle,
   Users,
+  Calendar,
 } from 'lucide-react'
 import { useVehiculoFicha } from '@/hooks/useVehiculos'
 import { ROUTES } from '@/constants/routes'
@@ -45,6 +46,17 @@ export function VehiculoDetailPage() {
           Volver a vehículos
         </Link>
         <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() =>
+              navigate(
+                ROUTES.TURNO_NEW_FROM_CLIENTE(ficha.clienteId, { vehiculoId: ficha.id })
+              )
+            }
+          >
+            <Calendar className="h-4 w-4" />
+            Agendar turno
+          </Button>
           <Button
             variant="outline"
             onClick={() =>

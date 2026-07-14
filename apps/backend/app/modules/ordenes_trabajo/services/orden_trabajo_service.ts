@@ -284,6 +284,10 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
       await this.otControlCalidadService.assertAprobadoParaFinalizar(id)
     }
 
+    if (estadoNuevo === 'entregada') {
+      await this.assertCobroOkParaEntrega(id, estadoActual)
+    }
+
     const updateData: Partial<OrdenTrabajo> = { estado: estadoNuevo }
     if (estadoNuevo === 'entregada') {
       updateData.fechaEntregaReal = DateTime.now()
@@ -367,6 +371,23 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     }
   }
 
+  private async assertCobroOkParaEntrega(ordenId: string, estadoActual: OrdenEstado): Promise<void> {
+    const resumenes = await this.facturaRepository.findCobroResumenByOrdenTrabajoIds(
+      [ordenId],
+      new Map([[ordenId, estadoActual]])
+    )
+    const resumen = resumenes.get(ordenId)
+    if (!resumen) return
+
+    if (resumen.estado === 'pendiente' || resumen.estado === 'parcial') {
+      throw new Error('COBRO_PENDIENTE_ENTREGA')
+    }
+
+    if (resumen.estado === 'borrador') {
+      throw new Error('FACTURA_BORRADOR_ENTREGA')
+    }
+  }
+
   private async descontarStockPorOt(
     ordenTrabajoId: string,
     ordenNumero: string,
@@ -408,6 +429,7 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
         tipo: 'egreso',
         cantidad,
         motivo: `OT ${ordenNumero}`,
+        orden_trabajo_id: ordenTrabajoId,
         user_id: userId,
         created_at: now,
       })

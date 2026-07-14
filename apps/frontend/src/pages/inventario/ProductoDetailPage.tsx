@@ -66,6 +66,21 @@ export function ProductoDetailPage() {
       render: (item) => item.motivo ?? '-',
     },
     {
+      key: 'ordenTrabajoNumero',
+      header: 'OT',
+      render: (item) =>
+        item.ordenTrabajoId ? (
+          <Link
+            to={ROUTES.ORDEN_TRABAJO_DETAIL(item.ordenTrabajoId)}
+            className="font-medium text-brand-600 hover:text-brand-700"
+          >
+            {item.ordenTrabajoNumero ?? item.ordenTrabajoId.slice(0, 8)}
+          </Link>
+        ) : (
+          <span className="text-slate-400">—</span>
+        ),
+    },
+    {
       key: 'userNombre',
       header: 'Usuario',
       render: (item) => item.userNombre ?? '-',

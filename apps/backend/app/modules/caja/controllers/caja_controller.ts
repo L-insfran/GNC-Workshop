@@ -75,6 +75,9 @@ export default class CajaController {
       if (error.message === 'FACTURA_NO_ENCONTRADA') {
         return response.notFound(ApiResponse.error('NOT_FOUND', 'Factura no encontrada'))
       }
+      if (error.message === 'ORDEN_NO_ENCONTRADA') {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
+      }
       if (error.message === 'FACTURA_NO_EMITIDA') {
         return response.badRequest(
           ApiResponse.error('FACTURA_NO_EMITIDA', 'Solo se puede cobrar una factura emitida')

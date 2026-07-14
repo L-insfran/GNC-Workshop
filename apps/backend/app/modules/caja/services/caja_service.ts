@@ -3,6 +3,7 @@ import type { CreateCajaMovimientoDTO, IArqueo, ICajaSaldo, IPaginationParams } 
 import type User from '#models/user'
 import type CajaMovimiento from '#models/caja_movimiento'
 import Factura from '#models/factura'
+import OrdenTrabajo from '#models/orden_trabajo'
 import CajaRepository from '#modules/caja/repositories/caja_repository'
 import FacturaRepository from '#modules/facturacion/repositories/factura_repository'
 import { validarMontoCobro } from '#shared/factura_cobro_util'
@@ -57,9 +58,12 @@ export default class CajaService {
       throw new Error('CAJA_NO_ENCONTRADA')
     }
 
-    if (data.facturaId && data.tipo === 'ingreso') {
+    let ordenTrabajoId = data.ordenTrabajoId ?? null
+    let facturaId = data.facturaId ?? null
+
+    if (facturaId && data.tipo === 'ingreso') {
       const factura = await Factura.query()
-        .where('id', data.facturaId)
+        .where('id', facturaId)
         .whereNull('deleted_at')
         .first()
 
@@ -73,6 +77,21 @@ export default class CajaService {
 
       const totalCobrado = await this.facturaRepository.sumCobradoByFacturaId(factura.id)
       validarMontoCobro(Number(factura.total), totalCobrado, data.monto)
+
+      if (!ordenTrabajoId && factura.ordenTrabajoId) {
+        ordenTrabajoId = factura.ordenTrabajoId
+      }
+    }
+
+    if (ordenTrabajoId) {
+      const orden = await OrdenTrabajo.query()
+        .where('id', ordenTrabajoId)
+        .whereNull('deleted_at')
+        .first()
+
+      if (!orden) {
+        throw new Error('ORDEN_NO_ENCONTRADA')
+      }
     }
 
     if (data.tipo === 'egreso') {
@@ -87,7 +106,8 @@ export default class CajaService {
       tipo: data.tipo,
       monto: data.monto,
       concepto: data.concepto.trim(),
-      facturaId: data.facturaId ?? null,
+      facturaId,
+      ordenTrabajoId,
       userId: user.id,
     })
   }

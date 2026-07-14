@@ -79,6 +79,7 @@ export default class InventarioController {
       page: Number(request.input('page', 1)),
       perPage: Number(request.input('perPage', 20)),
       productoId: request.input('productoId'),
+      ordenTrabajoId: request.input('ordenTrabajoId'),
     }
     const result = await productoService.listMovimientos(params)
     return response.ok(ApiResponse.paginated(result.data, result.meta as never))

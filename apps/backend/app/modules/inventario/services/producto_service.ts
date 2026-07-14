@@ -125,7 +125,7 @@ export default class ProductoService extends BaseService<Producto> {
   async listMovimientos(params?: IListMovimientosParams) {
     const result = await this.movimientoRepository.findAll(params)
     return {
-      data: serializeStockMovimientos(result.data),
+      data: await serializeStockMovimientos(result.data),
       meta: result.meta,
     }
   }

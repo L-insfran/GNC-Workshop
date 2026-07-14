@@ -3,6 +3,7 @@ import { BaseModel, column, belongsTo } from '@adonisjs/lucid/orm'
 import type { BelongsTo } from '@adonisjs/lucid/types/relations'
 import Producto from '#models/producto'
 import User from '#models/user'
+import OrdenTrabajo from '#models/orden_trabajo'
 
 export default class StockMovimiento extends BaseModel {
   static table = 'stock_movimientos'
@@ -23,6 +24,9 @@ export default class StockMovimiento extends BaseModel {
   declare motivo: string | null
 
   @column()
+  declare ordenTrabajoId: string | null
+
+  @column()
   declare userId: string | null
 
   @column.dateTime({ autoCreate: true })
@@ -30,6 +34,9 @@ export default class StockMovimiento extends BaseModel {
 
   @belongsTo(() => Producto)
   declare producto: BelongsTo<typeof Producto>
+
+  @belongsTo(() => OrdenTrabajo)
+  declare ordenTrabajo: BelongsTo<typeof OrdenTrabajo>
 
   @belongsTo(() => User)
   declare user: BelongsTo<typeof User>
