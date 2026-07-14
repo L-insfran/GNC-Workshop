@@ -1,17 +1,23 @@
 # Módulo: Marketing
 
-## Estado: Planificado (Fase 7)
+## Estado: Pendiente
 
-## Responsabilidad
+Tabla `campanas` existe en migraciones; **sin** service, controller ni pantallas.
+
+## Responsabilidad (diseño objetivo)
 
 Campañas de comunicación a clientes (vencimientos, promociones).
 
 ## Tablas
 
-- `campanas`
+- `campanas` (presente en esquema; sin uso de aplicación)
 - `campana_destinatarios` (futuro)
 - `comunicacion_logs` (futuro)
 
-## Canales
+## Canales previstos
 
-Email, WhatsApp Business API (futuro), SMS
+Email, WhatsApp Business API, SMS
+
+## Nota
+
+Hasta implementar el módulo, las alertas de vencimiento viven en Dashboard (listado stub, sin envío).

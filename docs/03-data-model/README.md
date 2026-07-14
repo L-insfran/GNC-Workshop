@@ -1,6 +1,10 @@
 # Modelo de Datos
 
-## ERD Principal (MVP + módulos planificados)
+## ERD Principal (diseño objetivo)
+
+> Nota: este diagrama y el [catálogo](tables-catalog.md) describen el modelo aspiracional (80+ tablas).
+> Las migraciones en `apps/backend/database/migrations/` cubren el MVP operativo (~25 tablas de negocio).
+> Estado de implementación de módulos: [docs/10-roadmap](../10-roadmap/README.md).
 
 ```mermaid
 erDiagram

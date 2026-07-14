@@ -5,31 +5,34 @@ alwaysApply: false
 
 # Roadmap
 
-## Fase 0 - Contexto (actual)
-Documentación completa + reglas Cursor
+> Estado sincronizado con código (julio 2026). Detalle: `docs/10-roadmap/`.
 
-## Fase 1 - Infraestructura
-Monorepo, Docker, scaffolding apps
+## Fase 0 - Contexto ✅
+Documentación + reglas Cursor
 
-## Fase 2 - Backend core
-Auth, RBAC, auditoría, base classes
+## Fase 1 - Infraestructura ⚠️
+Monorepo + Docker datos (PG/Redis/MinIO) + scaffolding. Falta compose completo app/nginx.
 
-## Fase 3 - MVP Backend
+## Fase 2 - Backend core ⚠️
+Auth, RBAC, CRUD users, auditoría write-only. Faltan Policies granulares y UI de auditoría.
+
+## Fase 3 - MVP Backend ✅
 Clientes, Vehículos, Equipos GNC, Órdenes de Trabajo
 
-## Fase 4 - Frontend foundation
+## Fase 4 - Frontend foundation ✅
 Design system, layout, auth, routing
 
-## Fase 5 - MVP Frontend
-Pantallas del núcleo operativo
+## Fase 5 - MVP Frontend ✅
+Pantallas del núcleo operativo + flujo recepción/taller/QC
 
-## Fase 6 - Dashboard
-KPIs, gráficos, alertas de vencimientos
+## Fase 6 - Dashboard ⚠️
+KPIs, gráficos, alertas. Notificaciones de vencimiento en stub.
 
-## Fase 7 - Módulos adicionales
-Inventario → Caja → Facturación → Agenda → Marketing → Reportes → Config
+## Fase 7 - Módulos adicionales ⚠️
+Hechos: Inventario, Caja, Facturación (sin AFIP), Agenda, Config.
+Pendientes: Marketing, Reportes.
 
-## Fase 8 - Calidad y deploy
-Testing, CI/CD, producción Ubuntu+Nginx
+## Fase 8 - Calidad y deploy ⚠️
+CI básico + tests unitarios. Faltan integración/e2e y deploy prod completo.
 
 Ver `docs/10-roadmap/` para detalle completo.

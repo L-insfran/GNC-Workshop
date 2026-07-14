@@ -1,5 +1,8 @@
 # Catálogo de Tablas - Definición Detallada
 
+> Catálogo de **diseño objetivo**. No todas las tablas listadas existen en migraciones.
+> Estado de módulos: [docs/10-roadmap](../10-roadmap/README.md).
+
 ## Auth & Users
 
 ### users

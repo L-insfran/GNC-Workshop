@@ -81,8 +81,13 @@ App disponible en `http://localhost:5173`
 
 ## Módulos implementados
 
-- **MVP**: Auth, Users, Clientes, Vehículos, Equipos GNC, Órdenes de Trabajo, Dashboard
-- **Planificados**: Inventario, Caja, Facturación, Agenda, Marketing, Reportes
+| Estado | Módulos |
+|--------|---------|
+| **Implementados (MVP)** | Auth, Users, Clientes, Vehículos, Equipos GNC, Órdenes de Trabajo, Dashboard, Inventario, Caja, Facturación (interna, sin AFIP), Agenda, Configuración |
+| **Parcial** | Auditoría (solo escritura en `audit_logs`; sin UI), notificaciones de vencimientos (stub) |
+| **Pendientes** | Marketing, Reportes, integración AFIP, Policies granulares |
+
+Estado detallado por fases: [docs/10-roadmap/README.md](docs/10-roadmap/README.md).
 
 ## Documentación
 

@@ -2,30 +2,35 @@
 
 Cada módulo es una unidad aislada. Ver subcarpetas para README y diagramas.
 
-## MVP (Fases 3-5)
+> Estado sincronizado con código: julio 2026. Roadmap completo en [docs/10-roadmap](../10-roadmap/README.md).
+
+## Implementados
+
+| Módulo | Carpeta | Madurez | Notas |
+|--------|---------|---------|-------|
+| Auth | [auth](auth/README.md) | Avanzado | Login, tokens, sesión |
+| Users | [users](users/README.md) | Avanzado | CRUD + roles (admin) |
+| Clientes | [clientes](clientes/README.md) | Avanzado | CRUD + ficha |
+| Vehículos | _(sin README dedicado)_¹ | Avanzado | CRUD + ficha + marcas/modelos |
+| Equipos GNC | [equipos-gnc](equipos-gnc/README.md) | Avanzado | Cilindros, oblea, PH |
+| Órdenes de Trabajo | [ordenes-trabajo](ordenes-trabajo/README.md) | Avanzado | Estados, ítems, kits, QC, tablero |
+| Dashboard | [dashboard](dashboard/README.md) | Avanzado² | KPIs y alertas; notificaciones stub |
+| Inventario | [inventario](inventario/README.md) | MVP | Sin proveedores/OC |
+| Caja | [caja](caja/README.md) | MVP | Movimientos y arqueo |
+| Facturación | [facturacion](facturacion/README.md) | MVP interna | Sin AFIP |
+| Agenda | [agenda](agenda/README.md) | MVP | Turnos + generar OT |
+| Configuración | [configuracion](configuracion/README.md) | Hub MVP | Catálogos operativos |
+
+¹ No hay `docs/05-modules/vehiculos/`; el dominio está cubierto por modelo de datos y reglas de negocio.  
+² Notificación real de vencimientos pendiente.
+
+## Parciales / pendientes
 
 | Módulo | Carpeta | Estado |
 |--------|---------|--------|
-| Auth | [auth](auth/README.md) | Core |
-| Users | [users](users/README.md) | Core |
-| Clientes | [clientes](clientes/README.md) | MVP |
-| Vehículos | [vehiculos](vehiculos/README.md) | MVP |
-| Equipos GNC | [equipos-gnc](equipos-gnc/README.md) | MVP |
-| Órdenes de Trabajo | [ordenes-trabajo](ordenes-trabajo/README.md) | MVP |
-| Dashboard | [dashboard](dashboard/README.md) | Fase 6 |
-
-## Post-MVP (Fase 7+)
-
-| Módulo | Carpeta |
-|--------|---------|
-| Inventario | [inventario](inventario/README.md) |
-| Caja | [caja](caja/README.md) |
-| Facturación | [facturacion](facturacion/README.md) |
-| Agenda | [agenda](agenda/README.md) |
-| Marketing | [marketing](marketing/README.md) |
-| Reportes | [reportes](reportes/README.md) |
-| Configuración | [configuracion](configuracion/README.md) |
-| Auditoría | [auditoria](auditoria/README.md) |
+| Auditoría | [auditoria](auditoria/README.md) | Write-only (`audit_logs`); sin API/UI de consulta |
+| Marketing | [marketing](marketing/README.md) | Pendiente (tabla `campanas` sin uso) |
+| Reportes | [reportes](reportes/README.md) | Pendiente |
 
 ## Patrón de implementación por módulo
 
@@ -35,3 +40,4 @@ Cada módulo es una unidad aislada. Ver subcarpetas para README y diagramas.
 4. Páginas frontend en `apps/frontend/src/pages/{modulo}/`
 5. Tests unit + integración
 6. Actualizar rutas y sidebar
+7. Actualizar este índice y el roadmap
