@@ -1,6 +1,9 @@
 import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
+import type { IPaginationParams } from '@gnc/shared-types'
 import Vehiculo from '#models/vehiculo'
 import { BaseRepository } from '#shared/base_repository'
+
+type VehiculoListParams = IPaginationParams & { clienteId?: string }
 
 export default class VehiculoRepository extends BaseRepository<Vehiculo> {
   protected model = Vehiculo
@@ -20,23 +23,6 @@ export default class VehiculoRepository extends BaseRepository<Vehiculo> {
       .preload('modelo')
       .preload('cliente')
       .first()
-  }
-
-import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
-import type { IPaginationParams } from '@gnc/shared-types'
-import Vehiculo from '#models/vehiculo'
-import { BaseRepository } from '#shared/base_repository'
-
-type VehiculoListParams = IPaginationParams & { clienteId?: string }
-
-export default class VehiculoRepository extends BaseRepository<Vehiculo> {
-  protected model = Vehiculo
-
-  protected applySearch(
-    query: ModelQueryBuilderContract<LucidModel, LucidRow>,
-    search: string
-  ): ModelQueryBuilderContract<LucidModel, LucidRow> {
-    return query.whereILike('patente', `%${search}%`)
   }
 
   async findAllWithRelations(params: VehiculoListParams = {}) {

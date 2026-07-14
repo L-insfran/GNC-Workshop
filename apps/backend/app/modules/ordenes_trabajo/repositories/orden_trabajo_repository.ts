@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon'
+import type { IOrdenTrabajoListParams } from '@gnc/shared-types'
 import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import OrdenTrabajo from '#models/orden_trabajo'
 import { BaseRepository } from '#shared/base_repository'
@@ -24,22 +25,6 @@ export default class OrdenTrabajoRepository extends BaseRepository<OrdenTrabajo>
       .preload('mecanico')
       .preload('recepcionista')
       .first()
-  }
-
-import { DateTime } from 'luxon'
-import type { IOrdenTrabajoListParams } from '@gnc/shared-types'
-import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
-import OrdenTrabajo from '#models/orden_trabajo'
-import { BaseRepository } from '#shared/base_repository'
-
-export default class OrdenTrabajoRepository extends BaseRepository<OrdenTrabajo> {
-  protected model = OrdenTrabajo
-
-  protected applySearch(
-    query: ModelQueryBuilderContract<LucidModel, LucidRow>,
-    search: string
-  ): ModelQueryBuilderContract<LucidModel, LucidRow> {
-    return query.whereILike('numero', `%${search}%`)
   }
 
   private applyListFilters(
