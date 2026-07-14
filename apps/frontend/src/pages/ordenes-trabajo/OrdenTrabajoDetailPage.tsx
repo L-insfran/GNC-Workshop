@@ -16,6 +16,7 @@ import { OtControlCalidadSection } from '@/components/ordenes-trabajo/OtControlC
 import { OtFacturacionSection } from '@/components/ordenes-trabajo/OtFacturacionSection'
 import { OtSenaSection } from '@/components/ordenes-trabajo/OtSenaSection'
 import { OtRegistrarSenaSection } from '@/components/ordenes-trabajo/OtRegistrarSenaSection'
+import { OtHistorialEstadosSection } from '@/components/ordenes-trabajo/OtHistorialEstadosSection'
 import { useOtControlCalidad } from '@/hooks/useOtControlCalidad'
 import { ApiError } from '@/services/api-client'
 import {
@@ -410,6 +411,8 @@ export function OrdenTrabajoDetailPage() {
           )}
         </CardBody>
       </Card>
+
+      <OtHistorialEstadosSection ordenTrabajoId={orden.id} />
     </div>
   )
 }

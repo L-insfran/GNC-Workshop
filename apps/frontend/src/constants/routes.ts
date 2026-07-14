@@ -16,7 +16,9 @@ export const ROUTES = {
     `/equipos-gnc/nuevo?vehiculoId=${vehiculoId}`,
   EQUIPO_GNC_EDIT: (id: string) => `/equipos-gnc/${id}/editar`,
   ORDENES_TRABAJO: '/ordenes-trabajo',
+  ORDENES_TRABAJO_MIS: '/ordenes-trabajo?mis=1',
   ORDENES_TRABAJO_TABLERO: '/ordenes-trabajo/tablero',
+  ORDENES_TRABAJO_TABLERO_MIS: '/ordenes-trabajo/tablero?mis=1',
   ORDENES_TRABAJO_FILTRO: (filtro: string) => `/ordenes-trabajo?filtro=${filtro}`,
   ORDEN_TRABAJO_NEW: '/ordenes-trabajo/nuevo',
   ORDEN_TRABAJO_NEW_FROM_CLIENTE: (
@@ -50,6 +52,7 @@ export const ROUTES = {
     return `/inventario/movimiento?${search.toString()}`
   },
   CAJA: '/caja',
+  CAJA_ARQUEO: '/caja/arqueo',
   CAJA_MOVIMIENTO_NEW: '/caja/movimiento',
   FACTURACION: '/facturacion',
   FACTURA_NEW: '/facturacion/nueva',

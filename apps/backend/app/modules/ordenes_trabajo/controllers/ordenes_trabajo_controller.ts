@@ -3,6 +3,7 @@ import type { IOrdenTrabajoListParams, IPaginationParams } from '@gnc/shared-typ
 import { ApiResponse } from '#shared/api_response'
 import { parseDateOnly } from '#shared/date_util'
 import { serializeOrdenTrabajo, serializeOrdenesTrabajo } from '#shared/orden_trabajo_serializer'
+import { serializeOtEstadosHistorial } from '#shared/ot_estado_historial_serializer'
 import { buildOtSenaResumen } from '#shared/ot_sena_util'
 import OrdenTrabajoService from '#modules/ordenes_trabajo/services/orden_trabajo_service'
 import FacturaService from '#modules/facturacion/services/factura_service'
@@ -18,7 +19,13 @@ const facturaRepository = new FacturaRepository()
 const turnoRepository = new TurnoRepository()
 
 export default class OrdenesTrabajoController {
-  async index({ request, response }: HttpContext) {
+  async index({ request, response, auth }: HttpContext) {
+    let mecanicoAsignadoId = request.input('mecanicoAsignadoId') as string | undefined
+    const mis = request.input('mis') === '1' || request.input('mis') === true
+    if (mis || mecanicoAsignadoId === 'me') {
+      mecanicoAsignadoId = auth.user!.id
+    }
+
     const params: IOrdenTrabajoListParams = {
       page: Number(request.input('page', 1)),
       perPage: Number(request.input('perPage', 20)),
@@ -26,6 +33,10 @@ export default class OrdenesTrabajoController {
       sortBy: request.input('sortBy'),
       sortOrder: request.input('sortOrder'),
       filtro: request.input('filtro'),
+      estado: request.input('estado'),
+      mecanicoAsignadoId,
+      fechaDesde: request.input('fechaDesde'),
+      fechaHasta: request.input('fechaHasta'),
       vehiculoId: request.input('vehiculoId'),
       equipoGncId: request.input('equipoGncId'),
       clienteId: request.input('clienteId'),
@@ -66,6 +77,14 @@ export default class OrdenesTrabajoController {
         )
       )
     )
+  }
+
+  async historial({ params, response }: HttpContext) {
+    const historial = await ordenTrabajoService.getHistorial(params.id)
+    if (!historial) {
+      return response.notFound(ApiResponse.error('NOT_FOUND', 'Orden de trabajo no encontrada'))
+    }
+    return response.ok(ApiResponse.success(serializeOtEstadosHistorial(historial)))
   }
 
   async facturaBorrador({ params, response }: HttpContext) {

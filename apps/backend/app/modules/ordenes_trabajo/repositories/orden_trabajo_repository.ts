@@ -2,6 +2,7 @@ import { DateTime } from 'luxon'
 import type { IOrdenTrabajoListParams } from '@gnc/shared-types'
 import type { LucidModel, LucidRow, ModelQueryBuilderContract } from '@adonisjs/lucid/types/model'
 import OrdenTrabajo from '#models/orden_trabajo'
+import OtEstadoHistorial from '#models/ot_estado_historial'
 import { BaseRepository } from '#shared/base_repository'
 
 export default class OrdenTrabajoRepository extends BaseRepository<OrdenTrabajo> {
@@ -11,7 +12,24 @@ export default class OrdenTrabajoRepository extends BaseRepository<OrdenTrabajo>
     query: ModelQueryBuilderContract<LucidModel, LucidRow>,
     search: string
   ): ModelQueryBuilderContract<LucidModel, LucidRow> {
-    return query.whereILike('numero', `%${search}%`)
+    const term = `%${search}%`
+    return query.where((builder) => {
+      builder
+        .whereILike('numero', term)
+        .orWhereHas('cliente', (clienteQuery) => {
+          clienteQuery.whereILike('razon_social', term).orWhereILike('documento_numero', term)
+        })
+        .orWhereHas('vehiculo', (vehiculoQuery) => {
+          vehiculoQuery.whereILike('patente', term)
+        })
+    })
+  }
+
+  async findHistorialByOrdenId(ordenTrabajoId: string) {
+    return OtEstadoHistorial.query()
+      .where('orden_trabajo_id', ordenTrabajoId)
+      .preload('user')
+      .orderBy('created_at', 'desc')
   }
 
   async findByIdWithRelations(id: string): Promise<OrdenTrabajo | null> {
@@ -52,6 +70,28 @@ export default class OrdenTrabajoRepository extends BaseRepository<OrdenTrabajo>
       query
         .where('estado', 'entregada')
         .where('fecha_entrega_real', '>=', inicioMes.toSQL()!)
+    }
+
+    if (params.estado) {
+      query.where('estado', params.estado)
+    }
+
+    if (params.mecanicoAsignadoId) {
+      query.where('mecanico_asignado_id', params.mecanicoAsignadoId)
+    }
+
+    if (params.fechaDesde) {
+      const desde = DateTime.fromISO(params.fechaDesde, { zone: 'utc' }).startOf('day')
+      if (desde.isValid) {
+        query.where('fecha_ingreso', '>=', desde.toSQL()!)
+      }
+    }
+
+    if (params.fechaHasta) {
+      const hasta = DateTime.fromISO(params.fechaHasta, { zone: 'utc' }).endOf('day')
+      if (hasta.isValid) {
+        query.where('fecha_ingreso', '<=', hasta.toSQL()!)
+      }
     }
 
     if (params.vehiculoId) {

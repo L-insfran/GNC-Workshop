@@ -7,16 +7,27 @@ import type {
   ITipoTrabajo,
   IFacturaBorradorPreview,
   IFacturaVinculadaOT,
+  IOtEstadoHistorial,
 } from '@gnc/shared-types'
 import { apiDelete, apiGet, apiPatch, apiPost, apiPut } from '@/services/api-client'
 
 export const ordenTrabajoService = {
   list(params?: IOrdenTrabajoListParams) {
-    return apiGet<IOrdenTrabajo[]>('/ordenes-trabajo', params)
+    const query = params
+      ? {
+          ...params,
+          mis: params.mis ? '1' : undefined,
+        }
+      : undefined
+    return apiGet<IOrdenTrabajo[]>('/ordenes-trabajo', query)
   },
 
   getById(id: string) {
     return apiGet<IOrdenTrabajo>(`/ordenes-trabajo/${id}`)
+  },
+
+  getHistorial(id: string) {
+    return apiGet<IOtEstadoHistorial[]>(`/ordenes-trabajo/${id}/historial`)
   },
 
   getFacturaBorrador(id: string) {

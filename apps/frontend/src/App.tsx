@@ -25,6 +25,7 @@ import { ProductoDetailPage } from '@/pages/inventario/ProductoDetailPage'
 import { MovimientoPage } from '@/pages/inventario/MovimientoPage'
 import { CajaPage } from '@/pages/caja/CajaPage'
 import { MovimientoCajaFormPage } from '@/pages/caja/MovimientoCajaFormPage'
+import { ArqueoCajaPage } from '@/pages/caja/ArqueoCajaPage'
 import { FacturasPage } from '@/pages/facturacion/FacturasPage'
 import { FacturaFormPage } from '@/pages/facturacion/FacturaFormPage'
 import { FacturaDetailPage } from '@/pages/facturacion/FacturaDetailPage'
@@ -92,6 +93,7 @@ export default function App() {
 
           <Route path="caja" element={<RoleGuard allowedRoles={MODULE_ROLES.caja} />}>
             <Route index element={<CajaPage />} />
+            <Route path="arqueo" element={<ArqueoCajaPage />} />
             <Route path="movimiento" element={<MovimientoCajaFormPage />} />
           </Route>
 

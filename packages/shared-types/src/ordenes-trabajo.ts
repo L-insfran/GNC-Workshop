@@ -97,9 +97,26 @@ export interface IOrdenTrabajoListParams {
   sortBy?: string
   sortOrder?: 'asc' | 'desc'
   filtro?: OrdenTrabajoFiltro
+  estado?: OrdenEstado
+  mecanicoAsignadoId?: string
+  fechaDesde?: string
+  fechaHasta?: string
   vehiculoId?: string
   equipoGncId?: string
   clienteId?: string
+  /** Si true, el backend filtra por el usuario autenticado como mecánico asignado */
+  mis?: boolean
+}
+
+export interface IOtEstadoHistorial {
+  id: string
+  ordenTrabajoId: string
+  estadoAnterior?: OrdenEstado
+  estadoNuevo: OrdenEstado
+  userId?: string
+  userNombre?: string
+  observacion?: string
+  createdAt: string
 }
 
 export interface RegistrarOtSenaDTO {

@@ -79,6 +79,12 @@ export default class OrdenTrabajoService extends BaseService<OrdenTrabajo> {
     return this.repository.findByIdWithRelations(id)
   }
 
+  async getHistorial(ordenTrabajoId: string) {
+    const orden = await this.repository.findById(ordenTrabajoId)
+    if (!orden) return null
+    return this.repository.findHistorialByOrdenId(ordenTrabajoId)
+  }
+
   async getFacturaBorrador(id: string): Promise<IFacturaBorradorPreview | null> {
     const orden = await this.repository.findByIdWithRelations(id)
     if (!orden) return null

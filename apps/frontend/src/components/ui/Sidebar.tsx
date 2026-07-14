@@ -12,10 +12,11 @@ import {
   FileText,
   Calendar,
   Settings,
+  UserRound,
 } from 'lucide-react'
 import { cn } from '@/utils/cn'
 import { ROUTES } from '@/constants/routes'
-import { MODULE_ROLES, ROLE_LABELS } from '@/constants/roles'
+import { MODULE_ROLES, ROLE_LABELS, ROLES } from '@/constants/roles'
 import { useAuth } from '@/hooks/useAuth'
 import type { RoleName } from '@gnc/shared-types'
 
@@ -24,10 +25,12 @@ interface NavItemConfig {
   path: string
   icon: typeof LayoutDashboard
   roles: RoleName[]
+  /** Coincide solo pathname (ignora query) salvo end estricto */
+  end?: boolean
 }
 
 const NAV_ITEMS: NavItemConfig[] = [
-  { label: 'Dashboard', path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: MODULE_ROLES.dashboard },
+  { label: 'Dashboard', path: ROUTES.DASHBOARD, icon: LayoutDashboard, roles: MODULE_ROLES.dashboard, end: true },
   {
     label: 'Configuración',
     path: ROUTES.CONFIGURACION,
@@ -42,6 +45,13 @@ const NAV_ITEMS: NavItemConfig[] = [
     path: ROUTES.ORDENES_TRABAJO,
     icon: ClipboardList,
     roles: MODULE_ROLES.ordenesTrabajo,
+    end: true,
+  },
+  {
+    label: 'Mis OT',
+    path: ROUTES.ORDENES_TRABAJO_MIS,
+    icon: UserRound,
+    roles: [ROLES.MECANICO],
   },
   {
     label: 'Tablero taller',
@@ -75,9 +85,9 @@ export function Sidebar() {
       <nav className="flex-1 space-y-1 overflow-y-auto p-4 scrollbar-thin">
         {visibleItems.map((item) => (
           <NavLink
-            key={item.path}
+            key={`${item.label}-${item.path}`}
             to={item.path}
-            end={item.path === ROUTES.DASHBOARD || item.path === ROUTES.ORDENES_TRABAJO}
+            end={item.end}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',

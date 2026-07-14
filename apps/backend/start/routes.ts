@@ -29,6 +29,7 @@ router
         router.get('vehiculos/:id/ficha', '#modules/vehiculos/controllers/vehiculos_controller.ficha')
         router.resource('equipos-gnc', '#modules/equipos_gnc/controllers/equipos_gnc_controller').apiOnly()
         router.get('equipos-gnc/:id/ficha', '#modules/equipos_gnc/controllers/equipos_gnc_controller.ficha')
+        router.get('ordenes-trabajo/:id/historial', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.historial')
         router.get('ordenes-trabajo/:id/factura-borrador', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.facturaBorrador')
         router.get('ordenes-trabajo/:id/factura-vinculada', '#modules/ordenes_trabajo/controllers/ordenes_trabajo_controller.facturaVinculada')
         router.get('ordenes-trabajo/:id/items', '#modules/ordenes_trabajo/controllers/ot_items_controller.index')
