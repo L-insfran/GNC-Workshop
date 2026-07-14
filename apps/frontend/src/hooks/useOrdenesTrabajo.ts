@@ -9,7 +9,10 @@ import { ordenTrabajoService } from '@/services/ordenTrabajoService'
 
 const QUERY_KEY = 'ordenes-trabajo'
 
-export function useOrdenesTrabajo(params?: IOrdenTrabajoListParams) {
+export function useOrdenesTrabajo(
+  params?: IOrdenTrabajoListParams,
+  options?: { enabled?: boolean }
+) {
   return useQuery({
     queryKey: [QUERY_KEY, params],
     queryFn: async () => {
@@ -19,6 +22,7 @@ export function useOrdenesTrabajo(params?: IOrdenTrabajoListParams) {
         meta: response.meta,
       }
     },
+    enabled: options?.enabled ?? true,
   })
 }
 

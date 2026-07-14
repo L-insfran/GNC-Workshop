@@ -170,7 +170,9 @@ export function VehiculoDetailPage() {
                     size="sm"
                     onClick={() =>
                       navigate(
-                        ROUTES.ORDEN_TRABAJO_NEW_FROM_VEHICULO(ficha.clienteId, ficha.id, equipo.id)
+                        ROUTES.ORDEN_TRABAJO_NEW_FROM_VEHICULO(ficha.clienteId, ficha.id, {
+                          equipoGncId: equipo.id,
+                        })
                       )
                     }
                   >

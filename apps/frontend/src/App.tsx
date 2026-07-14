@@ -19,6 +19,7 @@ import { OrdenesTrabajoPage } from '@/pages/ordenes-trabajo/OrdenesTrabajoPage'
 import { OrdenesTrabajoBoardPage } from '@/pages/ordenes-trabajo/OrdenesTrabajoBoardPage'
 import { OrdenTrabajoFormPage } from '@/pages/ordenes-trabajo/OrdenTrabajoFormPage'
 import { OrdenTrabajoDetailPage } from '@/pages/ordenes-trabajo/OrdenTrabajoDetailPage'
+import { OrdenTrabajoPrintPage } from '@/pages/ordenes-trabajo/OrdenTrabajoPrintPage'
 import { ProductosPage } from '@/pages/inventario/ProductosPage'
 import { ProductoFormPage } from '@/pages/inventario/ProductoFormPage'
 import { ProductoDetailPage } from '@/pages/inventario/ProductoDetailPage'
@@ -79,6 +80,7 @@ export default function App() {
             <Route index element={<OrdenesTrabajoPage />} />
             <Route path="tablero" element={<OrdenesTrabajoBoardPage />} />
             <Route path="nuevo" element={<OrdenTrabajoFormPage />} />
+            <Route path=":id/imprimir" element={<OrdenTrabajoPrintPage />} />
             <Route path=":id" element={<OrdenTrabajoDetailPage />} />
             <Route path=":id/editar" element={<OrdenTrabajoFormPage />} />
           </Route>

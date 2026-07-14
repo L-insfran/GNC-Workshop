@@ -7,8 +7,12 @@ import {
   Car,
   Users,
   Calendar,
+  ShieldAlert,
+  Droplets,
 } from 'lucide-react'
+import { esRenovacionOblea, esPruebaHidraulica } from '@gnc/shared-types'
 import { useEquipoGncFicha } from '@/hooks/useEquiposGnc'
+import { useTiposTrabajo } from '@/hooks/useOrdenesTrabajo'
 import { ROUTES } from '@/constants/routes'
 import { Button } from '@/components/ui/Button'
 import { Card, CardBody, CardHeader } from '@/components/ui/Card'
@@ -34,12 +38,24 @@ export function EquipoGncDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { data: ficha, isLoading, error } = useEquipoGncFicha(id)
+  const { data: tiposTrabajo } = useTiposTrabajo()
 
   if (isLoading) return <PageLoader />
 
   if (error || !ficha) {
     return <Alert variant="error">No se pudo cargar el equipo GNC.</Alert>
   }
+
+  const tipoOblea = (tiposTrabajo ?? []).find((t) => esRenovacionOblea(t.nombre))
+  const tipoPh = (tiposTrabajo ?? []).find((t) => esPruebaHidraulica(t.nombre))
+
+  const nuevaOtConTipo = (tipoTrabajoId?: string) =>
+    navigate(
+      ROUTES.ORDEN_TRABAJO_NEW_FROM_VEHICULO(ficha.clienteId, ficha.vehiculoId, {
+        equipoGncId: ficha.id,
+        tipoTrabajoId,
+      })
+    )
 
   return (
     <div className="mx-auto max-w-5xl space-y-4">
@@ -65,14 +81,7 @@ export function EquipoGncDetailPage() {
             <Calendar className="h-4 w-4" />
             Agendar turno
           </Button>
-          <Button
-            variant="outline"
-            onClick={() =>
-              navigate(
-                ROUTES.ORDEN_TRABAJO_NEW_FROM_VEHICULO(ficha.clienteId, ficha.vehiculoId, ficha.id)
-              )
-            }
-          >
+          <Button variant="outline" onClick={() => nuevaOtConTipo()}>
             <ClipboardList className="h-4 w-4" />
             Nueva OT
           </Button>
@@ -85,8 +94,42 @@ export function EquipoGncDetailPage() {
 
       {(ficha.obleaVencida || ficha.phVencida) && (
         <Alert variant="warning" title="Alertas regulatorias">
-          {ficha.obleaVencida && 'Oblea GNC vencida. '}
-          {ficha.phVencida && 'Hay cilindros con PH vencida.'}
+          <div className="space-y-3">
+            <p>
+              {ficha.obleaVencida && 'Oblea GNC vencida. '}
+              {ficha.phVencida && 'Hay cilindros con PH vencida.'}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {ficha.obleaVencida && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!tipoOblea}
+                  onClick={() => nuevaOtConTipo(tipoOblea?.id)}
+                >
+                  <ShieldAlert className="h-4 w-4" />
+                  Renovar oblea
+                </Button>
+              )}
+              {ficha.phVencida && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={!tipoPh}
+                  onClick={() => nuevaOtConTipo(tipoPh?.id)}
+                >
+                  <Droplets className="h-4 w-4" />
+                  Prueba hidráulica
+                </Button>
+              )}
+            </div>
+            {((ficha.obleaVencida && !tipoOblea) || (ficha.phVencida && !tipoPh)) && (
+              <p className="text-xs text-slate-500">
+                Configurá los tipos de trabajo “Renovación de oblea” / “Prueba hidráulica” para
+                habilitar la precarga automática.
+              </p>
+            )}
+          </div>
         </Alert>
       )}
 

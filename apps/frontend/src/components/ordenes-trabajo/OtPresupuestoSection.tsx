@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Trash2, Printer } from 'lucide-react'
 import type { IOtItem, OrdenEstado, OtItemTipo } from '@gnc/shared-types'
 import { OT_ESTADOS_CON_RESERVA_STOCK, OT_ITEM_DELETABLE_ESTADOS, OT_ITEM_EDITABLE_ESTADOS } from '@gnc/shared-types'
 import { useOtItemMutations, useOtPresupuesto } from '@/hooks/useOtItems'
@@ -165,12 +165,20 @@ export function OtPresupuestoSection({ ordenTrabajoId, ordenEstado }: OtPresupue
           title="Presupuesto"
           description="Servicios y repuestos incluidos en la orden"
           action={
-            puedeEditar ? (
-              <Button size="sm" onClick={openCreate}>
-                <Plus className="h-4 w-4" />
-                Agregar ítem
-              </Button>
-            ) : undefined
+            <div className="flex flex-wrap gap-2">
+              <Link to={ROUTES.ORDEN_TRABAJO_PRINT(ordenTrabajoId)}>
+                <Button size="sm" variant="outline">
+                  <Printer className="h-4 w-4" />
+                  Imprimir
+                </Button>
+              </Link>
+              {puedeEditar ? (
+                <Button size="sm" onClick={openCreate}>
+                  <Plus className="h-4 w-4" />
+                  Agregar ítem
+                </Button>
+              ) : null}
+            </div>
           }
         />
         <CardBody className="space-y-4">

@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "migration:run": "node ace.js migration:run",
     "migration:rollback": "node ace.js migration:rollback",
-    "db:seed": "node ace.js db:seed"
+    "db:seed": "node ace.js db:seed",
+    "vencimientos:alertar": "node ace.js vencimientos:alertar"
   },
   "imports": {
     "#controllers/*": "./app/controllers/*.js",
@@ -33,7 +34,8 @@
     "#tests/*": "./tests/*.js",
     "#config/*": "./config/*.js",
     "#modules/*": "./app/modules/*.js",
-    "#shared/*": "./app/shared/*.js"
+    "#shared/*": "./app/shared/*.js",
+    "#commands/*": "./commands/*.js"
   },
   "dependencies": {
     "@adonisjs/auth": "^9.3.0",

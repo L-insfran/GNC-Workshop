@@ -41,6 +41,11 @@ export interface IVencimientoAlerta {
   nivel: 'info' | 'warning' | 'danger'
 }
 
+export interface IVencimientoPendienteNotificar extends IVencimientoAlerta {
+  canalSugerido: 'email' | 'whatsapp'
+  motivo: string
+}
+
 export interface IProduccionDiaria {
   fecha: string
   ordenesCompletadas: number

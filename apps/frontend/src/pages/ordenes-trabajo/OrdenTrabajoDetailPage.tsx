@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ArrowLeft, Calendar, Pencil } from 'lucide-react'
+import { ArrowLeft, Calendar, Pencil, Printer } from 'lucide-react'
 import { useOrdenTrabajo, useOrdenTrabajoMutations } from '@/hooks/useOrdenesTrabajo'
 import { useMecanicos } from '@/hooks/useMecanicos'
 import { ROUTES } from '@/constants/routes'
@@ -9,6 +9,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Badge, getOrdenEstadoBadgeVariant } from '@/components/ui/Badge'
 import { Select } from '@/components/ui/Select'
 import { Alert } from '@/components/ui/Alert'
+import { Modal } from '@/components/ui/Modal'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { SinMecanicosAlert } from '@/components/ordenes-trabajo/SinMecanicosAlert'
 import { OtPresupuestoSection } from '@/components/ordenes-trabajo/OtPresupuestoSection'
@@ -43,6 +44,7 @@ export function OrdenTrabajoDetailPage() {
   const [nuevoEstado, setNuevoEstado] = useState<OrdenEstado | ''>('')
   const [mecanicoAsignadoId, setMecanicoAsignadoId] = useState('')
   const [estadoError, setEstadoError] = useState<string | null>(null)
+  const [confirmEntregaSinFactura, setConfirmEntregaSinFactura] = useState(false)
 
   if (isLoading) return <PageLoader />
 
@@ -83,6 +85,28 @@ export function OrdenTrabajoDetailPage() {
     nuevoEstado === 'entregada' &&
     (cobro?.estado === 'sin_factura' || cobro?.estado === 'con_sena' || cobro?.estado === 'anulada')
 
+  const aplicarCambioEstado = async () => {
+    if (!nuevoEstado || !id) return
+
+    try {
+      await updateEstado.mutateAsync({
+        id,
+        data: {
+          estado: nuevoEstado,
+          mecanicoAsignadoId: nuevoEstado === 'en_taller' ? mecanicoResuelto : undefined,
+        },
+      })
+      setNuevoEstado('')
+      setMecanicoAsignadoId('')
+      setConfirmEntregaSinFactura(false)
+    } catch (err) {
+      const message =
+        err instanceof ApiError ? err.message : 'No se pudo actualizar el estado.'
+      setEstadoError(message)
+      setConfirmEntregaSinFactura(false)
+    }
+  }
+
   const handleEstadoChange = async () => {
     if (!nuevoEstado || !id) return
     setEstadoError(null)
@@ -106,21 +130,12 @@ export function OrdenTrabajoDetailPage() {
       return
     }
 
-    try {
-      await updateEstado.mutateAsync({
-        id,
-        data: {
-          estado: nuevoEstado,
-          mecanicoAsignadoId: nuevoEstado === 'en_taller' ? mecanicoResuelto : undefined,
-        },
-      })
-      setNuevoEstado('')
-      setMecanicoAsignadoId('')
-    } catch (err) {
-      const message =
-        err instanceof ApiError ? err.message : 'No se pudo actualizar el estado.'
-      setEstadoError(message)
+    if (entregaSinFactura) {
+      setConfirmEntregaSinFactura(true)
+      return
     }
+
+    await aplicarCambioEstado()
   }
 
   return (
@@ -133,10 +148,16 @@ export function OrdenTrabajoDetailPage() {
           <ArrowLeft className="h-4 w-4" />
           Volver a órdenes
         </Link>
-        <Button onClick={() => navigate(ROUTES.ORDEN_TRABAJO_EDIT(orden.id))}>
-          <Pencil className="h-4 w-4" />
-          Editar
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={() => navigate(ROUTES.ORDEN_TRABAJO_PRINT(orden.id))}>
+            <Printer className="h-4 w-4" />
+            Imprimir
+          </Button>
+          <Button onClick={() => navigate(ROUTES.ORDEN_TRABAJO_EDIT(orden.id))}>
+            <Pencil className="h-4 w-4" />
+            Editar
+          </Button>
+        </div>
       </div>
 
       {!hayMecanicos && <SinMecanicosAlert />}
@@ -413,6 +434,22 @@ export function OrdenTrabajoDetailPage() {
       </Card>
 
       <OtHistorialEstadosSection ordenTrabajoId={orden.id} />
+
+      <Modal
+        isOpen={confirmEntregaSinFactura}
+        onClose={() => setConfirmEntregaSinFactura(false)}
+        title="Entregar sin factura"
+        description="Esta OT no tiene factura emitida y cobrada. ¿Confirmás la entrega del vehículo de todos modos?"
+      >
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={() => setConfirmEntregaSinFactura(false)}>
+            Cancelar
+          </Button>
+          <Button isLoading={updateEstado.isPending} onClick={aplicarCambioEstado}>
+            Confirmar entrega
+          </Button>
+        </div>
+      </Modal>
     </div>
   )
 }

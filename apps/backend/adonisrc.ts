@@ -13,9 +13,13 @@ export default defineConfig({
     tmp: 'tmp',
     views: 'resources/views',
   },
+  /**
+   * Relative paths for local commands (without extension). Ace will import .js on runtime.
+   */
   commands: [
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/lucid/commands'),
+    () => import('#commands/vencimientos_alertar'),
   ],
   providers: [
     () => import('@adonisjs/core/providers/app_provider'),

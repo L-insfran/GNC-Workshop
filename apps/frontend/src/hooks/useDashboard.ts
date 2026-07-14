@@ -21,6 +21,17 @@ export function useDashboardVencimientos() {
   })
 }
 
+export function useDashboardPendientesNotificar(enabled = true) {
+  return useQuery({
+    queryKey: ['dashboard', 'vencimientos-pendientes-notificar'],
+    queryFn: async () => {
+      const response = await dashboardService.getPendientesNotificar()
+      return response.data ?? []
+    },
+    enabled,
+  })
+}
+
 export function useDashboardAlertasOperativas() {
   return useQuery({
     queryKey: ['dashboard', 'alertas-operativas'],

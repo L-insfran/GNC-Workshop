@@ -23,19 +23,26 @@ export const ROUTES = {
   ORDEN_TRABAJO_NEW: '/ordenes-trabajo/nuevo',
   ORDEN_TRABAJO_NEW_FROM_CLIENTE: (
     clienteId: string,
-    params?: { vehiculoId?: string; equipoGncId?: string },
+    params?: { vehiculoId?: string; equipoGncId?: string; tipoTrabajoId?: string },
   ) => {
     const search = new URLSearchParams({ clienteId })
     if (params?.vehiculoId) search.set('vehiculoId', params.vehiculoId)
     if (params?.equipoGncId) search.set('equipoGncId', params.equipoGncId)
+    if (params?.tipoTrabajoId) search.set('tipoTrabajoId', params.tipoTrabajoId)
     return `/ordenes-trabajo/nuevo?${search.toString()}`
   },
-  ORDEN_TRABAJO_NEW_FROM_VEHICULO: (clienteId: string, vehiculoId: string, equipoGncId?: string) => {
+  ORDEN_TRABAJO_NEW_FROM_VEHICULO: (
+    clienteId: string,
+    vehiculoId: string,
+    params?: { equipoGncId?: string; tipoTrabajoId?: string },
+  ) => {
     const search = new URLSearchParams({ clienteId, vehiculoId })
-    if (equipoGncId) search.set('equipoGncId', equipoGncId)
+    if (params?.equipoGncId) search.set('equipoGncId', params.equipoGncId)
+    if (params?.tipoTrabajoId) search.set('tipoTrabajoId', params.tipoTrabajoId)
     return `/ordenes-trabajo/nuevo?${search.toString()}`
   },
   ORDEN_TRABAJO_DETAIL: (id: string) => `/ordenes-trabajo/${id}`,
+  ORDEN_TRABAJO_PRINT: (id: string) => `/ordenes-trabajo/${id}/imprimir`,
   ORDEN_TRABAJO_EDIT: (id: string) => `/ordenes-trabajo/${id}/editar`,
   INVENTARIO: '/inventario',
   INVENTARIO_STOCK_BAJO: '/inventario?stockBajo=1',

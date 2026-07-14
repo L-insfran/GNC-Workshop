@@ -64,6 +64,7 @@ export function OrdenTrabajoFormPage() {
   const prefillClienteId = searchParams.get('clienteId') ?? ''
   const prefillVehiculoId = searchParams.get('vehiculoId') ?? ''
   const prefillEquipoGncId = searchParams.get('equipoGncId') ?? ''
+  const prefillTipoTrabajoId = searchParams.get('tipoTrabajoId') ?? ''
   const puedeRegistrarSena = checkRole([...MODULE_ROLES.caja, ...MODULE_ROLES.clientes])
 
   const { data: orden, isLoading } = useOrdenTrabajo(id)
@@ -92,6 +93,7 @@ export function OrdenTrabajoFormPage() {
       clienteId: prefillClienteId,
       vehiculoId: prefillVehiculoId,
       equipoGncId: prefillEquipoGncId,
+      tipoTrabajoId: prefillTipoTrabajoId,
     },
   })
 
@@ -101,13 +103,16 @@ export function OrdenTrabajoFormPage() {
 
   useEffect(() => {
     if (isEditing || prefillAppliedRef.current) return
-    if (!prefillClienteId && !prefillVehiculoId && !prefillEquipoGncId) return
+    if (!prefillClienteId && !prefillVehiculoId && !prefillEquipoGncId && !prefillTipoTrabajoId) {
+      return
+    }
 
     reset((current) => ({
       ...current,
       clienteId: prefillClienteId || current.clienteId,
       vehiculoId: prefillVehiculoId || current.vehiculoId,
       equipoGncId: prefillEquipoGncId || current.equipoGncId,
+      tipoTrabajoId: prefillTipoTrabajoId || current.tipoTrabajoId,
     }))
     if (prefillClienteId) {
       prevClienteIdRef.current = prefillClienteId
@@ -118,6 +123,7 @@ export function OrdenTrabajoFormPage() {
     prefillClienteId,
     prefillVehiculoId,
     prefillEquipoGncId,
+    prefillTipoTrabajoId,
     reset,
   ])
 
