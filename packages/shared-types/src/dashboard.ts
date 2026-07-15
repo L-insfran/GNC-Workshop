@@ -41,9 +41,35 @@ export interface IVencimientoAlerta {
   nivel: 'info' | 'warning' | 'danger'
 }
 
+export type NotificacionCanal = 'email' | 'whatsapp'
+export type NotificacionDriver = 'manual' | 'whatsapp_cloud'
+
+/** Contrato listo para cablear WhatsApp Cloud / otros proveedores */
+export interface INotificacionDriverInfo {
+  driver: NotificacionDriver
+  envioAutomaticoDisponible: boolean
+  tallerNombre: string
+}
+
 export interface IVencimientoPendienteNotificar extends IVencimientoAlerta {
-  canalSugerido: 'email' | 'whatsapp'
+  canalSugerido: NotificacionCanal
   motivo: string
+  clienteEmail: string | null
+  clienteTelefono: string | null
+  asuntoEmail: string
+  mensaje: string
+  whatsappUrl: string | null
+  mailtoUrl: string | null
+  puedeWhatsapp: boolean
+  puedeEmail: boolean
+  modoDriver: NotificacionDriver
+  envioAutomaticoDisponible: boolean
+}
+
+export interface IRegistrarVencimientoNotificacionDTO {
+  canal: NotificacionCanal
+  modo?: 'asistido' | 'automatico'
+  estado?: 'enviado' | 'omitido'
 }
 
 export interface IProduccionDiaria {

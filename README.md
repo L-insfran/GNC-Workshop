@@ -84,7 +84,7 @@ App disponible en `http://localhost:5173`
 | Estado | Módulos |
 |--------|---------|
 | **Implementados (MVP)** | Auth, Users, Clientes, Vehículos, Equipos GNC, Órdenes de Trabajo, Dashboard, Inventario, Caja, Facturación (interna, sin AFIP), Agenda, Configuración |
-| **Parcial** | Auditoría (solo escritura en `audit_logs`; sin UI), notificaciones de vencimientos (stub) |
+| **Parcial** | Auditoría (solo escritura en `audit_logs`; sin UI), WhatsApp Cloud API (adapter listo; envío HTTP pendiente). Notificaciones asistidas wa.me/mailto ya activas |
 | **Pendientes** | Marketing, Reportes, integración AFIP, Policies granulares |
 
 Estado detallado por fases: [docs/10-roadmap/README.md](docs/10-roadmap/README.md).

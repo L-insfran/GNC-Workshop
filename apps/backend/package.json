@@ -35,6 +35,7 @@
     "#config/*": "./config/*.js",
     "#modules/*": "./app/modules/*.js",
     "#shared/*": "./app/shared/*.js",
+    "#integrations/*": "./app/integrations/*.js",
     "#commands/*": "./commands/*.js"
   },
   "dependencies": {

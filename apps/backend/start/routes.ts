@@ -110,6 +110,14 @@ router
           '#modules/dashboard/controllers/dashboard_controller.vencimientosPendientesNotificar'
         )
         router.get(
+          'dashboard/notificaciones/config',
+          '#modules/dashboard/controllers/dashboard_controller.notificacionesConfig'
+        )
+        router.post(
+          'dashboard/vencimientos/:alertaId/marcar-notificado',
+          '#modules/dashboard/controllers/dashboard_controller.marcarVencimientoNotificado'
+        )
+        router.get(
           'dashboard/alertas-operativas',
           '#modules/dashboard/controllers/dashboard_controller.alertasOperativas'
         )

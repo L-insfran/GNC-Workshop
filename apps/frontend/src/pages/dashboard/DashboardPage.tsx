@@ -9,8 +9,6 @@ import {
   Package,
   PauseCircle,
   LayoutGrid,
-  Bell,
-  Mail,
 } from 'lucide-react'
 import {
   BarChart,
@@ -28,7 +26,6 @@ import {
   useDashboardProduccion,
   useDashboardVencimientos,
   useDashboardAlertasOperativas,
-  useDashboardPendientesNotificar,
 } from '@/hooks/useDashboard'
 import { useOrdenesTrabajo } from '@/hooks/useOrdenesTrabajo'
 import { useAuth } from '@/hooks/useAuth'
@@ -40,10 +37,10 @@ import { Alert } from '@/components/ui/Alert'
 import { Badge, getOrdenEstadoBadgeVariant, getVencimientoBadgeVariant } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
+import { VencimientosNotificacionSection } from '@/components/dashboard/vencimientos-notificacion-section'
 import {
   formatCurrency,
   formatDateOnly,
-  formatPatente,
   ORDEN_ESTADO_LABELS,
 } from '@/utils/format'
 
@@ -78,8 +75,6 @@ export function DashboardPage() {
   const { data: vencimientos, isLoading: vencLoading } = useDashboardVencimientos()
   const { data: alertasOperativas, isLoading: alertasLoading } = useDashboardAlertasOperativas()
   const { data: produccion, isLoading: prodLoading } = useDashboardProduccion(7)
-  const { data: pendientesNotificar, isLoading: pendientesLoading } =
-    useDashboardPendientesNotificar(!soloVistaMecanico)
   const { data: misOrdenes, isLoading: misOtLoading } = useOrdenesTrabajo(
     { perPage: 8, filtro: 'activas', mis: true },
     { enabled: esMecanico }
@@ -287,54 +282,7 @@ export function DashboardPage() {
             </Card>
           </div>
 
-          <Card>
-            <CardHeader
-              title="Notificaciones de vencimiento"
-              description="Alertas listas para avisar a clientes (envío real próximamente)"
-              action={
-                <Badge variant="neutral">
-                  <Bell className="mr-1 h-3 w-3" />
-                  Stub
-                </Badge>
-              }
-            />
-            <CardBody className="space-y-3">
-              {pendientesLoading ? (
-                <PageLoader />
-              ) : (pendientesNotificar ?? []).length === 0 ? (
-                <p className="py-6 text-center text-sm text-slate-500">
-                  No hay vencimientos críticos pendientes de notificar
-                </p>
-              ) : (
-                (pendientesNotificar ?? []).slice(0, 8).map((alerta) => (
-                  <Link
-                    key={`notif-${alerta.id}`}
-                    to={vencimientoLink(alerta)}
-                    className="flex items-start justify-between gap-3 rounded-lg border border-slate-100 p-3 transition-colors hover:border-brand-200 hover:bg-slate-50"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-slate-900">
-                        {alerta.motivo}
-                      </p>
-                      <p className="text-xs text-slate-500">
-                        {alerta.clienteNombre} · {alerta.vehiculoPatente}
-                      </p>
-                      <p className="mt-1 inline-flex items-center gap-1 text-xs text-slate-400">
-                        <Mail className="h-3 w-3" />
-                        Canal sugerido: {alerta.canalSugerido}
-                      </p>
-                    </div>
-                    <Badge variant={getVencimientoBadgeVariant(alerta.nivel)}>
-                      {alerta.diasRestantes}d
-                    </Badge>
-                  </Link>
-                ))
-              )}
-              <p className="text-xs text-slate-400">
-                Para procesar el batch: <code>node ace vencimientos:alertar</code> en el backend.
-              </p>
-            </CardBody>
-          </Card>
+          <VencimientosNotificacionSection enabled={!soloVistaMecanico} />
         </>
       )}
 

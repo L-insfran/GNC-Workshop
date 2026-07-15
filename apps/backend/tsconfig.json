@@ -19,7 +19,8 @@
       "#tests/*": ["./tests/*"],
       "#config/*": ["./config/*"],
       "#modules/*": ["./app/modules/*"],
-      "#shared/*": ["./app/shared/*"]
+      "#shared/*": ["./app/shared/*"],
+      "#integrations/*": ["./app/integrations/*"]
     }
   },
   "include": ["**/*"],

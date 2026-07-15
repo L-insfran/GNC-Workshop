@@ -26,10 +26,12 @@ alwaysApply: false
 - Colas de jobs (vencimientos, notificaciones)
 - Sesiones (opcional)
 
-## Notificaciones (futuro)
-- Email: alertas de vencimiento
-- WhatsApp Business API: recordatorios a clientes
-- Push: alertas internas del taller
+## Notificaciones
+- Email / WhatsApp: vencimientos de oblea y PH
+- **Hoy**: driver `manual` (asistido vía wa.me / mailto, $0)
+- **Mañana**: driver `whatsapp_cloud` (Meta Cloud API) — adapter y contrato listos en `app/integrations/notificaciones/`
+- Config: `NOTIFICACION_DRIVER`, `WHATSAPP_CLOUD_*`, `TALLER_NOMBRE`
+- Push: alertas internas del taller (futuro)
 
 ## Patrón de integración
 
@@ -40,3 +42,4 @@ Service → IntegrationAdapter → ExternalAPI
 ```
 
 Nunca llamar APIs externas desde Controllers.
+Para notificaciones: `VencimientosNotificacionService` → `createNotificacionAdapter()`.

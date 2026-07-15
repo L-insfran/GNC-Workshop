@@ -1,4 +1,5 @@
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { IRegistrarVencimientoNotificacionDTO } from '@gnc/shared-types'
 import { dashboardService } from '@/services/dashboardService'
 
 export function useDashboardKpis() {
@@ -29,6 +30,38 @@ export function useDashboardPendientesNotificar(enabled = true) {
       return response.data ?? []
     },
     enabled,
+  })
+}
+
+export function useDashboardNotificacionesConfig(enabled = true) {
+  return useQuery({
+    queryKey: ['dashboard', 'notificaciones-config'],
+    queryFn: async () => {
+      const response = await dashboardService.getNotificacionesConfig()
+      return response.data
+    },
+    enabled,
+  })
+}
+
+export function useMarcarVencimientoNotificado() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      alertaId,
+      data,
+    }: {
+      alertaId: string
+      data: IRegistrarVencimientoNotificacionDTO
+    }) => {
+      const response = await dashboardService.marcarNotificado(alertaId, data)
+      return response.data
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ['dashboard', 'vencimientos-pendientes-notificar'],
+      })
+    },
   })
 }
 

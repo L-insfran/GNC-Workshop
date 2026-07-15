@@ -13,7 +13,7 @@
 | 3 — MVP Backend | ✅ Completa |
 | 4 — Frontend foundation | ✅ Completa |
 | 5 — MVP Frontend | ✅ Completa |
-| 6 — Dashboard | ⚠️ Hecho; notificaciones en stub |
+| 6 — Dashboard | ✅ Asistido + adapters; falta HTTP WhatsApp Cloud |
 | 7 — Módulos adicionales | ⚠️ Parcial (faltan Marketing y Reportes) |
 | 8 — Calidad y deploy | ⚠️ Parcial (CI básico; tests finos; deploy incompleto) |
 
@@ -65,7 +65,9 @@
 - [x] KPIs, gráficos de producción, alertas de vencimientos
 - [x] Alertas operativas (stock bajo, OT, etc.)
 - [x] Comando `vencimientos:alertar` + endpoint pendientes de notificar
-- [ ] Envío real de notificaciones (email / WhatsApp); hoy es **stub**
+- [x] Arquitectura de adapters (manual asistido + WhatsApp Cloud stub)
+- [x] UI asistida: wa.me / mailto + marcar notificado (`vencimiento_notificaciones`)
+- [ ] Envío HTTP real vía WhatsApp Cloud API (completar `WhatsappCloudAdapter.enviar`)
 
 ## Fase 7 - Módulos adicionales ⚠️
 
@@ -94,7 +96,7 @@
 ## Próximos focos (prioridad sugerida)
 
 1. Policies / autorización granular en API
-2. Notificaciones reales de vencimientos (reemplazar stub)
+2. Completar envío HTTP en `WhatsappCloudAdapter` (Meta Cloud API) cuando haya cuenta de pago
 3. AFIP / marcar explícitamente factura interna vs fiscal
 4. Módulo Reportes mínimo (export CSV/PDF + auditoría `export`)
 5. UI/API de Auditoría

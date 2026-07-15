@@ -7,7 +7,7 @@ alwaysApply: false
 
 ## Corto plazo (deuda actual del MVP)
 - Policies granulares en API
-- Notificaciones reales de vencimientos (reemplazar stub)
+- Completar HTTP de WhatsApp Cloud API (`WhatsappCloudAdapter.enviar`) — UI asistida ya lista
 - Módulo Reportes (export CSV/PDF)
 - UI/API de consulta de auditoría
 - Integración AFIP (hoy factura interna)

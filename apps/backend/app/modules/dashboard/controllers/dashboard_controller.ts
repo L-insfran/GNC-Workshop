@@ -2,6 +2,7 @@ import type { HttpContext } from '@adonisjs/core/http'
 import { ApiResponse } from '#shared/api_response'
 import DashboardService from '#modules/dashboard/services/dashboard_service'
 import VencimientosNotificacionService from '#modules/dashboard/services/vencimientos_notificacion_service'
+import { registrarNotificacionValidator } from '#modules/dashboard/validators/registrar_notificacion_validator'
 
 const dashboardService = new DashboardService()
 const vencimientosNotificacionService = new VencimientosNotificacionService()
@@ -20,6 +21,41 @@ export default class DashboardController {
   async vencimientosPendientesNotificar({ response }: HttpContext) {
     const data = await vencimientosNotificacionService.listPendientes()
     return response.ok(ApiResponse.success(data))
+  }
+
+  async notificacionesConfig({ response }: HttpContext) {
+    const data = vencimientosNotificacionService.getDriverInfo()
+    return response.ok(ApiResponse.success(data))
+  }
+
+  async marcarVencimientoNotificado({ params, request, auth, response }: HttpContext) {
+    const dto = await request.validateUsing(registrarNotificacionValidator)
+    try {
+      const registro = await vencimientosNotificacionService.marcarNotificado(
+        params.alertaId,
+        auth.user?.id ?? null,
+        {
+          canal: dto.canal,
+          modo: dto.modo,
+          estado: dto.estado,
+        }
+      )
+      return response.ok(
+        ApiResponse.success({
+          id: registro.id,
+          alertaId: registro.alertaId,
+          canal: registro.canal,
+          modo: registro.modo,
+          estado: registro.estado,
+          notificadoAt: registro.notificadoAt.toISO(),
+        })
+      )
+    } catch (error) {
+      if (error instanceof Error && error.message === 'ALERTA_NO_ENCONTRADA') {
+        return response.notFound(ApiResponse.error('NOT_FOUND', 'Alerta de vencimiento no encontrada'))
+      }
+      throw error
+    }
   }
 
   async alertasOperativas({ response }: HttpContext) {

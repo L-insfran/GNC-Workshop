@@ -25,8 +25,8 @@ Design system, layout, auth, routing
 ## Fase 5 - MVP Frontend ✅
 Pantallas del núcleo operativo + flujo recepción/taller/QC
 
-## Fase 6 - Dashboard ⚠️
-KPIs, gráficos, alertas. Notificaciones de vencimiento en stub.
+## Fase 6 - Dashboard ✅ (API WhatsApp pendiente)
+KPIs, gráficos, alertas. Notificaciones asistidas (wa.me/mailto) + adapters listos para WhatsApp Cloud.
 
 ## Fase 7 - Módulos adicionales ⚠️
 Hechos: Inventario, Caja, Facturación (sin AFIP), Agenda, Config.

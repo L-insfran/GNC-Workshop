@@ -5,7 +5,7 @@ import VencimientosNotificacionService from '#modules/dashboard/services/vencimi
 export default class VencimientosAlertar extends BaseCommand {
   static commandName = 'vencimientos:alertar'
   static description =
-    'Lista vencimientos de oblea/PH pendientes de notificar (stub sin envío real)'
+    'Procesa vencimientos de oblea/PH: modo asistido (default) o WhatsApp Cloud si está configurado'
 
   static options: CommandOptions = {
     startApp: true,
@@ -13,8 +13,12 @@ export default class VencimientosAlertar extends BaseCommand {
 
   async run() {
     const service = new VencimientosNotificacionService()
+    const driver = service.getDriverInfo()
     const result = await service.procesarAlertas(this.logger)
 
+    this.logger.info(
+      `Driver: ${result.driver} · automático=${driver.envioAutomaticoDisponible ? 'sí' : 'no'}`
+    )
     this.logger.info(
       `Procesadas ${result.total} alertas (${result.danger} críticas, ${result.warning} advertencia)`
     )
@@ -24,8 +28,16 @@ export default class VencimientosAlertar extends BaseCommand {
       return
     }
 
-    this.logger.success(
-      'Stub OK. Próximo paso: conectar adapter de email/WhatsApp sin cambiar este comando.'
-    )
+    if (result.requierenManual > 0) {
+      this.logger.info(
+        `${result.requierenManual} requieren acción asistida en el Dashboard (WhatsApp / email).`
+      )
+    }
+    if (result.automaticosOk > 0) {
+      this.logger.success(`${result.automaticosOk} enviadas automáticamente`)
+    }
+    if (result.fallidos > 0) {
+      this.logger.error(`${result.fallidos} fallaron al enviar`)
+    }
   }
 }

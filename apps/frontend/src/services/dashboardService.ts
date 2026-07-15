@@ -3,9 +3,11 @@ import type {
   IAlertaOperativa,
   IVencimientoAlerta,
   IVencimientoPendienteNotificar,
+  INotificacionDriverInfo,
+  IRegistrarVencimientoNotificacionDTO,
   IProduccionDiaria,
 } from '@gnc/shared-types'
-import { apiGet } from '@/services/api-client'
+import { apiGet, apiPost } from '@/services/api-client'
 
 export const dashboardService = {
   getKpis() {
@@ -20,6 +22,21 @@ export const dashboardService = {
     return apiGet<IVencimientoPendienteNotificar[]>(
       '/dashboard/vencimientos/pendientes-notificar'
     )
+  },
+
+  getNotificacionesConfig() {
+    return apiGet<INotificacionDriverInfo>('/dashboard/notificaciones/config')
+  },
+
+  marcarNotificado(alertaId: string, data: IRegistrarVencimientoNotificacionDTO) {
+    return apiPost<{
+      id: string
+      alertaId: string
+      canal: string
+      modo: string
+      estado: string
+      notificadoAt: string
+    }>(`/dashboard/vencimientos/${encodeURIComponent(alertaId)}/marcar-notificado`, data)
   },
 
   getAlertasOperativas() {

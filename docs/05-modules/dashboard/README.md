@@ -1,35 +1,49 @@
 # Módulo: Dashboard
 
-## Estado: Implementado — Fase 6 (notificaciones stub)
+## Estado: Implementado — Fase 6
 
 ## Responsabilidad
 
-Módulo estrella del sistema. KPIs, gráficos, alertas de vencimientos y alertas operativas.
+KPIs, gráficos, alertas de vencimientos/operativas y notificaciones a clientes (asistidas hoy, API mañana).
 
 ## Endpoints
 
 ```
-GET /api/v1/dashboard/kpis
-GET /api/v1/dashboard/vencimientos
-GET /api/v1/dashboard/vencimientos/pendientes-notificar
-GET /api/v1/dashboard/alertas-operativas
-GET /api/v1/dashboard/produccion
+GET  /api/v1/dashboard/kpis
+GET  /api/v1/dashboard/vencimientos
+GET  /api/v1/dashboard/vencimientos/pendientes-notificar
+POST /api/v1/dashboard/vencimientos/:alertaId/marcar-notificado
+GET  /api/v1/dashboard/notificaciones/config
+GET  /api/v1/dashboard/alertas-operativas
+GET  /api/v1/dashboard/produccion
 ```
 
-## KPIs
+## Notificaciones (arquitectura)
 
-- Órdenes activas
-- Órdenes del día
-- Clientes activos
-- Vencimientos próximos (oblea 30d / PH 60d)
-- Facturación del mes
-- Producción del mes
+```
+VencimientosNotificacionService
+        ↓
+createNotificacionAdapter()   ← config NOTIFICACION_DRIVER
+        ↓
+ ManualAssistidoAdapter  |  WhatsappCloudAdapter (stub listo)
+        ↓
+   wa.me / mailto        |  Meta Graph API (pendiente HTTP)
+```
+
+| Driver | Env | Comportamiento |
+|--------|-----|----------------|
+| `manual` (default) | `NOTIFICACION_DRIVER=manual` | Deep links en Dashboard; $0 |
+| `whatsapp_cloud` | + `WHATSAPP_CLOUD_TOKEN` + `PHONE_NUMBER_ID` | Mismo contrato; completar `enviar()` en el adapter |
+
+Tabla `vencimiento_notificaciones`: historial de avisos (asistidos o automáticos). Una alerta deja de listarse como pendiente cuando hay registro `enviado` para el mismo `alerta_id` + `fecha_vencimiento`.
+
+## Comando
+
+```bash
+cd apps/backend && npm run vencimientos:alertar
+```
 
 ## Frontend
 
-`DashboardPage` con StatCards, alertas, gráfico de producción (Recharts) y sección de pendientes de notificar (stub).
-
-## Notificaciones
-
-- Comando: `node ace vencimientos:alertar` (lista pendientes; **sin envío real**)
-- Próximo paso: adapter email/WhatsApp sin cambiar el contrato del comando
+- `DashboardPage` + `VencimientosNotificacionSection`
+- Botones WhatsApp / Email + “Marcar notificado”

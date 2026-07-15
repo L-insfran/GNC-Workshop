@@ -17,4 +17,11 @@ export default await Env.create(new URL('../', import.meta.url), {
 
   REDIS_HOST: Env.schema.string({ format: 'host' }),
   REDIS_PORT: Env.schema.number(),
+
+  /** manual (default, asistido $0) | whatsapp_cloud (Meta API, futuro) */
+  NOTIFICACION_DRIVER: Env.schema.enum.optional(['manual', 'whatsapp_cloud'] as const),
+  WHATSAPP_CLOUD_TOKEN: Env.schema.string.optional(),
+  WHATSAPP_CLOUD_PHONE_NUMBER_ID: Env.schema.string.optional(),
+  WHATSAPP_CLOUD_API_VERSION: Env.schema.string.optional(),
+  TALLER_NOMBRE: Env.schema.string.optional(),
 })
