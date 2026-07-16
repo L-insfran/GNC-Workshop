@@ -19,6 +19,9 @@ ERP especializado para talleres de GNC (Gas Natural Comprimido) en Argentina.
 | 08 | [Seguridad](08-security/README.md) | RBAC, auditoría, políticas |
 | 09 | [Deployment](09-deployment/README.md) | Docker, Nginx, CI/CD |
 | 10 | [Roadmap](10-roadmap/README.md) | Fases y estado real de implementación |
+| — | [Guía de usuario](guia-usuario.md) | Manual operativo para el personal del taller |
+| — | [Guías por rol](guia-usuario/README.md) | Versiones cortas: recepción, mecánico, caja, etc. |
+| — | [PDF — Guía de usuario](pdf/GNC-Workshop-Guia-de-Usuario.pdf) | Manual completo listo para imprimir / compartir |
 
 ## Convenciones
 

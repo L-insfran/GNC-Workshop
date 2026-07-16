@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>GNC Workshop — Guía de usuario</title>
+  <style>
+  @page { margin: 18mm 16mm; size: A4; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.45;
+    color: #1e293b;
+    max-width: 180mm;
+    margin: 0 auto;
+    padding: 8mm 0;
+  }
+  .cover {
+    page-break-after: always;
+    min-height: 240mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 20mm 10mm;
+    border-top: 6px solid #0f172a;
+  }
+  .cover .eyebrow {
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 9pt;
+    color: #64748b;
+    margin-bottom: 12px;
+  }
+  .cover h1 {
+    font-size: 28pt;
+    margin: 0 0 8px;
+    color: #0f172a;
+    border: none;
+    padding: 0;
+  }
+  .cover .subtitle {
+    font-size: 13pt;
+    color: #475569;
+    margin: 0 0 28px;
+  }
+  .cover .meta {
+    font-size: 9.5pt;
+    color: #64748b;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 16px;
+    margin-top: 24px;
+  }
+  .section-break { page-break-before: always; }
+  h1 {
+    font-size: 18pt;
+    color: #0f172a;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 6px;
+    margin-top: 0;
+  }
+  h2 {
+    font-size: 13pt;
+    color: #0f172a;
+    margin-top: 22px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 11.5pt;
+    color: #334155;
+    margin-top: 16px;
+    page-break-after: avoid;
+  }
+  h4 { font-size: 10.5pt; color: #475569; }
+  p { margin: 6px 0 10px; }
+  ul, ol { margin: 6px 0 12px; padding-left: 22px; }
+  li { margin: 3px 0; }
+  li.check { list-style: none; margin-left: -18px; }
+  strong { color: #0f172a; }
+  code {
+    font-family: Consolas, "Courier New", monospace;
+    font-size: 9pt;
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+  a { color: #1d4ed8; text-decoration: none; }
+  hr {
+    border: none;
+    border-top: 1px solid #cbd5e1;
+    margin: 22px 0;
+  }
+  blockquote {
+    margin: 12px 0;
+    padding: 8px 14px;
+    border-left: 4px solid #0f172a;
+    background: #f8fafc;
+    color: #334155;
+  }
+  blockquote p { margin: 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0 16px;
+    font-size: 9.5pt;
+    page-break-inside: avoid;
+  }
+  th, td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: #0f172a;
+    color: #fff;
+    font-weight: 600;
+  }
+  tr:nth-child(even) td { background: #f8fafc; }
+  .footer-note {
+    margin-top: 28px;
+    font-size: 8.5pt;
+    color: #94a3b8;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 8px;
+  }
+</style>
+</head>
+<body>
+  <section class="cover">
+    <div class="eyebrow">Manual operativo</div>
+    <h1>GNC Workshop</h1>
+    <p class="subtitle">Guía de usuario del sistema de gestión para talleres de GNC</p>
+    <p>Incluye la guía completa de módulos y las guías rápidas por rol: recepción, mecánico, caja, depósito, supervisor y administrador.</p>
+    <div class="meta">
+      <div>Documento para personal del taller</div>
+      <div>Sin detalles técnicos — uso diario</div>
+    </div>
+  </section>
+
+<section>
+<h1>Guía de usuario — GNC Workshop</h1>
+<p><strong>Sistema de gestión para talleres de GNC</strong></p>
+<p>Esta guía explica cómo usar cada parte del sistema, paso a paso. Está pensada para el día a día del taller: recepción, taller, depósito, caja y administración.</p>
+<blockquote><p><strong>Guías por rol:</strong> si preferís una versión corta según tu puesto, mirá <a href="guia-usuario/README.md">Guías por rol</a>.</p></blockquote>
+<hr />
+<h2>1. Cómo empezar</h2>
+<h3>Iniciar sesión</h3>
+<ol>
+<li>Abrí el sistema en el navegador.</li>
+<li>Ingresá tu <strong>usuario</strong> y <strong>contraseña</strong>.</li>
+<li>Hacé clic en <strong>Iniciar sesión</strong>.</li>
+</ol>
+<p>Al entrar verás el menú lateral con los módulos según tu rol (no todos ven las mismas pantallas).</p>
+<h3>Consejos generales</h3>
+<ul>
+<li>Usá la <strong>búsqueda</strong> y los <strong>filtros</strong> en los listados para encontrar rápido.</li>
+<li>Antes de eliminar o anular algo, el sistema suele pedir confirmación.</li>
+<li>El flujo habitual del taller es: <strong>Cliente → Vehículo → Equipo GNC → Turno u Orden de trabajo → Factura / Cobro</strong>.</li>
+</ul>
+<hr />
+<h2>2. Panel de inicio (Dashboard)</h2>
+<p>Es la pantalla principal. Muestra un resumen del taller.</p>
+<h3>Qué vas a ver</h3>
+<ul>
+<li>Indicadores del día (órdenes activas, producción, etc.).</li>
+<li><strong>Alertas de vencimientos</strong> (oblea GNC y prueba hidráulica de cilindros).</li>
+<li>Alertas operativas (por ejemplo, stock bajo u órdenes pendientes).</li>
+</ul>
+<h3>Cómo avisar un vencimiento al cliente</h3>
+<ol>
+<li>Entrá al <strong>Dashboard</strong>.</li>
+<li>Buscá la sección de <strong>vencimientos pendientes</strong>.</li>
+<li>Elegí al cliente de la lista.</li>
+<li>Abrí el aviso por <strong>WhatsApp</strong> o <strong>correo</strong> (según lo disponible).</li>
+<li>Cuando ya hayas contactado al cliente, marcá el aviso como <strong>notificado</strong>.</li>
+</ol>
+<p>Así el taller no pierde de vista renovaciones de oblea y PH.</p>
+<hr />
+<h2>3. Clientes</h2>
+<p>Acá se registran las personas o empresas dueñas de los vehículos.</p>
+<h3>Registrar un cliente nuevo</h3>
+<ol>
+<li>Menú <strong>Clientes</strong> → <strong>Nuevo cliente</strong>.</li>
+<li>Completá:</li>
+</ol>
+<p>   - Tipo: persona física o jurídica</p>
+<p>   - Nombre / razón social</p>
+<p>   - Tipo y número de documento (DNI, CUIT o CUIL)</p>
+<p>   - Teléfono y email (recomendado)</p>
+<p>   - Condición frente al IVA</p>
+<p>   - Notas internas (opcional)</p>
+<ol>
+<li>Guardá.</li>
+<li>Se abre la <strong>ficha del cliente</strong>.</li>
+</ol>
+<h3>Buscar o editar un cliente</h3>
+<ol>
+<li>En <strong>Clientes</strong>, usá el buscador (nombre, documento, etc.).</li>
+<li>Abrí la ficha.</li>
+<li>Editá los datos si hace falta y guardá.</li>
+</ol>
+<h3>Desde la ficha del cliente podés</h3>
+<ul>
+<li>Ver sus vehículos.</li>
+<li>Ir a crear un vehículo asociado.</li>
+<li>Continuar el flujo hacia equipo GNC u orden de trabajo.</li>
+</ul>
+<hr />
+<h2>4. Vehículos</h2>
+<p>Cada cliente puede tener uno o más vehículos.</p>
+<h3>Registrar un vehículo</h3>
+<ol>
+<li>Menú <strong>Vehículos</strong> → <strong>Nuevo vehículo</strong>  </li>
+</ol>
+<p>   <em>(o desde la ficha del cliente)</em>.</p>
+<ol>
+<li>Seleccioná el <strong>cliente</strong>.</li>
+<li>Completá:</li>
+</ol>
+<p>   - Patente</p>
+<p>   - Marca y modelo</p>
+<p>   - Año</p>
+<p>   - Tipo de combustible (nafta, diesel, GNC, dual)</p>
+<p>   - Color, kilometraje, n.º de motor/chasis (si los tenés)</p>
+<ol>
+<li>Guardá.</li>
+</ol>
+<blockquote><p>Si no aparece la marca o el modelo, un administrador o supervisor debe cargarlos antes en <strong>Configuración → Marcas y modelos</strong>.</p></blockquote>
+<h3>Consultar un vehículo</h3>
+<ol>
+<li>Entrá a <strong>Vehículos</strong> o a la ficha del cliente.</li>
+<li>Abrí el detalle: datos, equipo GNC asociado e historial relacionado.</li>
+</ol>
+<hr />
+<h2>5. Equipos GNC</h2>
+<p>Registra el equipo instalado en el vehículo: regulador, cilindros, oblea y fechas de PH.</p>
+<h3>Registrar un equipo GNC</h3>
+<ol>
+<li>Menú <strong>Equipos GNC</strong> → <strong>Nuevo equipo</strong>.</li>
+<li>Seleccioná el <strong>vehículo</strong>.</li>
+<li>Completá:</li>
+</ol>
+<p>   - Número de serie del equipo</p>
+<p>   - Fecha de instalación</p>
+<p>   - Marca y modelo del regulador</p>
+<p>   - Certificador CRPC (si corresponde)</p>
+<ol>
+<li>Agregá los <strong>cilindros</strong> (hasta 4), con:</li>
+</ol>
+<p>   - Número de serie</p>
+<p>   - Marca</p>
+<p>   - Capacidad (m³)</p>
+<p>   - Posición</p>
+<p>   - Fecha de última PH</p>
+<p>   - Fecha de fabricación (opcional)</p>
+<ol>
+<li>Guardá.</li>
+</ol>
+<h3>Por qué es importante</h3>
+<ul>
+<li>Controlás vencimientos de <strong>oblea</strong> (anual) y <strong>PH</strong> (cada 5 años por cilindro).</li>
+<li>Es la base para crear órdenes de trabajo correctas (revisión, renovación, PH, etc.).</li>
+</ul>
+<hr />
+<h2>6. Agenda (turnos)</h2>
+<p>Calendario para citar clientes y, al llegar, generar la orden de trabajo.</p>
+<h3>Crear un turno</h3>
+<ol>
+<li>Menú <strong>Agenda</strong> → <strong>Nuevo turno</strong>.</li>
+<li>Elegí fecha y horario.</li>
+<li>Seleccioná cliente (y vehículo, si aplica).</li>
+<li>Indicá el motivo o tipo de atención.</li>
+<li>Guardá.</li>
+</ol>
+<h3>Cuando el cliente llega</h3>
+<ol>
+<li>Abrí el turno en la agenda.</li>
+<li>Confirmá la asistencia.</li>
+<li>Usá la opción <strong>Generar orden de trabajo</strong>.</li>
+<li>Revisá los datos precompletados y confirmá la OT.</li>
+</ol>
+<p>Así recepción deja de cargar todo de cero: el turno ya trae contexto.</p>
+<hr />
+<h2>7. Órdenes de trabajo (OT)</h2>
+<p>Es el corazón del taller: desde que entra el vehículo hasta que se entrega.</p>
+<h3>Estados de una OT (en orden)</h3>
+<ol>
+<li><strong>Borrador</strong> — armada, aún no confirmada</li>
+<li><strong>Recepción</strong> — el vehículo está en el taller</li>
+<li><strong>En taller</strong> — el mecánico trabaja</li>
+<li><strong>En espera de repuesto</strong> — falta material</li>
+<li><strong>Control de calidad</strong> — revisión final</li>
+<li><strong>Finalizada</strong> — trabajo aprobado</li>
+<li><strong>Entregada</strong> — el cliente retiró el vehículo</li>
+</ol>
+<p>También puede <strong>cancelarse</strong> cuando corresponda.</p>
+<h3>Crear una orden de trabajo</h3>
+<ol>
+<li>Menú <strong>Órdenes de trabajo</strong> → <strong>Nueva orden</strong>.</li>
+<li>Seleccioná:</li>
+</ol>
+<p>   - Cliente</p>
+<p>   - Vehículo</p>
+<p>   - Equipo GNC (si tiene)</p>
+<p>   - Tipo de trabajo (instalación, revisión anual, renovación de oblea, PH, reparación, etc.)</p>
+<ol>
+<li>Completá (opcional pero útil):</li>
+</ol>
+<p>   - Prioridad</p>
+<p>   - Fecha estimada de entrega</p>
+<p>   - Kilometraje de ingreso</p>
+<p>   - Mecánico asignado</p>
+<p>   - Descripción del problema</p>
+<p>   - Observaciones internas</p>
+<p>   - Seña (si cobrás anticipo y tenés permiso)</p>
+<ol>
+<li>Guardá.</li>
+</ol>
+<h3>Seguir el trabajo (día a día)</h3>
+<ol>
+<li>Abrí la OT desde el listado o el <strong>tablero</strong>.</li>
+<li>En <strong>Cambiar estado</strong>, pasá al siguiente estado según el avance.</li>
+<li>Si falta repuesto: pasá a <strong>En espera de repuesto</strong> y volvé a <strong>En taller</strong> cuando llegue.</li>
+<li>Cuando el trabajo esté listo: pasá a <strong>Control de calidad</strong>.</li>
+</ol>
+<h3>Control de calidad (antes de finalizar)</h3>
+<p>En control de calidad se marca un checklist, por ejemplo:</p>
+<ul>
+<li>Sin fugas</li>
+<li>Presión del regulador OK</li>
+<li>Válvulas de seguridad OK</li>
+<li>Estanqueidad aprobada</li>
+<li>Documentación en orden</li>
+</ul>
+<p>Solo con el control completo se puede pasar a <strong>Finalizada</strong>.</p>
+<h3>Entrega al cliente</h3>
+<ol>
+<li>Verificá que la OT esté <strong>finalizada</strong>.</li>
+<li>Revisá cobro / factura si corresponde.</li>
+<li>Cambiá el estado a <strong>Entregada</strong>.</li>
+</ol>
+<h3>Tablero de órdenes</h3>
+<p>En <strong>Órdenes de trabajo → Tablero</strong> ves las OT por columnas de estado. Sirve para supervisión y para que el taller vea de un vistazo qué hay en cada etapa.</p>
+<h3>Imprimir una OT</h3>
+<p>Desde el detalle de la orden podés abrir la vista de impresión para entregar o archivar el comprobante interno del trabajo.</p>
+<hr />
+<h2>8. Inventario (depósito)</h2>
+<p>Controla productos, repuestos y movimientos de stock.</p>
+<h3>Alta de un producto</h3>
+<ol>
+<li>Menú <strong>Inventario</strong> → <strong>Nuevo producto</strong>.</li>
+<li>Completá nombre, categoría, código (si usan), stock mínimo y precios según corresponda.</li>
+<li>Guardá.</li>
+</ol>
+<h3>Registrar un movimiento de stock</h3>
+<ol>
+<li><strong>Inventario → Movimiento</strong>.</li>
+<li>Elegí el tipo:</li>
+</ol>
+<p>   - <strong>Ingreso</strong> — compra o entrada</p>
+<p>   - <strong>Egreso</strong> — salida / uso</p>
+<p>   - <strong>Ajuste</strong> — corrección de stock</p>
+<ol>
+<li>Seleccioná producto, cantidad y motivo.</li>
+<li>Guardá.</li>
+</ol>
+<h3>Alertas de stock bajo</h3>
+<p>En el listado de productos podés filtrar los que están por debajo del mínimo. El Dashboard también puede mostrar estas alertas.</p>
+<hr />
+<h2>9. Caja</h2>
+<p>Registra ingresos, egresos y el cierre del día.</p>
+<h3>Registrar un movimiento</h3>
+<ol>
+<li>Menú <strong>Caja</strong> → <strong>Nuevo movimiento</strong>.</li>
+<li>Indicá si es <strong>ingreso</strong> o <strong>egreso</strong>.</li>
+<li>Completá monto, medio de pago y concepto.</li>
+<li>Si corresponde, vinculá a una OT o factura.</li>
+<li>Guardá.</li>
+</ol>
+<h3>Ver saldo y movimientos</h3>
+<p>En la pantalla principal de <strong>Caja</strong> ves el saldo y el historial reciente.</p>
+<h3>Arqueo del día</h3>
+<ol>
+<li>Entrá a <strong>Caja → Arqueo</strong>.</li>
+<li>Revisá el resumen del día (ingresos, egresos, saldo).</li>
+<li>Usalo para cerrar caja y contrastar con el efectivo/medios reales.</li>
+</ol>
+<hr />
+<h2>10. Facturación</h2>
+<p>Emite comprobantes internos del taller (con IVA).</p>
+<blockquote><p>Por ahora son de <strong>uso interno</strong>; la facturación electrónica AFIP se incorporará más adelante.</p></blockquote>
+<h3>Generar una factura desde una OT</h3>
+<ol>
+<li>Abrí la orden de trabajo <strong>finalizada</strong> (o en condiciones de facturar).</li>
+<li>Usá la opción para generar / vincular factura (o andá a <strong>Facturación → Nueva</strong>).</li>
+<li>Revisá cliente, ítems e importes.</li>
+<li>Confirmá la emisión.</li>
+</ol>
+<h3>Consultar o anular</h3>
+<ol>
+<li>Menú <strong>Facturación</strong>.</li>
+<li>Abrí el comprobante.</li>
+<li>Si hay que anularlo, usá <strong>Anular</strong> (según permisos).</li>
+<li>Si corresponde, generá una <strong>nota de crédito</strong> a partir del comprobante.</li>
+</ol>
+<hr />
+<h2>11. Configuración (administración)</h2>
+<p>Solo para roles de administración / supervisión (y depósito en categorías). Es la base para que el resto del sistema funcione bien.</p>
+<table><thead><tr>
+<th>Sección</th>
+<th>Para qué sirve</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Usuarios</strong></td>
+<td>Alta de personal y roles (administrador, recepción, mecánico, caja, depósito, etc.)</td>
+</tr>
+<tr>
+<td><strong>Marcas y modelos</strong></td>
+<td>Catálogo de vehículos</td>
+</tr>
+<tr>
+<td><strong>Categorías</strong></td>
+<td>Clasificación de productos del inventario</td>
+</tr>
+<tr>
+<td><strong>Tipos de trabajo</strong></td>
+<td>Instalación, revisión, PH, etc.</td>
+</tr>
+<tr>
+<td><strong>Kits de trabajo</strong></td>
+<td>Conjuntos de ítems/repuestos habituales para armar OTs más rápido</td>
+</tr>
+</tbody></table>
+<h3>Ejemplo: crear un usuario</h3>
+<ol>
+<li><strong>Configuración → Usuarios → Nuevo</strong>.</li>
+<li>Completá nombre, email/usuario, contraseña y rol.</li>
+<li>Guardá.</li>
+</ol>
+<h3>Ejemplo: cargar marca y modelo</h3>
+<ol>
+<li><strong>Configuración → Marcas y modelos</strong>.</li>
+<li>Creá la marca.</li>
+<li>Agregá los modelos de esa marca.</li>
+</ol>
+<hr />
+<h2>12. Flujo completo recomendado (día típico)</h2>
+<h3>Alta de un cliente nuevo con su auto</h3>
+<ol>
+<li>Registrar <strong>cliente</strong>.</li>
+<li>Registrar <strong>vehículo</strong>.</li>
+<li>Registrar <strong>equipo GNC</strong> (si ya lo tiene o se instaló).</li>
+<li>Crear <strong>turno</strong> o directamente la <strong>OT</strong>.</li>
+<li>Avanzar la OT hasta <strong>control de calidad → finalizada → entregada</strong>.</li>
+<li>Emitir <strong>factura</strong> y registrar el <strong>cobro en caja</strong>.</li>
+</ol>
+<h3>Revisión anual / renovación de oblea</h3>
+<ol>
+<li>Ver alerta en el <strong>Dashboard</strong> (o buscar el vehículo).</li>
+<li>Contactar al cliente y agendar en <strong>Agenda</strong>.</li>
+<li>Al llegar, <strong>generar OT</strong> desde el turno.</li>
+<li>Ejecutar el trabajo y completar <strong>control de calidad</strong>.</li>
+<li>Entregar, facturar y cobrar.</li>
+</ol>
+<hr />
+<h2>13. Roles (quién ve qué)</h2>
+<table><thead><tr>
+<th>Rol</th>
+<th>Uso habitual</th>
+<th>Guía corta</th>
+</tr></thead><tbody>
+<tr>
+<td><strong>Administrador</strong></td>
+<td>Todo el sistema y configuración</td>
+<td><a href="guia-usuario/administrador.md">Administrador</a></td>
+</tr>
+<tr>
+<td><strong>Supervisor</strong></td>
+<td>Operación, aprobaciones, visión general</td>
+<td><a href="guia-usuario/supervisor.md">Supervisor</a></td>
+</tr>
+<tr>
+<td><strong>Recepción</strong></td>
+<td>Clientes, vehículos, turnos, alta de OT</td>
+<td><a href="guia-usuario/recepcion.md">Recepción</a></td>
+</tr>
+<tr>
+<td><strong>Mecánico</strong></td>
+<td>Sus órdenes, avance en taller</td>
+<td><a href="guia-usuario/mecanico.md">Mecánico</a></td>
+</tr>
+<tr>
+<td><strong>Caja</strong></td>
+<td>Cobros, movimientos, arqueo</td>
+<td><a href="guia-usuario/caja.md">Caja</a></td>
+</tr>
+<tr>
+<td><strong>Depósito</strong></td>
+<td>Productos y stock</td>
+<td><a href="guia-usuario/deposito.md">Depósito</a></td>
+</tr>
+</tbody></table>
+<p>Si no ves un menú, es normal: depende del rol asignado.</p>
+<hr />
+<h2>14. Buenas prácticas</h2>
+<ul>
+<li>Completá teléfono y email del cliente para avisos de vencimiento.</li>
+<li>No entregues el vehículo sin OT <strong>finalizada</strong> y control de calidad.</li>
+<li>Mantené al día las fechas de PH y oblea en el equipo GNC.</li>
+<li>Registrá señas y cobros en caja para no perder el rastro.</li>
+<li>Revisá el Dashboard al empezar el día (vencimientos + OTs activas).</li>
+</ul>
+</section>
+<section class="section-break">
+<h1>Guías por rol — Índice</h1>
+<p>Versiones cortas de la guía, enfocadas en lo que cada puesto usa todos los días.</p>
+<table><thead><tr>
+<th>Rol</th>
+<th>Guía</th>
+<th>Enfoque</th>
+</tr></thead><tbody>
+<tr>
+<td><a href="recepcion.md">Recepción</a></td>
+<td>Alta de clientes, vehículos, turnos y OT</td>
+<td>Atención al cliente</td>
+</tr>
+<tr>
+<td><a href="mecanico.md">Mecánico</a></td>
+<td>Órdenes asignadas y avance en taller</td>
+<td>Trabajo en piso</td>
+</tr>
+<tr>
+<td><a href="caja.md">Caja</a></td>
+<td>Cobros, movimientos y arqueo</td>
+<td>Dinero del día</td>
+</tr>
+<tr>
+<td><a href="deposito.md">Depósito</a></td>
+<td>Productos y stock</td>
+<td>Materiales</td>
+</tr>
+<tr>
+<td><a href="supervisor.md">Supervisor</a></td>
+<td>Tablero, calidad y vencimientos</td>
+<td>Control operativo</td>
+</tr>
+<tr>
+<td><a href="administrador.md">Administrador</a></td>
+<td>Usuarios y configuración</td>
+<td>Setup del taller</td>
+</tr>
+</tbody></table>
+<p>Guía completa (todos los módulos): <a href="../guia-usuario.md">../guia-usuario.md</a></p>
+</section>
+<section class="section-break">
+<h1>Guía rápida — Recepción</h1>
+<p>Tu trabajo en el sistema: <strong>recibir clientes, agendar turnos y abrir órdenes de trabajo</strong>.</p>
+<hr />
+<h2>Al empezar el día</h2>
+<ol>
+<li>Iniciá sesión.</li>
+<li>Revisá el <strong>Dashboard</strong> (vencimientos y alertas).</li>
+<li>Abrí la <strong>Agenda</strong> del día.</li>
+</ol>
+<hr />
+<h2>Registrar un cliente nuevo</h2>
+<ol>
+<li><strong>Clientes → Nuevo cliente</strong>.</li>
+<li>Completá tipo (persona o empresa), nombre/razón social, documento, teléfono, email e IVA.</li>
+<li>Guardá.</li>
+</ol>
+<p><strong>Tip:</strong> el teléfono y el email sirven para avisar vencimientos de oblea o PH.</p>
+<hr />
+<h2>Registrar su vehículo</h2>
+<ol>
+<li>Desde la ficha del cliente, o <strong>Vehículos → Nuevo vehículo</strong>.</li>
+<li>Elegí el cliente.</li>
+<li>Completá patente, marca, modelo, año y combustible.</li>
+<li>Guardá.</li>
+</ol>
+<p>Si falta la marca o el modelo, pedile a un supervisor o administrador que la cargue en <strong>Configuración</strong>.</p>
+<hr />
+<h2>Registrar el equipo GNC (si corresponde)</h2>
+<ol>
+<li><strong>Equipos GNC → Nuevo equipo</strong>.</li>
+<li>Asociá el vehículo.</li>
+<li>Completá serie, regulador, fecha de instalación y cilindros (serie, capacidad, fechas de PH).</li>
+<li>Guardá.</li>
+</ol>
+<hr />
+<h2>Agendar un turno</h2>
+<ol>
+<li><strong>Agenda → Nuevo turno</strong>.</li>
+<li>Fecha, horario, cliente y vehículo.</li>
+<li>Motivo de la visita.</li>
+<li>Guardá.</li>
+</ol>
+<hr />
+<h2>Cuando llega el cliente</h2>
+<h3>Opción A — Tiene turno</h3>
+<ol>
+<li>Abrí el turno en <strong>Agenda</strong>.</li>
+<li>Confirmá la asistencia.</li>
+<li><strong>Generar orden de trabajo</strong>.</li>
+<li>Revisá datos y guardá la OT.</li>
+</ol>
+<h3>Opción B — Sin turno (walk-in)</h3>
+<ol>
+<li>Verificá que existan cliente, vehículo y equipo (si aplica).</li>
+<li><strong>Órdenes de trabajo → Nueva orden</strong>.</li>
+<li>Cliente → vehículo → equipo → tipo de trabajo.</li>
+<li>Prioridad, fecha estimada, kilometraje y descripción.</li>
+<li>Si cobra seña, registrala (si tenés permiso).</li>
+<li>Guardá y pasá la OT a <strong>Recepción</strong>.</li>
+</ol>
+<hr />
+<h2>Entrega del vehículo</h2>
+<ol>
+<li>Confirmá que la OT esté <strong>Finalizada</strong>.</li>
+<li>Coordiná con caja el cobro / factura.</li>
+<li>Cambiá el estado a <strong>Entregada</strong>.</li>
+</ol>
+<hr />
+<h2>Qué no olvidar</h2>
+<ul>
+<li>No abras una OT sin cliente y vehículo correctos.</li>
+<li>Usá la Agenda para no sobrecargar el taller.</li>
+<li>Ante duda de marcas/modelos o tipos de trabajo, consultá a supervisión.</li>
+</ul>
+</section>
+<section class="section-break">
+<h1>Guía rápida — Mecánico</h1>
+<p>Tu trabajo en el sistema: <strong>ver tus órdenes, avanzar el trabajo y dejar listo el control de calidad</strong>.</p>
+<hr />
+<h2>Al empezar el día</h2>
+<ol>
+<li>Iniciá sesión.</li>
+<li>Entrá a <strong>Órdenes de trabajo</strong> (o el filtro <strong>Mis órdenes</strong> / <strong>Tablero</strong>).</li>
+<li>Revisá qué tenés asignado y en qué estado está cada una.</li>
+</ol>
+<hr />
+<h2>Abrir una orden asignada</h2>
+<ol>
+<li>Entrá al detalle de la OT.</li>
+<li>Leé:</li>
+</ol>
+<p>   - Tipo de trabajo</p>
+<p>   - Descripción del problema</p>
+<p>   - Vehículo y equipo GNC</p>
+<p>   - Observaciones internas</p>
+<ol>
+<li>Si aún no está en taller, pedí a recepción/supervisión que la pase a <strong>En taller</strong> (o cambiala si tenés permiso).</li>
+</ol>
+<hr />
+<h2>Avanzar el trabajo</h2>
+<h3>Trabajo normal</h3>
+<ol>
+<li>Trabajá con la OT en estado <strong>En taller</strong>.</li>
+<li>Cuando termines, pasala a <strong>Control de calidad</strong>.</li>
+</ol>
+<h3>Falta un repuesto</h3>
+<ol>
+<li>Cambiá a <strong>En espera de repuesto</strong>.</li>
+<li>Cuando el material esté disponible, volvé a <strong>En taller</strong>.</li>
+<li>Completá el trabajo y pasá a <strong>Control de calidad</strong>.</li>
+</ol>
+<hr />
+<h2>Control de calidad</h2>
+<p>En la OT, completá el checklist (ejemplos):</p>
+<ul>
+<li>Sin fugas detectadas</li>
+<li>Presión del regulador OK</li>
+<li>Válvulas de seguridad operativas</li>
+<li>Estanqueidad aprobada</li>
+<li>Documentación y etiquetas en orden</li>
+</ul>
+<p>Sin el checklist completo, la OT <strong>no se puede finalizar</strong>.</p>
+<hr />
+<h2>Qué no tenés que hacer (salvo que te lo indiquen)</h2>
+<ul>
+<li>Alta de clientes o facturación</li>
+<li>Arqueo de caja</li>
+<li>Configuración del sistema</li>
+</ul>
+<p>Tu foco: <strong>ejecutar y dejar la OT lista para finalizar</strong>.</p>
+<hr />
+<h2>Buenas prácticas</h2>
+<ul>
+<li>Actualizá el estado apenas cambie la situación (no dejes OT “olvidadas” en taller).</li>
+<li>Si el problema no coincide con lo cargado, avisá a recepción para corregir la descripción.</li>
+<li>Ante duda de seguridad GNC (fugas, PH vencida, etc.), escalá a supervisión.</li>
+</ul>
+</section>
+<section class="section-break">
+<h1>Guía rápida — Caja</h1>
+<p>Tu trabajo en el sistema: <strong>cobros, movimientos de caja y cierre del día</strong>.</p>
+<hr />
+<h2>Al empezar el día</h2>
+<ol>
+<li>Iniciá sesión.</li>
+<li>Abrí <strong>Caja</strong> y revisá el saldo / movimientos recientes.</li>
+<li>Coordiná con recepción las OT que se van a entregar o cobrar.</li>
+</ol>
+<hr />
+<h2>Registrar un cobro (ingreso)</h2>
+<ol>
+<li><strong>Caja → Nuevo movimiento</strong>.</li>
+<li>Tipo: <strong>Ingreso</strong>.</li>
+<li>Monto, medio de pago y concepto.</li>
+<li>Vinculá a la <strong>orden de trabajo</strong> o <strong>factura</strong>, si corresponde.</li>
+<li>Guardá.</li>
+</ol>
+<h3>Seña anticipada</h3>
+<p>Si el cliente deja seña al abrir la OT:</p>
+<ol>
+<li>Registrá el ingreso vinculándolo a esa OT.</li>
+<li>Al facturar / cobrar el resto, registrá el saldo pendiente.</li>
+</ol>
+<hr />
+<h2>Registrar un egreso</h2>
+<ol>
+<li><strong>Caja → Nuevo movimiento</strong>.</li>
+<li>Tipo: <strong>Egreso</strong>.</li>
+<li>Monto, medio y motivo (compra, gasto, etc.).</li>
+<li>Guardá.</li>
+</ol>
+<hr />
+<h2>Facturación (si tenés acceso)</h2>
+<ol>
+<li>Abrí la OT finalizada, o andá a <strong>Facturación → Nueva</strong>.</li>
+<li>Revisá cliente, ítems e importes.</li>
+<li>Emití el comprobante.</li>
+<li>Registrá el cobro en caja.</li>
+</ol>
+<blockquote><p>Los comprobantes actuales son de <strong>uso interno</strong> del taller.</p></blockquote>
+<h3>Anulación o nota de crédito</h3>
+<ol>
+<li>Abrí la factura en <strong>Facturación</strong>.</li>
+<li>Usá <strong>Anular</strong> o generá una <strong>nota de crédito</strong>, según el caso.</li>
+<li>Ajustá el movimiento de caja si hace falta.</li>
+</ol>
+<hr />
+<h2>Arqueo del día</h2>
+<ol>
+<li><strong>Caja → Arqueo</strong>.</li>
+<li>Compará el resumen del sistema con el efectivo y los comprobantes reales.</li>
+<li>Reportá diferencias a supervisión / administración.</li>
+</ol>
+<hr />
+<h2>Checklist de cierre</h2>
+<ul>
+<li class="check">☐ Todos los cobros del día registrados</li>
+<li class="check">☐ Egresos justificados</li>
+<li class="check">☐ OT entregadas con cobro al día (o seña / pendiente documentado)</li>
+<li class="check">☐ Arqueo revisado</li>
+</ul>
+<hr />
+<h2>Buenas prácticas</h2>
+<ul>
+<li>Siempre vinculá el movimiento a la OT o factura cuando exista.</li>
+<li>No cierres el día con movimientos “sueltos” sin concepto claro.</li>
+<li>Ante descuentos o excepciones, pedí autorización a supervisión.</li>
+</ul>
+</section>
+<section class="section-break">
+<h1>Guía rápida — Depósito</h1>
+<p>Tu trabajo en el sistema: <strong>productos, stock y movimientos de inventario</strong>.</p>
+<hr />
+<h2>Al empezar el día</h2>
+<ol>
+<li>Iniciá sesión.</li>
+<li>Revisá <strong>Inventario</strong> (y alertas de stock bajo en el Dashboard, si aparecen).</li>
+<li>Priorizá productos bajo mínimo o pedidos del taller.</li>
+</ol>
+<hr />
+<h2>Alta de un producto</h2>
+<ol>
+<li><strong>Inventario → Nuevo producto</strong>.</li>
+<li>Completá nombre, categoría, código (si usan), stock mínimo y datos de precio/costo según corresponda.</li>
+<li>Guardá.</li>
+</ol>
+<p>Si falta una categoría:</p>
+<ul>
+<li>Pedile a supervisión, o</li>
+<li>Creala en <strong>Configuración → Categorías</strong> (si tenés permiso), o desde el alta del producto cuando ofrezca “Nueva categoría”.</li>
+</ul>
+<hr />
+<h2>Ingreso de mercadería</h2>
+<ol>
+<li><strong>Inventario → Movimiento</strong>.</li>
+<li>Tipo: <strong>Ingreso</strong>.</li>
+<li>Producto, cantidad y motivo.</li>
+<li>Guardá.</li>
+</ol>
+<hr />
+<h2>Egreso / uso en taller</h2>
+<ol>
+<li><strong>Inventario → Movimiento</strong>.</li>
+<li>Tipo: <strong>Egreso</strong>.</li>
+<li>Producto, cantidad y motivo (idealmente asociado a la OT si el sistema lo permite).</li>
+<li>Guardá.</li>
+</ol>
+<hr />
+<h2>Ajuste de stock</h2>
+<p>Usalo cuando el físico no coincide con el sistema (conteo, rotura, error de carga):</p>
+<ol>
+<li><strong>Movimiento → Ajuste</strong>.</li>
+<li>Indicá la cantidad correcta o el ajuste y el motivo.</li>
+<li>Guardá.</li>
+</ol>
+<hr />
+<h2>Stock bajo</h2>
+<ol>
+<li>En el listado de productos, filtrá los de stock bajo.</li>
+<li>Informá a supervisión qué hay que reponer.</li>
+<li>Cuando llegue la mercadería, registrá el <strong>ingreso</strong>.</li>
+</ol>
+<hr />
+<h2>Buenas prácticas</h2>
+<ul>
+<li>Registrá el movimiento el mismo día (no acumules “para después”).</li>
+<li>Mantené stock mínimo realista para que las alertas sirvan.</li>
+<li>No des stock “de palabra”: todo egreso debe quedar en el sistema.</li>
+</ul>
+</section>
+<section class="section-break">
+<h1>Guía rápida — Supervisor</h1>
+<p>Tu trabajo en el sistema: <strong>controlar el taller, la calidad y los vencimientos</strong>.</p>
+<hr />
+<h2>Al empezar el día</h2>
+<ol>
+<li>Iniciá sesión y abrí el <strong>Dashboard</strong>.</li>
+<li>Revisá:</li>
+</ol>
+<p>   - Órdenes activas / demoradas</p>
+<p>   - Vencimientos de oblea y PH</p>
+<p>   - Alertas de stock u operación</p>
+<ol>
+<li>Abrí el <strong>Tablero</strong> de órdenes de trabajo.</li>
+</ol>
+<hr />
+<h2>Supervisar órdenes</h2>
+<ol>
+<li>En el <strong>tablero</strong>, mirá columnas: recepción, en taller, espera de repuesto, control de calidad.</li>
+<li>Identificá cuellos de botella (muchas en espera, pocas en avance).</li>
+<li>Asigná o reasigná mecánicos cuando haga falta.</li>
+<li>Asegurate de que las OT no se queden sin actualizar el estado.</li>
+</ol>
+<hr />
+<h2>Control de calidad y entrega</h2>
+<ol>
+<li>Verificá que las OT en <strong>Control de calidad</strong> tengan el checklist completo.</li>
+<li>Solo entonces deben pasar a <strong>Finalizada</strong>.</li>
+<li>Coordiná con recepción/caja antes de <strong>Entregada</strong>.</li>
+</ol>
+<hr />
+<h2>Vencimientos (oblea / PH)</h2>
+<ol>
+<li>En el Dashboard, revisá alertas pendientes.</li>
+<li>Contactá o pedí a recepción que contacte al cliente (WhatsApp / email).</li>
+<li>Marcá como <strong>notificado</strong> cuando ya se avisó.</li>
+<li>Agendá turnos de renovación / PH.</li>
+</ol>
+<hr />
+<h2>Catálogos operativos</h2>
+<p>Desde <strong>Configuración</strong> (según permisos):</p>
+<table><thead><tr>
+<th>Sección</th>
+<th>Cuándo usarla</th>
+</tr></thead><tbody>
+<tr>
+<td>Marcas y modelos</td>
+<td>Falta una marca/modelo al cargar un vehículo</td>
+</tr>
+<tr>
+<td>Tipos de trabajo</td>
+<td>Nuevo servicio del taller</td>
+</tr>
+<tr>
+<td>Kits de trabajo</td>
+<td>Armar paquetes habituales de ítems para OT</td>
+</tr>
+<tr>
+<td>Categorías</td>
+<td>Organizar el inventario</td>
+</tr>
+</tbody></table>
+<hr />
+<h2>Qué mirar en caja e inventario</h2>
+<ul>
+<li>Arqueo coherente al cierre.</li>
+<li>Stock bajo que pueda frenar OT.</li>
+<li>OT finalizadas sin cobro claro (coordinar con caja).</li>
+</ul>
+<hr />
+<h2>Buenas prácticas</h2>
+<ul>
+<li>Empezá el día por Dashboard + Tablero.</li>
+<li>No autorices entrega sin OT finalizada y QC ok.</li>
+<li>Mantené los catálogos limpios: sin marcas duplicadas ni tipos de trabajo confusos.</li>
+</ul>
+</section>
+<section class="section-break">
+<h1>Guía rápida — Administrador</h1>
+<p>Tu trabajo en el sistema: <strong>usuarios, roles y configuración base del taller</strong>.</p>
+<p>También tenés acceso total a la operación (clientes, OT, caja, etc.). Esta guía se centra en lo que solo vos (o casi solo vos) configurás.</p>
+<hr />
+<h2>Primera puesta a punto del taller</h2>
+<ol>
+<li>Creá los <strong>usuarios</strong> del personal con su rol correcto.</li>
+<li>Cargá <strong>marcas y modelos</strong> de vehículos habituales.</li>
+<li>Definí <strong>tipos de trabajo</strong> (instalación, revisión anual, renovación de oblea, PH, etc.).</li>
+<li>Armá <strong>kits de trabajo</strong> para los servicios más frecuentes.</li>
+<li>Creá <strong>categorías</strong> de inventario y los productos iniciales.</li>
+<li>Verificá que recepción, taller, caja y depósito puedan iniciar sesión.</li>
+</ol>
+<hr />
+<h2>Crear un usuario</h2>
+<ol>
+<li><strong>Configuración → Usuarios → Nuevo</strong>.</li>
+<li>Completá nombre, usuario/email, contraseña y <strong>rol</strong>.</li>
+<li>Guardá.</li>
+<li>Pedile a la persona que pruebe el login y revise que vea los menús correctos.</li>
+</ol>
+<h3>Roles habituales</h3>
+<table><thead><tr>
+<th>Rol</th>
+<th>Para quién</th>
+</tr></thead><tbody>
+<tr>
+<td>Administrador</td>
+<td>Dueño / responsable del sistema</td>
+</tr>
+<tr>
+<td>Supervisor</td>
+<td>Jefe de taller / encargado</td>
+</tr>
+<tr>
+<td>Recepción</td>
+<td>Atención al público</td>
+</tr>
+<tr>
+<td>Mecánico</td>
+<td>Personal de piso</td>
+</tr>
+<tr>
+<td>Caja</td>
+<td>Cobros y arqueo</td>
+</tr>
+<tr>
+<td>Depósito</td>
+<td>Stock y productos</td>
+</tr>
+</tbody></table>
+<hr />
+<h2>Marcas y modelos</h2>
+<ol>
+<li><strong>Configuración → Marcas y modelos</strong>.</li>
+<li>Alta de marca.</li>
+<li>Alta de modelos bajo esa marca.</li>
+</ol>
+<p>Sin esto, recepción no puede cargar vehículos correctamente.</p>
+<hr />
+<h2>Tipos de trabajo y kits</h2>
+<ol>
+<li><strong>Tipos de trabajo</strong>: definí los servicios que el taller ofrece.</li>
+<li><strong>Kits de trabajo</strong>: asociá ítems / materiales típicos a cada tipo o paquete, para armar OT más rápido.</li>
+</ol>
+<hr />
+<h2>Categorías de inventario</h2>
+<ol>
+<li><strong>Configuración → Categorías</strong>.</li>
+<li>Creá categorías claras (reguladores, válvulas, consumibles, etc.).</li>
+<li>Pedile a depósito que cargue productos bajo esas categorías.</li>
+</ol>
+<hr />
+<h2>Operación diaria (acceso total)</h2>
+<p>Además de configurar, podés:</p>
+<ul>
+<li>Revisar el <strong>Dashboard</strong> y vencimientos.</li>
+<li>Supervisar el <strong>tablero</strong> de OT.</li>
+<li>Intervenir en caja, facturación e inventario cuando haga falta.</li>
+</ul>
+<p>Para el detalle operativo, usá también las guías de <a href="supervisor.md">Supervisor</a>, <a href="recepcion.md">Recepción</a> y <a href="caja.md">Caja</a>.</p>
+<hr />
+<h2>Buenas prácticas</h2>
+<ul>
+<li>Un usuario = un rol real (no compartas cuentas).</li>
+<li>No borres catálogos en uso; corregí o desactivá con cuidado.</li>
+<li>Después de crear usuarios, validá un login de prueba por rol.</li>
+<li>Mantené tipos de trabajo y kits alineados a cómo trabaja el taller en la práctica.</li>
+</ul>
+</section>
+
+  <p class="footer-note">GNC Workshop Management System — Guía de usuario. Documento interno del taller.</p>
+</body>
+</html>
