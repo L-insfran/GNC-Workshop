@@ -14,12 +14,13 @@ export default defineConfig({
     views: 'resources/views',
   },
   /**
-   * Relative paths for local commands (without extension). Ace will import .js on runtime.
+   * Solo paquetes. Los comandos de la app en ./commands se registran solos.
+   * No importar un comando suelto acá: Ace lo trata como loader y falla con
+   * "loaderInstance.getMetaData is not a function".
    */
   commands: [
     () => import('@adonisjs/core/commands'),
     () => import('@adonisjs/lucid/commands'),
-    () => import('#commands/vencimientos_alertar'),
   ],
   providers: [
     () => import('@adonisjs/core/providers/app_provider'),
