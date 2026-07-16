@@ -96,10 +96,11 @@ export default class FacturaService extends BaseService<Factura> {
       throw new Error('NC_YA_EMITIDA')
     }
 
+    // La NC se vincula solo por facturaReferenciaId; no copia ordenTrabajoId
+    // para no chocar con el índice único facturas_ot_activa_unique.
     return {
       clienteId: factura.clienteId,
       facturaReferenciaId: factura.id,
-      ordenTrabajoId: factura.ordenTrabajoId ?? undefined,
       tipo: 'nota_credito',
       items: factura.items.map((item) => ({
         descripcion: item.descripcion,
@@ -124,10 +125,14 @@ export default class FacturaService extends BaseService<Factura> {
       throw new Error('ITEMS_REQUERIDOS')
     }
 
-    if (data.tipo === 'nota_credito') {
+    const esNotaCredito = data.tipo === 'nota_credito'
+    // NC no ocupa el cupo de factura activa de la OT.
+    const ordenTrabajoId = esNotaCredito ? null : (data.ordenTrabajoId ?? null)
+
+    if (esNotaCredito) {
       await this.validarNotaCredito(data)
-    } else if (data.ordenTrabajoId) {
-      const facturaActiva = await this.repository.findActivaByOrdenTrabajoId(data.ordenTrabajoId)
+    } else if (ordenTrabajoId) {
+      const facturaActiva = await this.repository.findActivaByOrdenTrabajoId(ordenTrabajoId)
       if (facturaActiva) {
         throw new Error('OT_YA_FACTURADA')
       }
@@ -144,10 +149,9 @@ export default class FacturaService extends BaseService<Factura> {
     const aplicaIva = data.tipo === 'factura_a' || data.tipo === 'factura_b'
     const iva = aplicaIva ? Number((subtotal * IVA_RATE).toFixed(2)) : 0
     const total = Number((subtotal + iva).toFixed(2))
-    const numero =
-      data.tipo === 'nota_credito'
-        ? await this.repository.generateNumeroNotaCredito()
-        : await this.repository.generateNumero()
+    const numero = esNotaCredito
+      ? await this.repository.generateNumeroNotaCredito()
+      : await this.repository.generateNumero()
     const estado = data.emitir === false ? 'borrador' : 'emitida'
 
     let facturaId = ''
@@ -157,7 +161,7 @@ export default class FacturaService extends BaseService<Factura> {
         {
           numero,
           clienteId: data.clienteId,
-          ordenTrabajoId: data.ordenTrabajoId ?? null,
+          ordenTrabajoId,
           facturaReferenciaId: data.facturaReferenciaId ?? null,
           tipo: data.tipo,
           subtotal,
@@ -184,8 +188,8 @@ export default class FacturaService extends BaseService<Factura> {
         )
       }
 
-      if (data.ordenTrabajoId) {
-        await aplicarSenasAFactura(data.ordenTrabajoId, factura.id, trx)
+      if (ordenTrabajoId) {
+        await aplicarSenasAFactura(ordenTrabajoId, factura.id, trx)
       }
     })
 

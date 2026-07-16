@@ -144,7 +144,8 @@ export function FacturaFormPage() {
     try {
       const response = await create.mutateAsync({
         ...data,
-        ordenTrabajoId,
+        // NC se vincula solo por facturaReferenciaId (no por OT).
+        ordenTrabajoId: esNotaCredito ? undefined : ordenTrabajoId,
         facturaReferenciaId,
         emitir: true,
       })

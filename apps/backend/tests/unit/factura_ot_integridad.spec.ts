@@ -69,6 +69,15 @@ function createCobroMock(): CajaMovimiento {
   } as CajaMovimiento
 }
 
+function ordenTrabajoIdParaCreacion(
+  tipo: 'factura_a' | 'factura_b' | 'factura_c' | 'nota_credito',
+  ordenTrabajoId?: string | null
+): string | null {
+  // Misma regla que FacturaService.create: NC no ocupa el cupo de OT.
+  if (tipo === 'nota_credito') return null
+  return ordenTrabajoId ?? null
+}
+
 test.group('Factura OT integridad', () => {
   test('bloquea nueva factura cuando la OT ya tiene factura emitida', ({ assert }) => {
     const facturaActiva = { estado: 'emitida' }
@@ -118,6 +127,12 @@ test.group('Factura OT integridad', () => {
         notaCreditoExistente: true,
       })
     )
+  })
+
+  test('nota de crédito no reutiliza ordenTrabajoId de la factura original', ({ assert }) => {
+    assert.isNull(ordenTrabajoIdParaCreacion('nota_credito', 'ot-1'))
+    assert.equal(ordenTrabajoIdParaCreacion('factura_b', 'ot-1'), 'ot-1')
+    assert.isNull(ordenTrabajoIdParaCreacion('factura_b', null))
   })
 
   test('serializeFactura marca cobrada cuando existe movimiento de caja', ({ assert }) => {
