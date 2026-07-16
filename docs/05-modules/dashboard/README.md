@@ -46,4 +46,11 @@ cd apps/backend && npm run vencimientos:alertar
 ## Frontend
 
 - `DashboardPage` + `VencimientosNotificacionSection`
+- Ficha de equipo: `EquipoVencimientosNotificacionCard` (mismo flujo asistido; incluye ya notificados para reenviar)
 - Botones WhatsApp / Email + “Marcar notificado”
+
+Query params en pendientes:
+
+```
+GET /api/v1/dashboard/vencimientos/pendientes-notificar?equipoGncId=:id&incluirYaNotificados=true
+```

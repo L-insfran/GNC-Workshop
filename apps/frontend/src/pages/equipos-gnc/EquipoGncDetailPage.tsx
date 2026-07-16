@@ -19,6 +19,7 @@ import { Card, CardBody, CardHeader } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { PageLoader } from '@/components/ui/LoadingSpinner'
 import { Alert } from '@/components/ui/Alert'
+import { EquipoVencimientosNotificacionCard } from '@/components/equipos-gnc/equipo-vencimientos-notificacion-card'
 import {
   ORDEN_ESTADO_LABELS,
   formatCurrency,
@@ -200,6 +201,8 @@ export function EquipoGncDetailPage() {
           </dl>
         </CardBody>
       </Card>
+
+      <EquipoVencimientosNotificacionCard equipoGncId={ficha.id} />
 
       <Card>
         <CardHeader title="Cilindros" description="Estado regulatorio de cada cilindro" />

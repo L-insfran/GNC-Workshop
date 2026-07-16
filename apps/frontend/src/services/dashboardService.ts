@@ -5,6 +5,7 @@ import type {
   IVencimientoPendienteNotificar,
   INotificacionDriverInfo,
   IRegistrarVencimientoNotificacionDTO,
+  IListPendientesNotificarParams,
   IProduccionDiaria,
 } from '@gnc/shared-types'
 import { apiGet, apiPost } from '@/services/api-client'
@@ -18,9 +19,10 @@ export const dashboardService = {
     return apiGet<IVencimientoAlerta[]>('/dashboard/vencimientos')
   },
 
-  getPendientesNotificar() {
+  getPendientesNotificar(params?: IListPendientesNotificarParams) {
     return apiGet<IVencimientoPendienteNotificar[]>(
-      '/dashboard/vencimientos/pendientes-notificar'
+      '/dashboard/vencimientos/pendientes-notificar',
+      params
     )
   },
 

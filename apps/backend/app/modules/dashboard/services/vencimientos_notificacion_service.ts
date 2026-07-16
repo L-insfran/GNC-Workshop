@@ -1,4 +1,8 @@
-import type { IVencimientoPendienteNotificar, INotificacionDriverInfo } from '@gnc/shared-types'
+import type {
+  IVencimientoPendienteNotificar,
+  INotificacionDriverInfo,
+  IListPendientesNotificarParams,
+} from '@gnc/shared-types'
 import Cliente from '#models/cliente'
 import DashboardService from '#modules/dashboard/services/dashboard_service'
 import VencimientoNotificacionRepository from '#modules/dashboard/repositories/vencimiento_notificacion_repository'
@@ -22,19 +26,25 @@ export default class VencimientosNotificacionService {
     return getNotificacionDriverInfo()
   }
 
-  async listPendientes(): Promise<IVencimientoPendienteNotificar[]> {
+  async listPendientes(
+    opts: IListPendientesNotificarParams = {}
+  ): Promise<IVencimientoPendienteNotificar[]> {
     const adapter = createNotificacionAdapter()
     const driverInfo = this.getDriverInfo()
     const vencimientos = await this.dashboardService.getVencimientos()
-    const criticos = vencimientos.filter((a) => a.nivel === 'warning' || a.nivel === 'danger')
+    let criticos = vencimientos.filter((a) => a.nivel === 'warning' || a.nivel === 'danger')
+
+    if (opts.equipoGncId) {
+      criticos = criticos.filter((a) => a.equipoGncId === opts.equipoGncId)
+    }
 
     const yaEnviadas = await this.notificacionRepo.findEnviadasKeys(
       criticos.map((a) => ({ alertaId: a.id, fechaVencimiento: a.fechaVencimiento }))
     )
 
-    const pendientesBase = criticos.filter(
-      (a) => !yaEnviadas.has(`${a.id}|${a.fechaVencimiento}`)
-    )
+    const pendientesBase = opts.incluirYaNotificados
+      ? criticos
+      : criticos.filter((a) => !yaEnviadas.has(`${a.id}|${a.fechaVencimiento}`))
 
     if (pendientesBase.length === 0) return []
 
@@ -84,6 +94,7 @@ export default class VencimientosNotificacionService {
         puedeEmail: Boolean(borradorEmail.mailtoUrl),
         modoDriver: driverInfo.driver,
         envioAutomaticoDisponible: driverInfo.envioAutomaticoDisponible,
+        yaNotificado: yaEnviadas.has(`${alerta.id}|${alerta.fechaVencimiento}`),
       }
     })
   }

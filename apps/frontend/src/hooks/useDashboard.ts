@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { IRegistrarVencimientoNotificacionDTO } from '@gnc/shared-types'
+import type {
+  IListPendientesNotificarParams,
+  IRegistrarVencimientoNotificacionDTO,
+} from '@gnc/shared-types'
 import { dashboardService } from '@/services/dashboardService'
 
 export function useDashboardKpis() {
@@ -22,11 +25,14 @@ export function useDashboardVencimientos() {
   })
 }
 
-export function useDashboardPendientesNotificar(enabled = true) {
+export function useDashboardPendientesNotificar(
+  enabled = true,
+  params?: IListPendientesNotificarParams
+) {
   return useQuery({
-    queryKey: ['dashboard', 'vencimientos-pendientes-notificar'],
+    queryKey: ['dashboard', 'vencimientos-pendientes-notificar', params ?? {}],
     queryFn: async () => {
-      const response = await dashboardService.getPendientesNotificar()
+      const response = await dashboardService.getPendientesNotificar(params)
       return response.data ?? []
     },
     enabled,
@@ -60,6 +66,7 @@ export function useMarcarVencimientoNotificado() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({
         queryKey: ['dashboard', 'vencimientos-pendientes-notificar'],
+        exact: false,
       })
     },
   })

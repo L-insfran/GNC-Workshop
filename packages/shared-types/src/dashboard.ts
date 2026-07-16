@@ -64,6 +64,14 @@ export interface IVencimientoPendienteNotificar extends IVencimientoAlerta {
   puedeEmail: boolean
   modoDriver: NotificacionDriver
   envioAutomaticoDisponible: boolean
+  /** True si ya hay registro `enviado` para esta alerta + fecha */
+  yaNotificado: boolean
+}
+
+export interface IListPendientesNotificarParams {
+  equipoGncId?: string
+  /** En ficha de equipo: incluir críticos aunque ya estén marcados como notificados */
+  incluirYaNotificados?: boolean
 }
 
 export interface IRegistrarVencimientoNotificacionDTO {

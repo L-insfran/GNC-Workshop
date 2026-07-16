@@ -18,8 +18,16 @@ export default class DashboardController {
     return response.ok(ApiResponse.success(data))
   }
 
-  async vencimientosPendientesNotificar({ response }: HttpContext) {
-    const data = await vencimientosNotificacionService.listPendientes()
+  async vencimientosPendientesNotificar({ request, response }: HttpContext) {
+    const equipoGncId = request.input('equipoGncId') as string | undefined
+    const incluirRaw = request.input('incluirYaNotificados')
+    const incluirYaNotificados =
+      incluirRaw === true || incluirRaw === 'true' || incluirRaw === '1' || incluirRaw === 1
+
+    const data = await vencimientosNotificacionService.listPendientes({
+      equipoGncId: equipoGncId || undefined,
+      incluirYaNotificados,
+    })
     return response.ok(ApiResponse.success(data))
   }
 
